@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@300;400;500&family=Syne:wght@700;800&display=swap');
+
+:root {
+  /* Backgrounds */
+  --bg-primary: #030303;     /* Deep Void Black (OLED contrast) */
+  --bg-secondary: #08090C;   /* Slate-Tinted Charcoal for cards/panels */
+  --bg-tertiary: rgba(11, 13, 18, 0.5); /* Glassmorphic panel background */
+  
+  /* Accents */
+  --accent-cyan: #00f0ff;    /* Primary Action / Active Nodes */
+  --accent-blue: #3b82f6;
+  --accent-indigo: #6366f1;  /* Secondary Paths / Ambient Light */
+  --accent-green: #10b981;
+  --accent-purple: #a855f7;  /* Swarm Coordinator Nodes */
+  --border-color: rgba(0, 240, 255, 0.08); /* Delicate Cyan Border */
+  --border-glow: rgba(0, 240, 255, 0.15);
+  
+  /* Text Colors */
+  --color-text-primary: #f3f4f6;   /* Off-white */
+  --color-text-secondary: #9ca3af; /* Medium gray for descriptions */
+  --color-text-muted: #6b7280;     /* Dark gray for telemetry/metrics (WCAG contrast: ~3.2:1) */
+  --color-text-muted-accessible: #8a93a6; /* Accessible alternative (WCAG contrast: >=4.5:1) */
+  
+  /* Typography */
+  --font-display: 'Syne', sans-serif;
+  --font-sans: 'Geist', 'Geist Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+  overflow-x: hidden;
+  cursor: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+p {
+  font-family: var(--font-sans);
+  letter-spacing: -0.01em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+a, button {
+  cursor: none;
+  font-family: var(--font-sans);
+}
+
+/* Custom CAD-style Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+  border-left: 1px solid var(--border-color);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.3); /* Match CAD theme */
+  border-radius: 0px; /* Sharp corners for schematic/CAD aesthetic */
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 240, 255, 0.6);
+}
+
+/* CAD Grid Background */
+.grid-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-size: 50px 50px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.grid-overlay-sub {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-size: 10px 10px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 240, 255, 0.006) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 240, 255, 0.006) 1px, transparent 1px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.scanline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.1) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 999;
+  opacity: 0.25;
+}
+
+.glow-spot {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(80px);
+}
+
+.code-text, .telemetry, .terminal {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent-cyan);
+  letter-spacing: -0.02em;
+}
+
+/* Layout */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+  z-index: 2;
+}
+
+.left-column {
+  width: 45%;
+  min-height: 100vh;
+  padding: 8rem 4rem 12rem 5rem;
+  z-index: 10;
+  position: relative;
+}
+
+.right-column {
+  width: 55%;
+  height: 100vh;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-left: 1px solid var(--border-color);
+  background: radial-gradient(circle at 75% 50%, rgba(8, 10, 15, 0.3) 0%, rgba(3, 4, 6, 0.95) 100%);
+  backdrop-filter: blur(3px);
+}
+
+/* 21st.dev Inspired: Border Beam Animation */
+@property --border-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes border-beam {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+.bento-card {
+  position: relative;
+  background: rgba(8, 10, 15, 0.5);
+  border-radius: 8px;
+  padding: 28px;
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  /* Double background to mask the rotating border beam */
+  background-image: 
+    linear-gradient(rgba(8, 10, 15, 0.9), rgba(8, 10, 15, 0.9)), 
+    conic-gradient(from var(--border-angle), transparent 50%, rgba(0, 240, 255, 0.1) 80%, var(--accent-cyan) 100%);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  border: 1.5px solid transparent;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bento-card.active {
+  background-image: 
+    linear-gradient(rgba(8, 10, 15, 0.9), rgba(8, 10, 15, 0.9)), 
+    conic-gradient(from var(--border-angle), transparent 40%, rgba(0, 240, 255, 0.2) 70%, var(--accent-cyan) 100%);
+  animation: border-beam 4s linear infinite;
+  box-shadow: 0 0 40px rgba(0, 240, 255, 0.08);
+}
+
+/* Asymmetrical Bento Grid Inner Layout */
+.bento-inner-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .bento-inner-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+    border-color: rgba(0, 240, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(0, 240, 255, 0.4);
+    border-color: rgba(0, 240, 255, 0.6);
+  }
+}
+
+@media (max-width: 1024px) {
+  body { cursor: auto; }
+  a, button { cursor: pointer; }
+  .app-container { flex-direction: column; }
+  .left-column { width: 100%; padding: 4rem 2rem; }
+  .right-column {
+    width: 100%;
+    height: 55vh;
+    position: relative;
+    border-left: none;
+    border-top: 1px solid var(--border-color);
+  }
+}

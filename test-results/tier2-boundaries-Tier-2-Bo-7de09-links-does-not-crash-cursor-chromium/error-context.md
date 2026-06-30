@@ -1,0 +1,284 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: tier2-boundaries.spec.ts >> Tier 2: Boundary and Corner Cases >> 5. Contact Section Boundaries >> rapid hover and unhover of contact links does not crash cursor
+- Location: e2e\tier2-boundaries.spec.ts:216:5
+
+# Error details
+
+```
+Error: expect(locator).toBeVisible() failed
+
+Locator: locator('[data-testid="custom-cursor"]')
+Expected: visible
+Timeout: 8000ms
+Error: element(s) not found
+
+Call log:
+  - Expect "toBeVisible" with timeout 8000ms
+  - waiting for locator('[data-testid="custom-cursor"]')
+
+```
+
+```yaml
+- text: "X:51 Y:251 >_ Agent_Console_Stream Online SYNAPSE: Establishing link with Helios (Vector Search)... [10:52:05] SYNAPSE: Initializing communication channels... [10:52:07] SYNAPSE: Establishing link with Aetheris (Agent Swarm)... [10:52:09] SYNAPSE: Establishing link with Helios (Vector Search)... [10:52:11] SYNAPSE: Establishing link with Chronos (Grid Forecast)... $ _"
+- main:
+  - text: "INIT_STAGE_01 AUTH: SUCCESS"
+  - heading "ENGINEERING INTELLIGENT SYSTEMS." [level=1]
+  - paragraph: Personal log of an AI Systems Architect and Founder. Focused on multi-agent execution runtimes, GPU-accelerated vector indexing, and planetary-scale predictive networks.
+  - text: SYS_SCROLL_TO_DECRYPT 2025 - Present Founder & Lead Architect
+  - heading "Aetheris AI" [level=2]
+  - text: CH_AETHERIS
+  - paragraph: Decentralized Orchestration Layer for Multi-Agent Swarms
+  - paragraph: As AI models matured, the bottleneck shifted from raw intelligence to orchestration. I founded Aetheris to solve the coordination problem in complex enterprise workflows. We built a decentralized runtime that allows autonomous agents to dynamically discover, collaborate, and execute tasks.
+  - paragraph: The system utilizes a hierarchical coordinator agent that decomposes user goals into sub-tasks, registers them in a distributed queue, and assigns them to specialized worker agents operating within secure, ephemeral sandboxes.
+  - paragraph: We implemented a real-time evaluator loop that scores agent outputs before they are committed, allowing the swarm to self-correct and backtrack if a path fails. This architecture reduced task failure rates by over 80% compared to traditional linear pipelines.
+  - text: 92.4% Task Success Verified goal completion rate 380ms Routing Latency Average agent routing time 12x Token Efficiency Reduction in redundant LLM calls
+  - heading "CORE_SCHEMATIC_TECH" [level=4]
+  - text: TypeScript FastAPI LangGraph Qdrant Docker Redis 2024 - 2025 Core Systems Engineer
+  - heading "Helios Engine" [level=2]
+  - text: CH_HELIOS
+  - paragraph: Rust-Based Sub-Millisecond Vector Retrieval Index
+  - paragraph: Off-the-shelf vector databases struggled with memory consumption and latency at billion-scale retrieval. I joined the Helios team to build a custom, bare-metal indexing engine in Rust.
+  - paragraph: We designed a custom implementation of the HNSW (Hierarchical Navigable Small World) algorithm, optimized for modern CPU cache hierarchies and SIMD vector instructions. We integrated Product Quantization (PQ) directly into the graph traversal to store compressed vectors in memory while keeping the full vectors on NVMe storage.
+  - paragraph: To handle high-throughput ingestion, we built a lock-free lock-step ingestion pipeline that builds index segments concurrently in memory before merging them, ensuring that search latency remained unaffected during heavy write loads.
+  - text: 0.82ms Query Latency 99th percentile search time 1.2B Scale High-dimensional vectors indexed 10x Memory Savings Achieved via Product Quantization
+  - heading "CORE_SCHEMATIC_TECH" [level=4]
+  - text: Rust SIMD gRPC RocksDB CUDA Tokio 2023 - 2024 AI Research Scientist
+  - heading "Chronos Predict" [level=2]
+  - text: CH_CHRONOS
+  - paragraph: Spatio-Temporal GNN for Continental Energy Grids
+  - paragraph: Energy grid balancing requires forecasting millions of fluctuating nodes in real-time. At Chronos, we developed a spatio-temporal deep learning network to predict grid load and renewable energy production surges.
+  - paragraph: We combined Graph Neural Networks (GNNs) to model the physical topology of the grid with Temporal Transformers to capture time-series trends (weather patterns, consumer usage cycles) across multiple scales.
+  - paragraph: The inference pipeline was engineered to ingest millions of IoT sensor readings per second via Kafka, run real-time inference in under 50ms, and feed predictions directly into automated grid control loops, preventing localized overloads and blackouts.
+  - text: 94.8% Prediction Accuracy Mean absolute percentage error 10M/s Sensor Ingestion Real-time IoT events processed 45ms Inference Loop End-to-end forecasting latency
+  - heading "CORE_SCHEMATIC_TECH" [level=4]
+  - text: "Python PyTorch PyTorch Geometric Kafka Kubernetes Triton STAGE_FIN HANDSHAKE: OPEN"
+  - heading "SECURE CONNECTION WITH THE ARCHITECT." [level=2]
+  - paragraph: Direct pathways are open for technical collaborations, venture advisory, or custom system designs.
+  - text: "ADDR:"
+  - link "hello@example.com":
+    - /url: mailto:hello@example.com
+  - text: "GITH:"
+  - link "github.com/architect":
+    - /url: https://github.com
+  - text: "LINK:"
+  - link "linkedin.com/in/architect":
+    - /url: https://linkedin.com
+- complementary:
+  - text: "SYS_MODE: SYNAPSE_ACTIVE SYS_STATUS: OPTIMAL SYS_HZ: 58 FPS PING: 44ms BUFF_OK: 100%"
+  - img
+  - text: SYSTEM CORE WebGL Swarm Parallax Grid CAD Reticle Spline Path THE ARCHITECT Aetheris AI Helios Engine Chronos Predict
+```
+
+# Test source
+
+```ts
+  127 | 
+  128 |     test('should handle empty tech stack gracefully', async ({ page }) => {
+  129 |       const techElements = page.locator('#helios').locator('span');
+  130 |       const count = await techElements.count();
+  131 |       expect(count).toBeGreaterThan(0);
+  132 |     });
+  133 |   });
+  134 | 
+  135 |   // 4. Chronos Predict Section (5 tests)
+  136 |   test.describe('4. Chronos Predict Boundaries', () => {
+  137 |     test('rapid scrolling past should not freeze card state', async ({ page }) => {
+  138 |       await page.evaluate(() => {
+  139 |         window.scrollTo(0, 2500);
+  140 |         window.scrollTo(0, 0);
+  141 |       });
+  142 |       const card = page.locator('#chronos .bento-card');
+  143 |       await expect(card).toBeVisible();
+  144 |     });
+  145 | 
+  146 |     test('ultrawide viewport should keep card aligned', async ({ page }) => {
+  147 |       await page.setViewportSize({ width: 2560, height: 1440 });
+  148 |       const card = page.locator('#chronos .bento-card');
+  149 |       const box = await card.boundingBox();
+  150 |       expect(box).not.toBeNull();
+  151 |     });
+  152 | 
+  153 |     test('text overflow should not break bento card bounds', async ({ page }) => {
+  154 |       const card = page.locator('#chronos .bento-card');
+  155 |       const isOverflowing = await card.evaluate((el) => el.scrollHeight > el.clientHeight + 10);
+  156 |       expect(isOverflowing).toBe(false);
+  157 |     });
+  158 | 
+  159 |     test('hovering card boundary exactly should not flicker hover', async ({ page }) => {
+  160 |       const card = page.locator('#chronos .bento-card');
+  161 |       const box = await card.boundingBox();
+  162 |       if (box) {
+  163 |         await page.mouse.move(box.x, box.y);
+  164 |       }
+  165 |       await expect(card).toBeVisible();
+  166 |     });
+  167 | 
+  168 |     test('should handle empty tech stack gracefully', async ({ page }) => {
+  169 |       const techElements = page.locator('#chronos').locator('span');
+  170 |       const count = await techElements.count();
+  171 |       expect(count).toBeGreaterThan(0);
+  172 |     });
+  173 |   });
+  174 | 
+  175 |   // 5. Contact Section / Form (5 tests)
+  176 |   test.describe('5. Contact Section Boundaries', () => {
+  177 |     test('copying contact links should work', async ({ page, context }) => {
+  178 |       await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  179 |       const emailLink = page.locator('#connect a[href^="mailto:"]');
+  180 |       await emailLink.scrollIntoViewIfNeeded();
+  181 |       // Right click or click to copy, or verify copy behavior if clipboard-copy is implemented
+  182 |       await expect(emailLink).toBeVisible();
+  183 |     });
+  184 | 
+  185 |     test('right clicking links should not break cursor lock state', async ({ page }) => {
+  186 |       const emailLink = page.locator('#connect a[href^="mailto:"]');
+  187 |       await emailLink.scrollIntoViewIfNeeded();
+  188 |       await emailLink.click({ button: 'right' });
+  189 |       const cursor = page.locator('[data-testid="custom-cursor"]');
+  190 |       await expect(cursor).toBeVisible();
+  191 |     });
+  192 | 
+  193 |     test('keyboard navigation can focus contact links', async ({ page }) => {
+  194 |       await page.keyboard.press('Tab');
+  195 |       // Tab until a link in connect is focused
+  196 |       let focusedHref = '';
+  197 |       for (let i = 0; i < 20; i++) {
+  198 |         await page.keyboard.press('Tab');
+  199 |         focusedHref = await page.evaluate(() => (document.activeElement as any)?.href || '');
+  200 |         if (focusedHref.includes('mailto') || focusedHref.includes('github') || focusedHref.includes('linkedin')) {
+  201 |           break;
+  202 |         }
+  203 |       }
+  204 |       expect(focusedHref).not.toBe('');
+  205 |     });
+  206 | 
+  207 |     test('pressing Enter on focused links should trigger action', async ({ page }) => {
+  208 |       const emailLink = page.locator('#connect a[href^="mailto:"]');
+  209 |       await emailLink.scrollIntoViewIfNeeded();
+  210 |       await emailLink.focus();
+  211 |       // Should not crash the page when Enter is pressed
+  212 |       await page.keyboard.press('Enter');
+  213 |       await expect(emailLink).toBeVisible();
+  214 |     });
+  215 | 
+  216 |     test('rapid hover and unhover of contact links does not crash cursor', async ({ page }) => {
+  217 |       const emailLink = page.locator('#connect a[href^="mailto:"]');
+  218 |       await emailLink.scrollIntoViewIfNeeded();
+  219 |       const box = await emailLink.boundingBox();
+  220 |       if (box) {
+  221 |         for (let i = 0; i < 5; i++) {
+  222 |           await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  223 |           await page.mouse.move(box.x - 100, box.y - 100);
+  224 |         }
+  225 |       }
+  226 |       const cursor = page.locator('[data-testid="custom-cursor"]');
+> 227 |       await expect(cursor).toBeVisible();
+      |                            ^ Error: expect(locator).toBeVisible() failed
+  228 |     });
+  229 |   });
+  230 | 
+  231 |   // 6. Terminal Console (5 tests)
+  232 |   test.describe('6. Terminal Console Boundaries', () => {
+  233 |     test('should wrap or truncate long log lines', async ({ page }) => {
+  234 |       const consoleWrapper = page.locator('[data-testid="terminal-console"]');
+  235 |       const isScrollableX = await consoleWrapper.evaluate((el) => el.scrollWidth > el.clientWidth + 5);
+  236 |       // Terminal should wrap text rather than scroll horizontally
+  237 |       expect(isScrollableX).toBe(false);
+  238 |     });
+  239 | 
+  240 |     test('log buffer should be capped at max lines', async ({ page }) => {
+  241 |       // Trigger multiple logs by scrolling
+  242 |       await page.evaluate(() => {
+  243 |         window.scrollTo(0, 500);
+  244 |         window.scrollTo(0, 1000);
+  245 |         window.scrollTo(0, 1500);
+  246 |       });
+  247 |       const logLines = page.locator('[data-testid="terminal-console"] [data-testid="terminal-log-line"]');
+  248 |       const count = await logLines.count();
+  249 |       expect(count).toBeLessThanOrEqual(50); // Capped at 50 or similar max log lines
+  250 |     });
+  251 | 
+  252 |     test('high frequency log updates should not degrade performance', async ({ page }) => {
+  253 |       // Simulate fast scroll triggering logs
+  254 |       await page.evaluate(async () => {
+  255 |         for (let i = 0; i < 20; i++) {
+  256 |           window.scrollTo(0, i * 100);
+  257 |           await new Promise((r) => setTimeout(r, 10));
+  258 |         }
+  259 |       });
+  260 |       const terminal = page.locator('[data-testid="terminal-console"]');
+  261 |       await expect(terminal).toBeVisible();
+  262 |     });
+  263 | 
+  264 |     test('resizing window recalculates terminal layout', async ({ page }) => {
+  265 |       await page.setViewportSize({ width: 800, height: 600 });
+  266 |       const terminal = page.locator('[data-testid="terminal-console"]');
+  267 |       await expect(terminal).toBeVisible();
+  268 |       await page.setViewportSize({ width: 1440, height: 900 });
+  269 |       await expect(terminal).toBeVisible();
+  270 |     });
+  271 | 
+  272 |     test('collapsing terminal preserves log history', async ({ page }) => {
+  273 |       const toggleBtn = page.locator('[data-testid="terminal-toggle"]');
+  274 |       if (await toggleBtn.isVisible()) {
+  275 |         await toggleBtn.click(); // Collapse
+  276 |         await toggleBtn.click(); // Expand
+  277 |         const bootLog = page.locator('[data-testid="terminal-console"]').getByText('SYS: Booting Core Decryptor');
+  278 |         await expect(bootLog).toBeVisible();
+  279 |       }
+  280 |     });
+  281 |   });
+  282 | 
+  283 |   // 7. Custom Cursor (5 tests)
+  284 |   test.describe('7. Custom Cursor Boundaries', () => {
+  285 |     test('moving mouse outside window should hide cursor', async ({ page }) => {
+  286 |       const cursor = page.locator('[data-testid="custom-cursor"]');
+  287 |       // Move mouse out of viewport (negative coordinates)
+  288 |       await page.mouse.move(-10, -10);
+  289 |       const opacity = await cursor.evaluate((el) => window.getComputedStyle(el).opacity);
+  290 |       expect(parseFloat(opacity)).toBe(0);
+  291 |     });
+  292 | 
+  293 |     test('touch devices should hide custom cursor', async ({ page }) => {
+  294 |       // Emulate mobile device or touch support
+  295 |       const hasTouch = await page.evaluate(() => {
+  296 |         return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  297 |       });
+  298 |       if (hasTouch) {
+  299 |         const cursor = page.locator('[data-testid="custom-cursor"]');
+  300 |         await expect(cursor).toBeHidden();
+  301 |       }
+  302 |     });
+  303 | 
+  304 |     test('extreme mouse speeds should not cause reticle lag beyond LERP', async ({ page }) => {
+  305 |       await page.mouse.move(0, 0);
+  306 |       await page.mouse.move(1000, 1000);
+  307 |       const coords = page.locator('[data-testid="cursor-coords"]');
+  308 |       // Wait for LERP to catch up
+  309 |       await page.waitForTimeout(200);
+  310 |       await expect(coords).toHaveText(/X:\s*1000\s+Y:\s*1000/);
+  311 |     });
+  312 | 
+  313 |     test('cursor should not block pointer events', async ({ page }) => {
+  314 |       const cursor = page.locator('[data-testid="custom-cursor"]');
+  315 |       const pointerEvents = await cursor.evaluate((el) => window.getComputedStyle(el).pointerEvents);
+  316 |       expect(pointerEvents).toBe('none');
+  317 |     });
+  318 | 
+  319 |     test('cursor handles dragging events gracefully', async ({ page }) => {
+  320 |       await page.mouse.move(100, 100);
+  321 |       await page.mouse.down();
+  322 |       await page.mouse.move(300, 300);
+  323 |       await page.mouse.up();
+  324 |       const cursor = page.locator('[data-testid="custom-cursor"]');
+  325 |       await expect(cursor).toBeVisible();
+  326 |     });
+  327 |   });
+```
