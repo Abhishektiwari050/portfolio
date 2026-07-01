@@ -85,22 +85,29 @@ interface ThreeCanvasProps {
   viewMode: 'home' | 'anatomy' | 'portfolio';
   scrollProgress: number;
   scrollVelocity: number;
+  side?: 'creative' | 'development';
 }
 
 export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
   viewMode,
   scrollProgress,
   scrollVelocity,
+  side = 'development',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewModeRef = useRef(viewMode);
   const scrollRef = useRef(scrollProgress);
   const velocityRef = useRef(scrollVelocity);
+  const sideRef = useRef(side);
   const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
 
   useEffect(() => {
     viewModeRef.current = viewMode;
   }, [viewMode]);
+
+  useEffect(() => {
+    sideRef.current = side;
+  }, [side]);
 
   useEffect(() => {
     scrollRef.current = scrollProgress;
@@ -293,6 +300,10 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
           mesh.material = boneMaterial;
           mesh.castShadow = true;
           mesh.receiveShadow = true;
+          // Keep only sub01 (skull), sub02 (neck spine), and Skelet01 (mid spine)
+          if (mesh.name !== 'sub01' && mesh.name !== 'sub02' && mesh.name !== 'Skelet01') {
+            mesh.visible = false;
+          }
         }
       });
 
@@ -308,9 +319,9 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
       const center = new THREE.Vector3();
       box.getCenter(center);
 
-      // Focus on the top 40% of the model (head & neck)
+      // Focus on the top 26% of the model (head & neck only)
       const targetBustHeight = 52.0;
-      const bustHeight = size.y * 0.40;
+      const bustHeight = size.y * 0.26;
       const scale = targetBustHeight / bustHeight;
       object.scale.set(scale, scale, scale);
 
@@ -320,7 +331,7 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
 
       object.position.set(
         -center.x * scale,
-        translationY,
+        translationY - 14.0, // lower to crop out the lower spine and pelvis
         -center.z * scale
       );
 
@@ -342,9 +353,15 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     }
     geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
 
-    // Colors: Slate and Indigo
+    // Colors: Slate and Indigo (or bright neon for Creative mode)
     const colors = new Float32Array(PARTICLE_COUNT * 3);
-    const palette = [
+    const palette = side === 'creative' ? [
+      new THREE.Color(0xff007f),
+      new THREE.Color(0xffd500),
+      new THREE.Color(0x39ff14),
+      new THREE.Color(0x00bfff),
+      new THREE.Color(0xffffff),
+    ] : [
       new THREE.Color(0x0f172a),
       new THREE.Color(0x1e293b),
       new THREE.Color(0x1e3a8a),
@@ -454,13 +471,31 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
         pointCloud.position.x += (targetX - pointCloud.position.x) * 0.08;
         material.uniforms.uOffsetX.value = pointCloud.position.x;
 
-        const targetScale = 0.0001;
-        skeletonGroup.scale.x += (targetScale - skeletonGroup.scale.x) * 0.08;
-        skeletonGroup.scale.y += (targetScale - skeletonGroup.scale.y) * 0.08;
-        skeletonGroup.scale.z += (targetScale - skeletonGroup.scale.z) * 0.08;
-        
-        if (skeletonGroup.scale.x < 0.01) {
-          skeletonGroup.visible = false;
+        if (sideRef.current === 'creative') {
+          // Keep skeleton bust visible in creative portfolio background
+          skeletonGroup.visible = true;
+          const targetScale = 1.35;
+          skeletonGroup.scale.x += (targetScale - skeletonGroup.scale.x) * 0.08;
+          skeletonGroup.scale.y += (targetScale - skeletonGroup.scale.y) * 0.08;
+          skeletonGroup.scale.z += (targetScale - skeletonGroup.scale.z) * 0.08;
+
+          // Align left behind text
+          skeletonGroup.position.x += (-45.0 - skeletonGroup.position.x) * 0.08;
+          skeletonGroup.position.y += (-6.0 - skeletonGroup.position.y) * 0.08;
+
+          // Slow rotation
+          skeletonGroup.rotation.y = elapsed * 0.12 + mouseRef.current.x * 0.18;
+          skeletonGroup.rotation.x = -0.15 + mouseRef.current.y * 0.12;
+        } else {
+          // Hide skeleton bust in high-tech development mode
+          const targetScale = 0.0001;
+          skeletonGroup.scale.x += (targetScale - skeletonGroup.scale.x) * 0.08;
+          skeletonGroup.scale.y += (targetScale - skeletonGroup.scale.y) * 0.08;
+          skeletonGroup.scale.z += (targetScale - skeletonGroup.scale.z) * 0.08;
+          
+          if (skeletonGroup.scale.x < 0.01) {
+            skeletonGroup.visible = false;
+          }
         }
 
         const rotationY = elapsed * 0.12 + mouseRef.current.x * 0.38;

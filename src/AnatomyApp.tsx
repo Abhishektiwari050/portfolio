@@ -422,7 +422,7 @@ export const AnatomyApp: React.FC = () => {
       >
         {/* ════ LEFT PANEL: CREATIVES (ARTISTIC YELLOW) ════════════════════ */}
         <a
-          href="/index.html#hero" // Redirects to creative portfolio intro
+          href="/index.html?side=creative" // Redirects to creative portfolio intro
           onMouseEnter={() => setHoverSide('left')}
           onMouseLeave={() => {
             setHoverSide(null);
@@ -816,7 +816,7 @@ export const AnatomyApp: React.FC = () => {
 
         {/* ════ RIGHT PANEL: ENGINEERING (TECHNICAL GRID) ════════════════════ */}
         <a
-          href="/index.html#aetheris" // Redirects to engineering projects
+          href="/index.html?side=development" // Redirects to engineering projects
           onMouseEnter={() => setHoverSide('right')}
           onMouseLeave={() => setHoverSide(null)}
           style={{

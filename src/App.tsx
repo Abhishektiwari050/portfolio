@@ -14,8 +14,37 @@ export function App() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [scrollVelocity, setScrollVelocity] = useState(0);
+  const [side, setSide] = useState<'creative' | 'development'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('side') === 'creative' ? 'creative' : 'development';
+    }
+    return 'development';
+  });
 
   const lenisRef = useRef<any>(null);
+
+  // Sync side parameter if URL updates dynamically
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      setSide(params.get('side') === 'creative' ? 'creative' : 'development');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Sync side class to document.body
+  useEffect(() => {
+    if (side === 'creative') {
+      document.body.classList.add('creative-side');
+    } else {
+      document.body.classList.remove('creative-side');
+    }
+    return () => {
+      document.body.classList.remove('creative-side');
+    };
+  }, [side]);
 
   // Initialize Lenis Smooth Scroll
   useEffect(() => {
@@ -73,6 +102,7 @@ export function App() {
         scrollProgress={scrollProgress} 
         scrollVelocity={scrollVelocity} 
         viewMode="portfolio"
+        side={side}
       />
 
       {/* Custom cursor */}

@@ -3,11 +3,19 @@ import React from 'react';
 export const Navbar: React.FC = () => {
   const isAnatomyPage = typeof window !== 'undefined' && window.location.pathname.includes('anatomy');
 
+  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const isCreative = params?.get('side') === 'creative';
+
   const navLinks = [
     { label: '// INTRO', href: isAnatomyPage ? '/#hero' : '#hero', isActive: !isAnatomyPage && (typeof window !== 'undefined' && window.location.hash === '#hero') },
     { label: '// WORK', href: isAnatomyPage ? '/#aetheris' : '#aetheris', isActive: !isAnatomyPage && (typeof window !== 'undefined' && window.location.hash === '#aetheris') },
     { label: '// ANATOMY', href: isAnatomyPage ? '#anatomy' : '/anatomy.html', isActive: isAnatomyPage },
     { label: '// CONTACT', href: isAnatomyPage ? '/#connect' : '#connect', isActive: !isAnatomyPage && (typeof window !== 'undefined' && window.location.hash === '#connect') },
+    ...(isAnatomyPage ? [] : [
+      isCreative 
+        ? { label: '// DEV MODE', href: '/index.html?side=development', isActive: false }
+        : { label: '// CREATIVE MODE', href: '/index.html?side=creative', isActive: false }
+    ])
   ];
 
   return (
