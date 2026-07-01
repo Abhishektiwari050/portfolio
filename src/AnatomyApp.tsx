@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
+import { TDSLoader } from 'three/examples/jsm/loaders/TDSLoader.js';
 
 // ── Particle Shaders ──────────────────────────────────────────────────────────
 const vertexShader = `
@@ -187,10 +188,140 @@ const ParticleFace: React.FC = () => {
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 };
 
+// ── ThreeSkull 3D Loader Component ─────────────────────────────────────────────
+const ThreeSkull: React.FC<{ mouseCoords: { x: number; y: number } }> = ({ mouseCoords }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mouseRef = useRef(mouseCoords);
+  const skullGroupRef = useRef<THREE.Group | null>(null);
+
+  useEffect(() => {
+    mouseRef.current = mouseCoords;
+  }, [mouseCoords]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 500);
+    camera.position.set(0, 0, 72);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+    scene.add(ambientLight);
+
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.8);
+    // Position light from left/top/front to match mockup shadows
+    dirLight1.position.set(-60, 40, 50);
+    scene.add(dirLight1);
+
+    const dirLight2 = new THREE.DirectionalLight(0x00bfff, 0.25); // Cool blue fill light
+    dirLight2.position.set(40, -30, -10);
+    scene.add(dirLight2);
+
+    const boneMaterial = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      roughness: 0.95,
+      metalness: 0.0,
+    });
+
+    const skullGroup = new THREE.Group();
+    scene.add(skullGroup);
+    skullGroupRef.current = skullGroup;
+
+    const tdsLoader = new TDSLoader();
+    tdsLoader.load('/Skelet_N031209.3ds', (object) => {
+      object.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          mesh.material = boneMaterial;
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+        }
+      });
+
+      // Align skeleton upright
+      object.rotation.x = -Math.PI / 2;
+      object.rotation.z = Math.PI;
+
+      // Compute bounding box to center skull bust
+      const box = new THREE.Box3().setFromObject(object);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      // Focus on skull (top portion)
+      const targetBustHeight = 44.0;
+      const bustHeight = size.y * 0.40;
+      const scale = targetBustHeight / bustHeight;
+      object.scale.set(scale, scale, scale);
+
+      // Center it
+      const bustCenterY = box.max.y - (bustHeight / 2);
+      const translationY = -bustCenterY * scale;
+
+      object.position.set(
+        -center.x * scale,
+        translationY - 6.0, // lower slightly
+        -center.z * scale
+      );
+
+      skullGroup.add(object);
+
+      // Flipped facing right (so we rotate around Y-axis by 90 degrees)
+      skullGroup.rotation.y = Math.PI / 2;
+    }, undefined, (error) => {
+      console.error('Failed to load 3D skeleton in ThreeSkull:', error);
+    });
+
+    let frameId: number;
+    const animate = () => {
+      if (skullGroupRef.current) {
+        const targetRotY = Math.PI / 2 + mouseRef.current.x * 0.22;
+        const targetRotX = mouseRef.current.y * 0.18;
+        
+        skullGroupRef.current.rotation.y += (targetRotY - skullGroupRef.current.rotation.y) * 0.08;
+        skullGroupRef.current.rotation.x += (targetRotX - skullGroupRef.current.rotation.x) * 0.08;
+      }
+
+      renderer.render(scene, camera);
+      frameId = requestAnimationFrame(animate);
+    };
+    animate();
+
+    const handleResize = () => {
+      if (!container) return;
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      cancelAnimationFrame(frameId);
+      if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
+      scene.clear();
+      boneMaterial.dispose();
+    };
+  }, []);
+
+  return <div ref={containerRef} style={{ width: '100%', height: '100%', pointerEvents: 'none' }} />;
+};
+
 // ── Main AnatomyApp ────────────────────────────────────────────────────────────
 export const AnatomyApp: React.FC = () => {
   const [time, setTime] = useState('');
   const [hoverSide, setHoverSide] = useState<'left' | 'right' | null>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const link = document.createElement('link');
@@ -217,9 +348,35 @@ export const AnatomyApp: React.FC = () => {
         overflow: 'hidden',
         fontFamily: '"Outfit", sans-serif',
         position: 'relative',
-        background: '#ffd500', // yellow base body background to prevent any playwright alpha checkerboard
+        background: '#ffd500', // yellow base body background
       }}
     >
+      {/* Inline Styles for animations */}
+      <style>{`
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-5px); }
+          100% { transform: translateY(0px); }
+        }
+        .hover-float {
+          animation: float 4s ease-in-out infinite;
+        }
+      `}</style>
+
+      {/* SVG Hand-Drawn Wobbly Filters */}
+      <svg style={{ position: 'absolute', width: 0, height: 0, pointerEvents: 'none', visibility: 'hidden' }}>
+        <defs>
+          <filter id="wobbly">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+          <filter id="splatter-rough">
+            <feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="4" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
+
       {/* ── Top Choose a Side Nav Badge ───────────────────────────────────── */}
       <div
         style={{
@@ -266,7 +423,16 @@ export const AnatomyApp: React.FC = () => {
         <a
           href="/index.html#hero" // Redirects to creative portfolio intro
           onMouseEnter={() => setHoverSide('left')}
-          onMouseLeave={() => setHoverSide(null)}
+          onMouseLeave={() => {
+            setHoverSide(null);
+            setMousePos({ x: 0, y: 0 });
+          }}
+          onMouseMove={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            setMousePos({ x, y });
+          }}
           style={{
             display: 'block',
             flex: '0 0 50%',
@@ -280,19 +446,359 @@ export const AnatomyApp: React.FC = () => {
             isolation: 'isolate',
           }}
         >
-          {/* Mockup Left Side Image */}
-          <img
-            src="/creatives_side.png"
-            alt="Creatives design showcase"
+          {/* Vertical Checkered Border on Left Edge */}
+          <div
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: 'block',
-              pointerEvents: 'none',
-              userSelect: 'none',
+              position: 'absolute',
+              left: '-2px',
+              top: '-2%',
+              bottom: '-2%',
+              width: '28px',
+              background: 'repeating-conic-gradient(#000000 0% 25%, #ffffff 0% 50%) 50% / 28px 28px',
+              zIndex: 10,
+              boxShadow: '3px 0 8px rgba(0,0,0,0.15)',
+              transform: 'rotate(-0.3deg)',
+              transformOrigin: 'top left',
             }}
           />
+
+          {/* Thin dividing line next to checkerboard */}
+          <div
+            style={{
+              position: 'absolute',
+              left: '26px',
+              top: 0,
+              bottom: 0,
+              width: '1.5px',
+              backgroundColor: '#000000',
+              zIndex: 10,
+            }}
+          />
+
+          {/* Halftone Dot Pattern Overlay in Bottom Left */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '-4%',
+              left: '2%',
+              width: '320px',
+              height: '320px',
+              backgroundImage: 'radial-gradient(rgba(0,0,0,0.16) 18%, transparent 18%)',
+              backgroundSize: '12px 12px',
+              maskImage: 'radial-gradient(circle at bottom left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 70%)',
+              WebkitMaskImage: 'radial-gradient(circle at bottom left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 70%)',
+              zIndex: 1,
+              pointerEvents: 'none',
+            }}
+          />
+
+          {/* ── Background Splatters and Doodles ── */}
+          {/* Neon Pink Splatter Top Left */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '-6%',
+              left: '6%',
+              width: '380px',
+              height: '300px',
+              opacity: 0.9,
+              zIndex: 1,
+              pointerEvents: 'none',
+              filter: 'url(#splatter-rough)',
+            }}
+          >
+            <svg viewBox="0 0 100 100" width="100%" height="100%">
+              <path
+                d="M10,25 C30,5 70,8 90,22 C105,35 95,65 80,78 C65,90 25,85 15,65 C5,45 2,35 10,25 Z"
+                fill="#ff007f"
+              />
+              <circle cx="15" cy="12" r="5" fill="#ff007f" />
+              <circle cx="85" cy="85" r="7" fill="#ff007f" />
+              <circle cx="95" cy="45" r="4" fill="#ff007f" />
+            </svg>
+          </div>
+
+          {/* Green Paint Splashes Bottom Left */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '15%',
+              left: '4%',
+              width: '220px',
+              height: '180px',
+              opacity: 0.85,
+              zIndex: 1,
+              pointerEvents: 'none',
+              filter: 'url(#splatter-rough)',
+            }}
+          >
+            <svg viewBox="0 0 100 100" width="100%" height="100%">
+              <path d="M20,30 C45,15 75,25 85,55 C95,85 70,95 40,80 C15,65 5,45 20,30 Z" fill="#39ff14" />
+            </svg>
+          </div>
+
+          {/* Electric Blue Splatter Middle Right */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '40%',
+              right: '-8%',
+              width: '340px',
+              height: '300px',
+              opacity: 0.85,
+              zIndex: 1,
+              pointerEvents: 'none',
+              filter: 'url(#splatter-rough)',
+            }}
+          >
+            <svg viewBox="0 0 100 100" width="100%" height="100%">
+              <path d="M30,30 C55,10 85,20 90,50 C95,80 75,95 55,90 C35,85 15,65 20,45 Z" fill="#00bfff" />
+              <circle cx="12" cy="22" r="5" fill="#00bfff" />
+              <circle cx="45" cy="95" r="6" fill="#00bfff" />
+            </svg>
+          </div>
+
+          {/* Brush strokes behind the skull (Bottom Right/Center) */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '2%',
+              right: '5%',
+              width: '420px',
+              height: '240px',
+              opacity: 0.9,
+              zIndex: 1,
+              pointerEvents: 'none',
+              filter: 'url(#splatter-rough)',
+            }}
+          >
+            <svg viewBox="0 0 200 100" width="100%" height="100%">
+              <path d="M10,80 Q70,20 180,60" stroke="#ff007f" strokeWidth="24" fill="none" strokeLinecap="round" />
+              <path d="M30,95 Q100,40 190,85" stroke="#39ff14" strokeWidth="16" fill="none" strokeLinecap="round" />
+              <path d="M50,98 Q120,60 195,95" stroke="#ffaa00" strokeWidth="12" fill="none" strokeLinecap="round" />
+            </svg>
+          </div>
+
+          {/* Neon Green Lightning Bolt Doodle */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '25%',
+              right: '18%',
+              zIndex: 3,
+              pointerEvents: 'none',
+              transform: `translate(${mousePos.x * 8}px, ${mousePos.y * 15}px) rotate(15deg)`,
+              transition: 'transform 0.15s ease-out',
+              filter: 'url(#wobbly)',
+            }}
+          >
+            <svg width="50" height="90" viewBox="0 0 60 100">
+              <path
+                d="M 35 5 L 10 50 L 30 50 L 20 95 L 50 40 L 30 40 Z"
+                fill="#39ff14"
+                stroke="#000000"
+                strokeWidth="4.5"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+
+          {/* Blue Asterisk Doodle */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '32%',
+              left: '12%',
+              zIndex: 3,
+              pointerEvents: 'none',
+              transform: `translate(${mousePos.x * -14}px, ${mousePos.y * 10}px)`,
+              transition: 'transform 0.15s ease-out',
+              filter: 'url(#wobbly)',
+            }}
+          >
+            <svg width="70" height="70" viewBox="0 0 80 80">
+              <path
+                d="M 40 10 L 40 70 M 10 40 L 70 40 M 18 18 L 62 62 M 62 18 L 18 62"
+                fill="none"
+                stroke="#0066ff"
+                strokeWidth="6"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+
+          {/* Green Spiral Doodle */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '27%',
+              left: '8%',
+              zIndex: 3,
+              pointerEvents: 'none',
+              transform: `translate(${mousePos.x * -6}px, ${mousePos.y * -6}px)`,
+              transition: 'transform 0.15s ease-out',
+              filter: 'url(#wobbly)',
+            }}
+          >
+            <svg width="90" height="90" viewBox="0 0 100 100">
+              <path
+                d="M 50 50 Q 42 38 52 32 Q 68 38 62 58 Q 45 72 30 55 Q 15 28 42 12 Q 80 2 85 50 Q 80 88 30 80 Q 2 55 22 25"
+                fill="none"
+                stroke="#39ff14"
+                strokeWidth="5.5"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+
+          {/* Blue 'X' Cross Doodle */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '48%',
+              right: '10%',
+              zIndex: 4,
+              pointerEvents: 'none',
+              transform: `translate(${mousePos.x * 10}px, ${mousePos.y * 8}px) rotate(12deg)`,
+              transition: 'transform 0.15s ease-out',
+              filter: 'url(#wobbly)',
+            }}
+          >
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <path
+                d="M 15 15 L 65 65 M 65 15 L 15 65"
+                fill="none"
+                stroke="#0055ff"
+                strokeWidth="13"
+                strokeLinecap="round"
+              />
+            </svg>
+          </div>
+
+          {/* Crown Doodle (Positioned above Title) */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '12%',
+              left: '32%',
+              zIndex: 4,
+              pointerEvents: 'none',
+              transform: `translate(${mousePos.x * 12}px, ${mousePos.y * -8}px) rotate(-8deg)`,
+              transition: 'transform 0.15s ease-out',
+              filter: 'url(#wobbly)',
+            }}
+          >
+            <svg
+              width="90"
+              height="65"
+              viewBox="0 0 100 70"
+              className="hover-float"
+            >
+              <path
+                d="M 15 55 L 20 20 L 40 40 L 50 15 L 60 40 L 80 20 L 85 55 Z"
+                fill="none"
+                stroke="#000000"
+                strokeWidth="5.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path d="M 12 58 Q 50 50 88 58" fill="none" stroke="#000000" strokeWidth="5.5" strokeLinecap="round" />
+              <circle cx="20" cy="16" r="5" fill="#000000" />
+              <circle cx="50" cy="11" r="5" fill="#000000" />
+              <circle cx="80" cy="16" r="5" fill="#000000" />
+            </svg>
+          </div>
+
+          {/* Smiley Face Doodle */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '8%',
+              left: '11%',
+              zIndex: 4,
+              pointerEvents: 'none',
+              transform: `translate(${mousePos.x * -10}px, ${mousePos.y * 12}px) rotate(-5deg)`,
+              transition: 'transform 0.15s ease-out',
+              filter: 'url(#wobbly)',
+            }}
+          >
+            <svg
+              width="110"
+              height="110"
+              viewBox="0 0 120 120"
+            >
+              <circle cx="60" cy="60" r="45" fill="#ffd500" stroke="#000000" strokeWidth="6.5" />
+              <ellipse cx="44" cy="48" rx="5.5" ry="8" fill="#000000" />
+              <ellipse cx="76" cy="48" rx="5.5" ry="8" fill="#000000" />
+              <path d="M 38 68 Q 60 92 82 68" fill="none" stroke="#000000" strokeWidth="6.5" strokeLinecap="round" />
+            </svg>
+          </div>
+
+          {/* ── Left Content Block (Creatives) ── */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '20%',
+              left: '26%',
+              zIndex: 10,
+              transform: `translate(${mousePos.x * 6}px, ${mousePos.y * 6}px) rotate(-3deg)`,
+              transition: 'transform 0.15s ease-out',
+              pointerEvents: 'none',
+            }}
+          >
+            <h1
+              style={{
+                fontFamily: '"Permanent Marker", sans-serif',
+                fontSize: 'clamp(56px, 7vw, 86px)',
+                color: '#000000',
+                margin: 0,
+                lineHeight: 1,
+                letterSpacing: '0.02em',
+                textTransform: 'uppercase',
+              }}
+            >
+              CREATIVES
+            </h1>
+            {/* Custom Underline Brush line */}
+            <svg width="100%" height="15" viewBox="0 0 300 15" style={{ filter: 'url(#wobbly)', display: 'block', marginTop: '2px' }}>
+              <path d="M 5 6 C 80 8, 220 3, 295 9" fill="none" stroke="#000000" strokeWidth="6.5" strokeLinecap="round" />
+            </svg>
+            <div
+              style={{
+                fontFamily: '"Space Mono", monospace',
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.38em',
+                color: '#000000',
+                marginTop: '8px',
+                textAlign: 'center',
+                borderTop: '3.5px solid #000000',
+                paddingTop: '6px',
+                display: 'inline-block',
+                width: '100%',
+                filter: 'url(#wobbly)',
+              }}
+            >
+              ABOUT DESIGN
+            </div>
+          </div>
+
+          {/* 3D WebGL Skull Canvas */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '-4%',
+              right: '-6%',
+              width: '64%',
+              height: '92%',
+              zIndex: 2,
+              pointerEvents: 'none',
+              transform: `translate(${mousePos.x * 16}px, ${mousePos.y * 12}px)`,
+              transition: 'transform 0.2s ease-out',
+            }}
+          >
+            <ThreeSkull mouseCoords={mousePos} />
+          </div>
 
           {/* Hover highlight overlay */}
           <div
