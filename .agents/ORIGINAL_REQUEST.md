@@ -79,3 +79,30 @@ Text is not static on award-winning sites. Headings and key text elements must a
 - [ ] `npm run dev` serves the site successfully on localhost
 - [ ] No JavaScript console errors on page load or during scroll
 - [ ] Page loads in under 3 seconds on localhost
+
+## 2026-07-01T02:25:52Z
+
+Implement and optimize the personal portfolio's anatomy page using the user's downloaded 3D skeleton model (`Skelet N031209.3ds`). The site must look exactly like the reference screenshot: a high-quality solid white plaster skull and spine/neck structure on the left against a bright yellow background, and the blue/black particle face on the right against an off-white background with a brutalist title and text.
+
+Working directory: `C:\Users\abhis\.gemini\antigravity\scratch\portfolio`
+Integrity mode: development
+
+## Requirements
+
+### R1. 3D Model Integration
+- Load the user's custom `.3ds` model `Skelet_N031209.3ds` using Three.js `TDSLoader`.
+- Override all child mesh materials with a pure matte white standard material (`roughness: 0.9`, `metalness: 0.0`).
+- Auto-scale and position the model as a bust (only the skull and neck/spine are visible in the left panel).
+- Implement slow, continuous auto-rotation of the skeleton model on the left, independent of mouse movement.
+
+### R2. Layout & Typography Optimization
+- Ensure a clean split-screen grid layout (50/50 vertical split) with solid yellow (`#d7ff00`) on the left and off-white (`#f5f5f7`) on the right.
+- Align all text overlays (coordinates, vertical info labels, crosshairs, navigation, brutalist title, concrete-and-yellow-triangle block graphic) to match the reference design perfectly.
+
+## Acceptance Criteria
+
+### Visual Rendering & Layout
+- [ ] No Draco decompression or loader errors in the console.
+- [ ] The custom 3DS skeleton model renders as a solid white plaster structure.
+- [ ] The model rotates slowly and continuously on its own (auto-rotation) and does not jump or reset.
+- [ ] The split-screen colors and brutalist typography (`Bebas Neue` font) align perfectly with the target screenshot.

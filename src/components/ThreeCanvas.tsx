@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
+import { TDSLoader } from 'three/examples/jsm/loaders/TDSLoader.js';
 
 // Custom shaders for the particle system
 const vertexShader = `
@@ -81,7 +82,7 @@ const fragmentShader = `
 `;
 
 interface ThreeCanvasProps {
-  viewMode: 'home' | 'anatomy';
+  viewMode: 'home' | 'anatomy' | 'portfolio';
   scrollProgress: number;
   scrollVelocity: number;
 }
@@ -234,6 +235,8 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     const gltfLoader = new GLTFLoader();
     gltfLoader.setDRACOLoader(dracoLoader);
 
+    const tdsLoader = new TDSLoader();
+
     // Load detailed face geometry from LeePerrySmith GLTF
     gltfLoader.load('/LeePerrySmith.glb', (gltf) => {
       let headMesh: THREE.Mesh | null = null;
@@ -265,27 +268,11 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     });
 
 
-    // Enable local clipping on the renderer
-    renderer.localClippingEnabled = true;
-
-    // Define clipping planes to cut off the skeleton's skull and only keep the neck/spine
-    const localPlaneSource = new THREE.Plane(new THREE.Vector3(0, -1, 0), -0.005); // Clips everything above the neck in local space
-    const localPlane = new THREE.Plane();
-
     // Beautiful plaster/bone material (pure matte white)
     const boneMaterial = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       roughness: 0.9,
       metalness: 0.0,
-    });
-
-    // Clipped material for the spine
-    const spineMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      roughness: 0.9,
-      metalness: 0.0,
-      clippingPlanes: [localPlane],
-      clipShadows: true,
     });
 
     // Add a high-contrast directional light specifically for the skull to create deep shadows
@@ -299,46 +286,8 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
     skeletonGroup.scale.set(0.001, 0.001, 0.001); // Start hidden/scaled out
     scene.add(skeletonGroup);
 
-    // 1. Load 3D Spine/Neck Model (using skeleton.glb with clipping)
-    gltfLoader.load('/skeleton.glb', (gltf) => {
-      const model = gltf.scene;
-      model.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh) {
-          const mesh = child as THREE.Mesh;
-          mesh.material = spineMaterial;
-          mesh.castShadow = true;
-          mesh.receiveShadow = true;
-        }
-      });
-      
-      // Focus on the top 22% of the skeleton (head & neck) and push the rest off-screen
-      const box = new THREE.Box3().setFromObject(model);
-      const size = new THREE.Vector3();
-      box.getSize(size);
-      
-      const headNeckRatio = 0.22;
-      const headNeckHeightInModel = size.y * headNeckRatio;
-      const targetHeightInScene = 52.0;
-      
-      const scale = targetHeightInScene / headNeckHeightInModel;
-      model.scale.set(scale, scale, scale);
-      
-      const headTopY = box.max.y * scale;
-      const translationY = 22.0 - headTopY;
-      
-      const center = new THREE.Vector3();
-      box.getCenter(center);
-      model.position.set(-center.x * scale, translationY, -center.z * scale);
-      model.rotation.y = Math.PI;
-      skeletonGroup.add(model);
-    }, undefined, (error) => {
-      console.error('Failed to load 3D skeleton model:', error);
-    });
-
-    // 2. Load 3D Skull Model (using the highly detailed, realistic skull.glb)
-    gltfLoader.load('/skull.glb', (gltf) => {
-      const model = gltf.scene;
-      model.traverse((child) => {
+    tdsLoader.load('/Skelet_N031209.3ds', (object) => {
+      object.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
           mesh.material = boneMaterial;
@@ -346,15 +295,38 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
           mesh.receiveShadow = true;
         }
       });
-      
-      // Scale and position the skull on top of the clipped neck
-      const skullScale = 18.2; // Adjusted to match the neck size perfectly
-      model.scale.set(skullScale, skullScale, skullScale);
-      model.position.set(0, 11.2, 0.6); // Positioned on top of the cervical vertebrae
-      model.rotation.y = Math.PI; // Face the camera initially
-      skeletonGroup.add(model);
+
+      // 3DS files need a 90-degree X-rotation to stand upright,
+      // and we rotate it around Z by 180 degrees to face the camera.
+      object.rotation.x = -Math.PI / 2;
+      object.rotation.z = Math.PI;
+
+      // Compute bounding box after rotation
+      const box = new THREE.Box3().setFromObject(object);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+      const center = new THREE.Vector3();
+      box.getCenter(center);
+
+      // Focus on the top 40% of the model (head & neck)
+      const targetBustHeight = 52.0;
+      const bustHeight = size.y * 0.40;
+      const scale = targetBustHeight / bustHeight;
+      object.scale.set(scale, scale, scale);
+
+      // Position the object so that the center of the bust portion is at (0, 0, 0)
+      const bustCenterY = box.max.y - (bustHeight / 2);
+      const translationY = -bustCenterY * scale;
+
+      object.position.set(
+        -center.x * scale,
+        translationY,
+        -center.z * scale
+      );
+
+      skeletonGroup.add(object);
     }, undefined, (error) => {
-      console.error('Failed to load 3D skull model:', error);
+      console.error('Failed to load 3D skeleton model:', error);
     });
 
 
@@ -469,13 +441,9 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({
         pointCloud.rotation.y = -Math.PI / 2 + rotationY;
         pointCloud.rotation.x = rotationX;
 
-        // Face right
-        skeletonGroup.rotation.y = Math.PI * 1.5 + rotationY;
-        skeletonGroup.rotation.x = rotationX;
-
-        // Update clipping plane in world space based on the group's matrixWorld
-        skeletonGroup.updateMatrixWorld(true);
-        localPlane.copy(localPlaneSource).applyMatrix4(skeletonGroup.matrixWorld);
+        // Face right, slow continuous auto-rotation independent of mouse
+        skeletonGroup.rotation.y = elapsed * 0.15;
+        skeletonGroup.rotation.x = 0;
       } else {
         const rawIdx = scroll * sectionCount;
         srcIdx = Math.min(Math.floor(rawIdx), sectionCount);

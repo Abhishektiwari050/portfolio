@@ -21,6 +21,24 @@ export const AnatomyApp: React.FC = () => {
       {/* ThreeJS Canvas in the foreground (z-index: 10) */}
       <ThreeCanvas viewMode="anatomy" scrollProgress={0} scrollVelocity={0} />
 
+      {/* Center Navigation Bar (Shared across top of the entire screen) */}
+      <div 
+        className="absolute left-1/2 -translate-x-1/2 top-8 flex items-center gap-6 z-20 text-[11px] font-mono tracking-widest"
+        style={{ color: '#1d1d1f' }}
+      >
+        <a 
+          href="/index.html" 
+          className="px-3 py-1 border border-black/10 rounded-sm hover:bg-black/5 transition-colors"
+          style={{ color: '#1d1d1f' }}
+        >
+          [ ARCHITECT ]
+        </a>
+        <span className="opacity-35">// INTRO</span>
+        <span className="opacity-35">// WORK</span>
+        <span className="text-black font-medium">// ANATOMY</span>
+        <span className="opacity-35">// CONTACT</span>
+      </div>
+
       {/* Main Layout Grid (z-index: 5, behind canvas) */}
       <div className="grid grid-cols-1 md:grid-cols-2 min-h-screen w-full relative z-5">
         
@@ -86,19 +104,7 @@ export const AnatomyApp: React.FC = () => {
             <div>OF FUNCTION</div>
           </div>
 
-          {/* Center Navigation Bar (Shared across top) */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-8 flex items-center gap-6 z-20 text-[11px] font-mono tracking-widest">
-            <a 
-              href="/index.html" 
-              className="px-3 py-1 border border-black/10 rounded-sm hover:bg-black/5 transition-colors"
-            >
-              [ ARCHITECT ]
-            </a>
-            <span className="opacity-35">// INTRO</span>
-            <span className="opacity-35">// WORK</span>
-            <span className="text-black font-medium">// ANATOMY</span>
-            <span className="opacity-35">// CONTACT</span>
-          </div>
+          {/* Center Navigation Bar (now centered globally to prevent clipping) */}
 
           {/* Middle Content: Brutalist Typography & Graphic */}
           <div className="my-auto max-w-lg pt-16">
@@ -127,8 +133,9 @@ export const AnatomyApp: React.FC = () => {
                 className="absolute right-0 bottom-0 w-[85px] h-[85px] text-[#d7ff00] fill-current" 
                 viewBox="0 0 100 100" 
                 preserveAspectRatio="none"
+                style={{ color: '#d7ff00' }}
               >
-                <polygon points="100,0 100,100 0,100" />
+                <polygon points="100,0 100,100 0,100" style={{ color: '#d7ff00' }} />
               </svg>
             </div>
           </div>
