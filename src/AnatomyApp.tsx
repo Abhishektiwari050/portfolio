@@ -258,9 +258,9 @@ const ThreeSkull: React.FC<{ mouseCoords: { x: number; y: number } }> = ({ mouse
       const center = new THREE.Vector3();
       box.getCenter(center);
 
-      // Focus on skull (top portion)
+      // Focus on skull (top portion: head & neck only, approx 22% of full skeleton)
       const targetBustHeight = 44.0;
-      const bustHeight = size.y * 0.40;
+      const bustHeight = size.y * 0.22;
       const scale = targetBustHeight / bustHeight;
       object.scale.set(scale, scale, scale);
 
@@ -270,14 +270,15 @@ const ThreeSkull: React.FC<{ mouseCoords: { x: number; y: number } }> = ({ mouse
 
       object.position.set(
         -center.x * scale,
-        translationY - 6.0, // lower slightly
+        translationY - 14.0, // lower significantly to fit the bottom half of the panel
         -center.z * scale
       );
 
       skullGroup.add(object);
 
-      // Flipped facing right (so we rotate around Y-axis by 90 degrees)
-      skullGroup.rotation.y = Math.PI / 2;
+      // Flipped facing right (so we rotate Y by -90 degrees, and tilt X up slightly)
+      skullGroup.rotation.y = -Math.PI / 2;
+      skullGroup.rotation.x = -0.22;
     }, undefined, (error) => {
       console.error('Failed to load 3D skeleton in ThreeSkull:', error);
     });
@@ -285,8 +286,8 @@ const ThreeSkull: React.FC<{ mouseCoords: { x: number; y: number } }> = ({ mouse
     let frameId: number;
     const animate = () => {
       if (skullGroupRef.current) {
-        const targetRotY = Math.PI / 2 + mouseRef.current.x * 0.22;
-        const targetRotX = mouseRef.current.y * 0.18;
+        const targetRotY = -Math.PI / 2 + mouseRef.current.x * 0.22;
+        const targetRotX = -0.22 + mouseRef.current.y * 0.18;
         
         skullGroupRef.current.rotation.y += (targetRotY - skullGroupRef.current.rotation.y) * 0.08;
         skullGroupRef.current.rotation.x += (targetRotX - skullGroupRef.current.rotation.x) * 0.08;
@@ -583,8 +584,8 @@ export const AnatomyApp: React.FC = () => {
           <div
             style={{
               position: 'absolute',
-              top: '25%',
-              right: '18%',
+              top: '28%',
+              right: '12%',
               zIndex: 3,
               pointerEvents: 'none',
               transform: `translate(${mousePos.x * 8}px, ${mousePos.y * 15}px) rotate(15deg)`,
@@ -607,8 +608,8 @@ export const AnatomyApp: React.FC = () => {
           <div
             style={{
               position: 'absolute',
-              top: '32%',
-              left: '12%',
+              top: '42%',
+              left: '8%',
               zIndex: 3,
               pointerEvents: 'none',
               transform: `translate(${mousePos.x * -14}px, ${mousePos.y * 10}px)`,
@@ -631,8 +632,8 @@ export const AnatomyApp: React.FC = () => {
           <div
             style={{
               position: 'absolute',
-              bottom: '27%',
-              left: '8%',
+              top: '56%',
+              left: '4%',
               zIndex: 3,
               pointerEvents: 'none',
               transform: `translate(${mousePos.x * -6}px, ${mousePos.y * -6}px)`,
@@ -656,7 +657,7 @@ export const AnatomyApp: React.FC = () => {
             style={{
               position: 'absolute',
               top: '48%',
-              right: '10%',
+              left: '32%',
               zIndex: 4,
               pointerEvents: 'none',
               transform: `translate(${mousePos.x * 10}px, ${mousePos.y * 8}px) rotate(12deg)`,
@@ -680,7 +681,7 @@ export const AnatomyApp: React.FC = () => {
             style={{
               position: 'absolute',
               top: '12%',
-              left: '32%',
+              left: '20%',
               zIndex: 4,
               pointerEvents: 'none',
               transform: `translate(${mousePos.x * 12}px, ${mousePos.y * -8}px) rotate(-8deg)`,
@@ -738,8 +739,8 @@ export const AnatomyApp: React.FC = () => {
           <div
             style={{
               position: 'absolute',
-              top: '20%',
-              left: '26%',
+              top: '24%',
+              left: '16%',
               zIndex: 10,
               transform: `translate(${mousePos.x * 6}px, ${mousePos.y * 6}px) rotate(-3deg)`,
               transition: 'transform 0.15s ease-out',
@@ -787,10 +788,10 @@ export const AnatomyApp: React.FC = () => {
           <div
             style={{
               position: 'absolute',
-              bottom: '-4%',
-              right: '-6%',
-              width: '64%',
-              height: '92%',
+              bottom: '-12%',
+              left: '8%',
+              width: '76%',
+              height: '106%',
               zIndex: 2,
               pointerEvents: 'none',
               transform: `translate(${mousePos.x * 16}px, ${mousePos.y * 12}px)`,
