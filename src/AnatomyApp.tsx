@@ -214,17 +214,13 @@ const ThreeSkull: React.FC<{ mouseCoords: { x: number; y: number } }> = ({ mouse
     container.appendChild(renderer.domElement);
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.18);
     scene.add(ambientLight);
 
-    const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.8);
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 3.0);
     // Position light from left/top/front to match mockup shadows
     dirLight1.position.set(-60, 40, 50);
     scene.add(dirLight1);
-
-    const dirLight2 = new THREE.DirectionalLight(0x00bfff, 0.25); // Cool blue fill light
-    dirLight2.position.set(40, -30, -10);
-    scene.add(dirLight2);
 
     const boneMaterial = new THREE.MeshStandardMaterial({
       color: 0xffffff,
@@ -244,6 +240,10 @@ const ThreeSkull: React.FC<{ mouseCoords: { x: number; y: number } }> = ({ mouse
           mesh.material = boneMaterial;
           mesh.castShadow = true;
           mesh.receiveShadow = true;
+          // Keep sub01 (skull), sub02 (upper spine), and Skelet01 (mid spine) visible to match mockup
+          if (mesh.name !== 'sub01' && mesh.name !== 'sub02' && mesh.name !== 'Skelet01') {
+            mesh.visible = false;
+          }
         }
       });
 
@@ -258,9 +258,9 @@ const ThreeSkull: React.FC<{ mouseCoords: { x: number; y: number } }> = ({ mouse
       const center = new THREE.Vector3();
       box.getCenter(center);
 
-      // Focus on skull (top portion: head & neck only, approx 22% of full skeleton)
+      // Focus on skull & neck (approx 26% of full skeleton)
       const targetBustHeight = 44.0;
-      const bustHeight = size.y * 0.22;
+      const bustHeight = size.y * 0.26;
       const scale = targetBustHeight / bustHeight;
       object.scale.set(scale, scale, scale);
 
