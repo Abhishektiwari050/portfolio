@@ -320,7 +320,6 @@ const ThreeSkull: React.FC<{ mouseCoords: { x: number; y: number } }> = ({ mouse
 
 // ── Main AnatomyApp ────────────────────────────────────────────────────────────
 export const AnatomyApp: React.FC = () => {
-  const [time, setTime] = useState('');
   const [hoverSide, setHoverSide] = useState<'left' | 'right' | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -330,13 +329,8 @@ export const AnatomyApp: React.FC = () => {
     link.rel = 'stylesheet';
     document.head.appendChild(link);
 
-    const updateTime = () => setTime(new Date().toTimeString().slice(0, 8));
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-
     return () => {
       document.head.removeChild(link);
-      clearInterval(interval);
     };
   }, []);
 

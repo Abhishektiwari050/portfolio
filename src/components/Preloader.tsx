@@ -109,7 +109,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
           fontSize: '0.15em',
           fontFamily: "'Geist Mono', monospace",
           fontWeight: 400,
-          color: '#00f0ff',
+          color: '#0055ff',
           letterSpacing: '0',
         }}>%</span>
       </div>
@@ -129,9 +129,9 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
           left: 0,
           height: '100%',
           width: `${progress}%`,
-          background: 'linear-gradient(90deg, #00f0ff, #6366f1)',
+          background: 'linear-gradient(90deg, #0055ff, #0033aa)',
           transition: 'width 0.08s linear',
-          boxShadow: '0 0 12px rgba(0, 240, 255, 0.4)',
+          boxShadow: '0 0 12px rgba(0, 85, 255, 0.4)',
         }} />
       </div>
 
@@ -157,7 +157,7 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
             : 'SYSTEMS ONLINE'}
         </span>
         <span style={{
-          color: '#00f0ff',
+          color: '#0055ff',
           opacity: progress >= 100 ? 1 : 0.4,
           transition: 'opacity 0.3s',
           fontSize: '0.6rem',
