@@ -263,6 +263,7 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [chatActive, setChatActive] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Initialize chat with Welcome
@@ -279,8 +280,10 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
     // Add user message
     setMessages(prev => [...prev, { sender: 'user', text: cleanText }]);
     setInput('');
+    setIsTyping(true);
 
     setTimeout(() => {
+      setIsTyping(false);
       const lower = cleanText.toLowerCase();
       let reply = '';
 
@@ -310,14 +313,14 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
         }
         setMessages(prev => [...prev, { sender: 'ai', text: reply }]);
       }
-    }, 400);
+    }, 800);
   };
 
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isTyping]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -328,7 +331,7 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
     handleSend(input);
   };
 
-  const showHeyOption = messages.length === 1;
+  const showHeyOption = messages.length === 1 && !isTyping;
 
   return (
     <div className="chat-widget" style={{
@@ -342,17 +345,32 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
           <span className="chat-dot chat-dot--yellow" />
           <span className="chat-dot chat-dot--green" />
         </div>
-        <div className="chat-title">assistant - {profile.name.toLowerCase().replace(' ', '')}@ai-node</div>
+        <div className="chat-title">
+          <span className="chat-status-dot" />
+          assistant - {profile.name.toLowerCase().replace(' ', '')}@ai-node
+        </div>
       </div>
       
       <div className="chat-body" ref={containerRef}>
         {messages.map((m, idx) => (
-          <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-            <div className={`chat-bubble chat-bubble--${m.sender}`}>
-              {m.text}
+          <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+            <div className="chat-bubble-container" style={{ display: 'flex', justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start', width: '100%' }}>
+              {m.sender === 'ai' && (
+                <div className="chat-avatar">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>
+                </div>
+              )}
+              <div className={`chat-bubble chat-bubble--${m.sender}`}>
+                {m.text}
+              </div>
+              {m.sender === 'user' && (
+                <div className="chat-avatar chat-avatar--user" style={{ marginLeft: 8 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+              )}
             </div>
             {m.options && (
-              <div className="chat-options-row" style={{ display: 'flex', gap: 10, margin: '8px 0', alignSelf: 'flex-start', paddingLeft: 4 }}>
+              <div className="chat-options-row">
                 {m.options.map((opt, i) => (
                   <button 
                     key={i} 
@@ -368,8 +386,21 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
           </div>
         ))}
 
+        {isTyping && (
+          <div className="chat-bubble-container" style={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
+            <div className="chat-avatar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>
+            </div>
+            <div className="chat-bubble chat-bubble--ai typing-indicator">
+              <span className="typing-dot" />
+              <span className="typing-dot" />
+              <span className="typing-dot" />
+            </div>
+          </div>
+        )}
+
         {showHeyOption && (
-          <div className="chat-options-row" style={{ display: 'flex', gap: 10, margin: '4px 0', alignSelf: 'flex-start', paddingLeft: 4 }}>
+          <div className="chat-options-row">
             <button type="button" className="chat-btn" onClick={() => handleSend('Hey')}>
               Click to send "Hey"
             </button>
@@ -378,20 +409,22 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
       </div>
 
       <form onSubmit={handleSubmit} className="chat-input-row">
-        <input
-          type="text"
-          className="chat-input"
-          placeholder={chatActive ? "Type a message..." : "Type 'Hey' to connect..."}
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          disabled={isExploreActivated}
-        />
+        <div className="chat-input-container">
+          <input
+            type="text"
+            className="chat-input"
+            placeholder={chatActive ? "Type a message..." : "Type 'Hey' to connect..."}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            disabled={isExploreActivated}
+          />
+        </div>
         <button 
           type="submit" 
           className="chat-send-btn" 
           disabled={isExploreActivated || (!chatActive && input.trim().toLowerCase() !== 'hey' && input.trim() !== '')}
         >
-          SEND
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
         </button>
       </form>
     </div>
