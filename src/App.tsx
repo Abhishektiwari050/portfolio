@@ -251,6 +251,8 @@ interface ChatProps {
   onExplore: () => void;
   isExploreActivated: boolean;
   transitionProgress: number;
+  chatActive: boolean;
+  setChatActive: (active: boolean) => void;
 }
 
 function getClientFallbackReply(message: string) {
@@ -285,10 +287,9 @@ interface ChatMessage {
   options?: { label: string; action: () => void }[];
 }
 
-function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgress }: ChatProps) {
+function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgress, chatActive, setChatActive }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
-  const [chatActive, setChatActive] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -302,6 +303,8 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
   const handleSend = async (text: string) => {
     const cleanText = text.trim();
     if (!cleanText) return;
+
+    setChatActive(true);
 
     // Add user message
     const newMessages: ChatMessage[] = [...messages, { sender: 'user', text: cleanText }];
@@ -513,7 +516,7 @@ export function App() {
   const [isExploreActivated, setIsExploreActivated] = useState(false);
   const [transitionProgress, setTransitionProgress] = useState(0);
   const [isTransitioning, setIsTransitioning]       = useState(false);
-  const [curtainState, setCurtainState]             = useState<'idle' | 'down' | 'up'>('idle');
+  const [chatActive, setChatActive]                 = useState(false);
   
   const horizontalRef = useRef<HTMLDivElement>(null);
   const lenisRefRef   = useRef<any>(null);
@@ -642,33 +645,41 @@ export function App() {
     };
   }, [isLoaded, isExploreActivated, isTransitioning]);
 
-  // ── Cinematic Transition Trigger (Curtain Wipe Explore Option) ──
+  // ── Cinematic Transition Trigger (Curtain Roll-up on AI Page) ──
   const triggerExploreTransition = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
     
-    // 1. Curtain slides down to cover the screen
-    setCurtainState('down');
+    // 1. Push down the AI page (#ch-0)
+    gsap.to('#ch-0', {
+      y: '6vh',
+      duration: 0.35,
+      ease: 'power2.out',
+      onComplete: () => {
+        // 2. Once pushed down, roll up #ch-0 and scroll to Chapter 1 simultaneously
+        setIsExploreActivated(true);
+        
+        if (lenisRefRef.current) {
+          lenisRefRef.current.start();
+          lenisRefRef.current.scrollTo(window.innerHeight, {
+            duration: 1.0,
+            easing: (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+          });
+        }
 
-    setTimeout(() => {
-      // 2. Once covered, swap active states instantly behind the curtain
-      setIsExploreActivated(true);
-      
-      if (lenisRefRef.current) {
-        lenisRefRef.current.start();
-        lenisRefRef.current.scrollTo(window.innerHeight * 1.25, { duration: 0 });
+        gsap.to('#ch-0', {
+          y: '-100vh',
+          duration: 1.0,
+          ease: 'power3.inOut',
+          onComplete: () => {
+            setIsTransitioning(false);
+            // Clear inline transforms for future re-entry stability
+            gsap.set('#ch-0', { clearProps: 'all' });
+            ScrollTrigger.refresh();
+          }
+        });
       }
-
-      // 3. Roll curtain back up to the top
-      setCurtainState('up');
-
-      setTimeout(() => {
-        // 4. Reset curtain state and release transition blocks
-        setCurtainState('idle');
-        setIsTransitioning(false);
-        ScrollTrigger.refresh();
-      }, 800);
-    }, 800);
+    });
   };
 
   // ── GSAP Reveal & Horizontal Scrolling Animations ──────────────────────────
@@ -726,14 +737,12 @@ export function App() {
     <>
       <Preloader onComplete={() => setIsLoaded(true)} />
       
-      {/* Curtain overlay for exploration scene pivot */}
-      <div className={`curtain-overlay curtain-overlay--${curtainState}`} />
-
       <StoryCanvas 
         scrollProgress={scrollProgress} 
         scrollVelocity={scrollVelocity}
         isExploreActivated={isExploreActivated || isTransitioning}
         transitionProgress={transitionProgress}
+        isChatActive={chatActive}
       />
       <CustomCursor />
       
@@ -811,6 +820,8 @@ export function App() {
                     onExplore={triggerExploreTransition} 
                     isExploreActivated={isExploreActivated || isTransitioning} 
                     transitionProgress={transitionProgress}
+                    chatActive={chatActive}
+                    setChatActive={setChatActive}
                   />
                 </div>
 

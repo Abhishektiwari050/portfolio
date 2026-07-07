@@ -1,35 +1,41 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
 
-// ─── Vertex Shader (GPU Morphing across 4 states) ──────────────────────────────
+// ─── Vertex Shader (GPU Morphing across 5 states) ──────────────────────────────
 const vertexShader = `
   uniform float uTime;
   uniform float uPixelRatio;
   uniform vec2  uMouse;
   uniform float uMouseInfluence;
   uniform float uScrollVelocity;
-  uniform float uChapterMix; // 0.0 to 3.0
+  uniform float uChapterMix; // 0.0 to 4.0
   
   attribute float aSize;
   attribute vec3  aColor;
   attribute float aMorphT;
   
-  attribute vec3  aPos0;      // "AI" Letters
-  attribute vec3  aPos1;      // Neural Network Layers
-  attribute vec3  aPos2;      // Binary Matrix
-  attribute vec3  aPos3;      // Computer Circuit Board
+  attribute vec3  aPos0;      // Face Model
+  attribute vec3  aPos1;      // "AI" Letters
+  attribute vec3  aPos2;      // Neural Network Layers
+  attribute vec3  aPos3;      // Binary Matrix
+  attribute vec3  aPos4;      // Computer Circuit Board
   
   varying vec3  vColor;
   varying float vAlpha;
 
   vec3 getMorphedPosition() {
-    float mixVal = clamp(uChapterMix, 0.0, 3.0);
+    float mixVal = clamp(uChapterMix, 0.0, 4.0);
     if (mixVal < 1.0) {
       return mix(aPos0, aPos1, mixVal);
     } else if (mixVal < 2.0) {
       return mix(aPos1, aPos2, mixVal - 1.0);
-    } else {
+    } else if (mixVal < 3.0) {
       return mix(aPos2, aPos3, mixVal - 2.0);
+    } else {
+      return mix(aPos3, aPos4, mixVal - 3.0);
     }
   }
   
@@ -56,11 +62,11 @@ const vertexShader = `
     }
     
     // Binary matrix flow (active in matrix stream state)
-    float mixVal = clamp(uChapterMix, 0.0, 3.0);
-    if (mixVal >= 1.0 && mixVal <= 3.0) {
+    float mixVal = clamp(uChapterMix, 0.0, 4.0);
+    if (mixVal >= 2.0 && mixVal <= 4.0) {
       float flowSpeed = 12.0;
       float yOffset = -mod(uTime * flowSpeed + aMorphT * 100.0, 80.0) + 40.0;
-      float mixWeight = 1.0 - abs(mixVal - 2.0); // peak at binary state (2.0)
+      float mixWeight = 1.0 - abs(mixVal - 3.0); // peak at binary state (3.0)
       if (mixWeight > 0.0) {
         pos.y += yOffset * mixWeight * 0.45;
       }
@@ -96,9 +102,24 @@ export interface StoryCanvasProps {
   scrollVelocity: number;
   isExploreActivated: boolean;
   transitionProgress: number;
+  isChatActive: boolean;
 }
 
 const N = 40_000;
+
+// FaceSphere placeholder before head model GLB loads
+function buildFaceSphere(): Float32Array {
+  const a = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    const theta = Math.random() * 2 * Math.PI;
+    const phi   = Math.acos(Math.random() * 2 - 1);
+    const r     = 20 + Math.random() * 2;
+    a[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
+    a[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) * 1.25;
+    a[i * 3 + 2] = r * Math.cos(phi) * 0.9;
+  }
+  return a;
+}
 
 // Spells the letters "A" and "I"
 function buildAISpelling(): Float32Array {
@@ -255,13 +276,15 @@ function buildCircuitBoard(): Float32Array {
 }
 
 const PALETTES: THREE.Color[][] = [
-  // 0: AI Letters
+  // 0: Face
+  [0x0055ff, 0x000000, 0x0077ff, 0x0022aa, 0x0099ff].map(h => new THREE.Color(h)),
+  // 1: AI Letters
   [0x0077ff, 0x00d4ff, 0x0055ff, 0x0099ff, 0x38bdf8].map(h => new THREE.Color(h)),
-  // 1: Network
+  // 2: Network
   [0x0055ff, 0x000000, 0x001144, 0x0099ff, 0x002288].map(h => new THREE.Color(h)),
-  // 2: Matrix
+  // 3: Matrix
   [0x0033aa, 0x000000, 0x0077ff, 0x0055ff, 0x001144].map(h => new THREE.Color(h)),
-  // 3: Circuit Board
+  // 4: Circuit Board
   [0x0099ff, 0x000000, 0x0055ff, 0x0033cc, 0x0077ff].map(h => new THREE.Color(h)),
 ];
 
@@ -269,19 +292,22 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
   scrollProgress, 
   scrollVelocity, 
   isExploreActivated, 
-  transitionProgress 
+  transitionProgress,
+  isChatActive
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef    = useRef(scrollProgress);
   const velocityRef  = useRef(scrollVelocity);
   const exploreRef    = useRef(isExploreActivated);
   const transitionRef = useRef(transitionProgress);
+  const chatActiveRef = useRef(isChatActive);
   const mouseRef     = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
 
   useEffect(() => { scrollRef.current = scrollProgress; },   [scrollProgress]);
   useEffect(() => { velocityRef.current = scrollVelocity; }, [scrollVelocity]);
   useEffect(() => { exploreRef.current = isExploreActivated; }, [isExploreActivated]);
   useEffect(() => { transitionRef.current = transitionProgress; }, [transitionProgress]);
+  useEffect(() => { chatActiveRef.current = isChatActive; }, [isChatActive]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -297,6 +323,7 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
     container.appendChild(renderer.domElement);
 
     const shapes: Float32Array[] = [
+      buildFaceSphere(),
       buildAISpelling(),
       buildNeuralNetwork(),
       buildBinaryMatrix(),
@@ -309,6 +336,32 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
     geometry.setAttribute('aPos1',    new THREE.BufferAttribute(shapes[1], 3));
     geometry.setAttribute('aPos2',    new THREE.BufferAttribute(shapes[2], 3));
     geometry.setAttribute('aPos3',    new THREE.BufferAttribute(shapes[3], 3));
+    geometry.setAttribute('aPos4',    new THREE.BufferAttribute(shapes[4], 3));
+
+    // Load real detailed head mesh for shape[0]
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+    const gltfLoader  = new GLTFLoader();
+    gltfLoader.setDRACOLoader(dracoLoader);
+
+    gltfLoader.load('/LeePerrySmith.glb', (gltf) => {
+      let headMesh: THREE.Mesh | null = null;
+      gltf.scene.traverse(c => { if ((c as THREE.Mesh).isMesh) headMesh = c as THREE.Mesh; });
+      if (headMesh) {
+        const sampler = new MeshSurfaceSampler(headMesh!).build();
+        const tmp     = new THREE.Vector3();
+        const data    = new Float32Array(N * 3);
+        const scale   = 13.5;
+        for (let i = 0; i < N; i++) {
+          sampler.sample(tmp);
+          data[i * 3]     = tmp.x * scale;
+          data[i * 3 + 1] = (tmp.y - 1.1) * scale;
+          data[i * 3 + 2] = -tmp.z * scale;
+        }
+        shapes[0] = data;
+        geometry.setAttribute('aPos0', new THREE.BufferAttribute(shapes[0], 3));
+      }
+    }, undefined, () => {});
 
     const sizes = new Float32Array(N);
     const phases = new Float32Array(N);
@@ -348,6 +401,7 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
     scene.add(cloud);
 
     let currentChapter = -1;
+    let currentRawIdx = 0.0;
     function updateColors(srcPal: THREE.Color[], tgtPal: THREE.Color[], mix: number) {
       const colAttr = geometry.getAttribute('aColor') as THREE.BufferAttribute;
       const arr = colAttr.array as Float32Array;
@@ -382,56 +436,49 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
       m.y += (m.ty - m.y) * 0.08;
       material.uniforms.uMouse.value.set(m.x, m.y);
 
-      let rawIdx = 0;
+      let targetRawIdx = 0.0;
       let targetZ = 130;
       let targetX = 54;
 
       const exploreActive = exploreRef.current;
       const tProg = transitionRef.current;
       const scroll = scrollRef.current;
+      const chatActive = chatActiveRef.current;
 
-      if (tProg > 0 && tProg < 0.98) {
-        if (tProg < 0.5) {
-          const t = tProg / 0.5;
-          rawIdx = 0; // Spell "AI"
-          targetZ = 130;
-          targetX = 54 - t * 54;
-          cloud.scale.setScalar(1.0 - t * 0.45);
-        } else {
-          const t = (tProg - 0.5) / 0.48;
-          rawIdx = t * 1.0; // Morph "AI" -> Neural Net
-          targetZ = 130 - t * 85;
-          targetX = 0;
-          cloud.scale.setScalar(0.55 + t * 0.45);
-        }
-      } else if (!exploreActive && tProg >= 0.98) {
-        rawIdx = 1.0;
-        targetZ = 45;
-        targetX = 0;
+      if (exploreActive) {
+        // Scrolled past Chapter 0 (curtain rolled up)
+        const startScroll = 0.08;
+        const normalizedScroll = Math.min(1.0, Math.max(0.0, (scroll - startScroll) / (1.0 - startScroll)));
+        targetRawIdx = 2.0 + normalizedScroll * 2.0; // 2.0 (Neural Net) to 4.0 (Circuit Board)
+        
+        targetZ = 130;
+        targetX = targetRawIdx >= 3.6 ? 0 : 12;
         cloud.scale.setScalar(1.0);
       } else {
-        const startScroll = 0.08;
-        if (scroll < startScroll) {
-          rawIdx = 0; // AI shape on hero
+        // Still on Hero / Chat screen (curtain not rolled up yet)
+        targetRawIdx = chatActive ? 1.0 : 0.0; // Morph to AI letters only if chat system is up/conversing!
+        
+        if (tProg > 0) {
+          // Center and zoom inside terminal wrapper
+          const t = Math.min(1.0, tProg / 0.8);
+          targetZ = 130 - t * 85;
+          targetX = 54 - t * 54;
+          cloud.scale.setScalar(0.8 - t * 0.3);
+        } else {
           targetZ = 130;
           targetX = 54;
-          cloud.scale.setScalar(1.0);
-        } else {
-          const normalizedScroll = Math.min(1.0, Math.max(0.0, (scroll - startScroll) / (1.0 - startScroll)));
-          rawIdx = 1.0 + normalizedScroll * 2.0; // 1.0 to 3.0
-          
-          targetZ = 130;
-          targetX = rawIdx >= 2.6 ? 0 : 12;
-          cloud.scale.setScalar(1.0);
+          cloud.scale.setScalar(0.8);
         }
       }
 
-      const CHAPTERS    = 4;
-      const srcIdx      = Math.min(Math.floor(rawIdx), CHAPTERS - 2);
-      const tgtIdx      = srcIdx + 1;
-      const mix         = rawIdx - srcIdx;
+      currentRawIdx += (targetRawIdx - currentRawIdx) * 0.08;
 
-      material.uniforms.uChapterMix.value = rawIdx;
+      const CHAPTERS    = 5;
+      const srcIdx      = Math.min(Math.floor(currentRawIdx), CHAPTERS - 2);
+      const tgtIdx      = srcIdx + 1;
+      const mix         = currentRawIdx - srcIdx;
+
+      material.uniforms.uChapterMix.value = currentRawIdx;
 
       if (srcIdx !== currentChapter) {
         currentChapter = srcIdx;
@@ -444,7 +491,7 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
           cloud.scale.setScalar(1.0);
         } else {
           targetX = srcIdx === 0 ? 54 : (srcIdx < 3 ? 12 : 0);
-          cloud.scale.setScalar(1.0);
+          cloud.scale.setScalar(srcIdx === 0 ? 0.8 : 1.0);
         }
       }
       cloud.position.x += (targetX - cloud.position.x) * 0.05;
