@@ -33,10 +33,61 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+function AnimatedCounter({ value }: { value: string }) {
+  const [displayValue, setDisplayValue] = useState('0');
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const numericMatch = value.match(/[\d.]+/);
+    if (!numericMatch) {
+      setDisplayValue(value);
+      return;
+    }
+    const target = parseFloat(numericMatch[0]);
+    const suffix = value.replace(numericMatch[0], '');
+    
+    let observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        let start = 0;
+        const duration = 1200; // 1.2s
+        const startTime = performance.now();
+
+        const animate = (now: number) => {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+          const current = start + target * easeProgress;
+          
+          if (value.includes('.')) {
+            setDisplayValue(current.toFixed(1) + suffix);
+          } else {
+            setDisplayValue(Math.floor(current) + suffix);
+          }
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          }
+        };
+        requestAnimationFrame(animate);
+        observer.disconnect();
+      }
+    }, { threshold: 0.1 });
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+    return () => observer.disconnect();
+  }, [value]);
+
+  return <span ref={elementRef}>{displayValue}</span>;
+}
+
 function MetricCard({ label, value, desc }: { label: string; value: string; desc: string }) {
   return (
     <div className="metric-card">
-      <div className="metric-card__value">{value}</div>
+      <div className="metric-card__value">
+        <AnimatedCounter value={value} />
+      </div>
       <div className="metric-card__label">{label}</div>
       <div className="metric-card__desc">{desc}</div>
     </div>
@@ -517,6 +568,22 @@ export function App() {
   const [transitionProgress, setTransitionProgress] = useState(0);
   const [isTransitioning, setIsTransitioning]       = useState(false);
   const [chatActive, setChatActive]                 = useState(false);
+
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle');
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.message) return;
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSubmitStatus('success');
+      setFormData({ name: '', email: '', message: '' });
+      setTimeout(() => setSubmitStatus('idle'), 4000);
+    }, 1200);
+  };
   
   const exploreActiveRef = useRef(isExploreActivated);
   const transitioningRef = useRef(isTransitioning);
@@ -812,6 +879,17 @@ export function App() {
                   <span className="hero-word" style={{ display: 'block' }}>TIWARI.</span>
                 </h1>
 
+                <div className="role-badges story-reveal" data-delay="0.25">
+                  <span className="role-badge">
+                    <span className="role-badge__dot" />
+                    AI Systems Engineer
+                  </span>
+                  <span className="role-badge">
+                    <span className="role-badge__dot" />
+                    LLM Architect
+                  </span>
+                </div>
+
                 <p className="hero-desc story-reveal" data-delay="0.4">
                   Building production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. 
                   Delivering intelligent client AI solutions at Vistar.
@@ -981,26 +1059,80 @@ export function App() {
                     sub="Let's build scalable intelligence. Seeking Full-Time AI & LLM Engineer roles."
                   />
 
-                  <div className="connect-grid story-reveal" data-delay="0.2">
-                    <a href={`mailto:${profile.email}`} className="connect-card glass-card">
-                      <span className="connect-card__icon">✉</span>
-                      <span className="connect-card__label">EMAIL DIRECT</span>
-                      <span className="connect-card__value">{profile.email}</span>
-                    </a>
-                    <a href={`https://${profile.github}`} target="_blank" rel="noopener noreferrer" className="connect-card glass-card">
-                      <span className="connect-card__icon">⌥</span>
-                      <span className="connect-card__label">GITHUB CODE</span>
-                      <span className="connect-card__value">{profile.github}</span>
-                    </a>
-                    <a href={`https://${profile.linkedin}`} target="_blank" rel="noopener noreferrer" className="connect-card glass-card">
-                      <span className="connect-card__icon">◈</span>
-                      <span className="connect-card__label">LINKEDIN PROFILE</span>
-                      <span className="connect-card__value">abhishek-tiwari-84841b258</span>
-                    </a>
-                    <div className="connect-card glass-card">
-                      <span className="connect-card__icon">☎</span>
-                      <span className="connect-card__label">PHONE CALL</span>
-                      <span className="connect-card__value">{profile.phone}</span>
+                  <div className="connect-split-layout">
+                    {/* Left Column: Glass Connection Cards */}
+                    <div className="connect-info-col story-reveal" data-delay="0.2">
+                      <a href={`mailto:${profile.email}`} className="connect-card glass-card">
+                        <span className="connect-card__icon">✉</span>
+                        <span className="connect-card__label">EMAIL DIRECT</span>
+                        <span className="connect-card__value">{profile.email}</span>
+                      </a>
+                      <a href={`https://${profile.github}`} target="_blank" rel="noopener noreferrer" className="connect-card glass-card">
+                        <span className="connect-card__icon">⌥</span>
+                        <span className="connect-card__label">GITHUB CODE</span>
+                        <span className="connect-card__value">{profile.github}</span>
+                      </a>
+                      <a href={`https://${profile.linkedin}`} target="_blank" rel="noopener noreferrer" className="connect-card glass-card">
+                        <span className="connect-card__icon">◈</span>
+                        <span className="connect-card__label">LINKEDIN PROFILE</span>
+                        <span className="connect-card__value">abhishek-tiwari-84841b258</span>
+                      </a>
+                      <div className="connect-card glass-card">
+                        <span className="connect-card__icon">☎</span>
+                        <span className="connect-card__label">PHONE CALL</span>
+                        <span className="connect-card__value">{profile.phone}</span>
+                      </div>
+                    </div>
+
+                    {/* Right Column: Premium Contact Form */}
+                    <div className="connect-form-col story-reveal" data-delay="0.35">
+                      <form onSubmit={handleFormSubmit} className="contact-form glass-card">
+                        <div className="contact-form__header">
+                          <h3>SEND A MESSAGE</h3>
+                          <p>Have an idea or need system architecture design? Drop a message directly.</p>
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="form-name">NAME</label>
+                          <input 
+                            type="text" 
+                            id="form-name" 
+                            required 
+                            placeholder="Your name" 
+                            value={formData.name} 
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="form-email">EMAIL</label>
+                          <input 
+                            type="email" 
+                            id="form-email" 
+                            required 
+                            placeholder="your.email@domain.com" 
+                            value={formData.email} 
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="form-message">MESSAGE</label>
+                          <textarea 
+                            id="form-message" 
+                            required 
+                            rows={4} 
+                            placeholder="Tell me about your project, timeline, and goals..." 
+                            value={formData.message} 
+                            onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                          />
+                        </div>
+                        <button type="submit" className="btn-primary form-submit-btn" disabled={isSubmitting}>
+                          {isSubmitting ? 'SENDING...' : 'DISPATCH MESSAGE'}
+                        </button>
+                        {submitStatus === 'success' && (
+                          <div className="form-status form-status--success">
+                            ✓ Message sent! Abhishek will reach back shortly.
+                          </div>
+                        )}
+                      </form>
                     </div>
                   </div>
 
