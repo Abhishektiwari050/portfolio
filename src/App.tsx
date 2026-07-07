@@ -255,16 +255,28 @@ interface ChatProps {
 
 function getClientFallbackReply(message: string) {
   const lower = message.toLowerCase();
+
+  // Guardrail check in fallback mode
+  const isOffTopic = !lower.includes('skill') && !lower.includes('stack') && !lower.includes('tech') &&
+                     !lower.includes('project') && !lower.includes('work') && !lower.includes('ship') &&
+                     !lower.includes('contact') && !lower.includes('email') && !lower.includes('phone') &&
+                     !lower.includes('connect') && !lower.includes('hey') && !lower.includes('hi') && 
+                     !lower.includes('hello') && !lower.includes('about') && !lower.includes('experience');
+
+  if (isOffTopic) {
+    return "I only answer questions about my professional background, skills, and shipped projects. How can I help you explore my work?";
+  }
+
   if (lower.includes('skill') || lower.includes('stack') || lower.includes('tech')) {
-    return "Abhishek's skills cover LLM engineering (OpenAI, Gemini, Claude, LangGraph, LlamaIndex), backend development (FastAPI, Python, TypeScript, PostgreSQL), and distributed agents orchestrated via RabbitMQ.";
+    return "My skills include LLM engineering (OpenAI, Gemini, Claude, prompt engineering), agent frameworks (LangGraph, LlamaIndex, CrewAI), and backend engineering (FastAPI, Python, PostgreSQL, RabbitMQ).";
   }
   if (lower.includes('project') || lower.includes('work') || lower.includes('ship')) {
-    return "Abhishek has shipped several production projects: an Agentic B2B Lead Gen platform with LLM compliance scoring, the VayuWays aviation compliance auditing tool, and WhatsApp RAG agents.";
+    return "I have shipped several production projects: an Agentic B2B Lead Gen scoring platform, the VayuWays aviation compliance tool, and WhatsApp RAG agents.";
   }
   if (lower.includes('contact') || lower.includes('email') || lower.includes('phone') || lower.includes('connect')) {
-    return `You can contact Abhishek Tiwari directly via email at ${profile.email}, phone at ${profile.phone}, or connect on LinkedIn (${profile.linkedin}).`;
+    return `You can contact me directly via email at ${profile.email}, phone at ${profile.phone}, or connect on LinkedIn (${profile.linkedin}).`;
   }
-  return "I am Abhishek's AI assistant co-pilot. I can answer questions about his skills, shipped projects, work history, and contact details. How can I help you today?";
+  return "I am Abhishek's AI assistant co-pilot. I can answer questions about my skills, shipped projects, work history, and contact details. How can I help you today?";
 }
 
 interface ChatMessage {
