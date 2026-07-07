@@ -518,6 +518,11 @@ export function App() {
   const [isTransitioning, setIsTransitioning]       = useState(false);
   const [chatActive, setChatActive]                 = useState(false);
   
+  const exploreActiveRef = useRef(isExploreActivated);
+  const transitioningRef = useRef(isTransitioning);
+  useEffect(() => { exploreActiveRef.current = isExploreActivated; }, [isExploreActivated]);
+  useEffect(() => { transitioningRef.current = isTransitioning; }, [isTransitioning]);
+  
   const horizontalRef = useRef<HTMLDivElement>(null);
   const lenisRefRef   = useRef<any>(null);
   const scrollProgressRef = useRef(0);
@@ -549,7 +554,7 @@ export function App() {
     });
 
     const handleWheel = (e: WheelEvent) => {
-      if (lenisRefRef.current && !isExploreActivated && !isTransitioning) {
+      if (lenisRefRef.current && !exploreActiveRef.current && !transitioningRef.current) {
         // Unlock scroll when scrolling back up
         if (e.deltaY < 0) {
           lenisRefRef.current.start();
@@ -562,7 +567,7 @@ export function App() {
       touchStartY = e.touches[0].clientY;
     };
     const handleTouchMove = (e: TouchEvent) => {
-      if (lenisRefRef.current && !isExploreActivated && !isTransitioning) {
+      if (lenisRefRef.current && !exploreActiveRef.current && !transitioningRef.current) {
         const touchY = e.touches[0].clientY;
         const deltaY = touchStartY - touchY;
         // Unlock scroll when swiping down (scrolling up)
@@ -585,7 +590,7 @@ export function App() {
       window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
     };
-  }, [isExploreActivated, isTransitioning]);
+  }, []);
 
   // ── Hero Zoom ScrollTrigger Pin ─────────────────────────────────────────────
   useEffect(() => {
@@ -659,13 +664,16 @@ export function App() {
         // 2. Once pushed down, roll up #ch-0 and scroll to Chapter 1 simultaneously
         setIsExploreActivated(true);
         
-        if (lenisRefRef.current) {
-          lenisRefRef.current.start();
-          lenisRefRef.current.scrollTo(window.innerHeight, {
-            duration: 1.0,
-            easing: (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
-          });
-        }
+        setTimeout(() => {
+          if (lenisRefRef.current) {
+            lenisRefRef.current.resize();
+            lenisRefRef.current.start();
+            lenisRefRef.current.scrollTo('#ch-1', {
+              duration: 1.0,
+              easing: (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+            });
+          }
+        }, 50);
 
         gsap.to('#ch-0', {
           y: '-100vh',
