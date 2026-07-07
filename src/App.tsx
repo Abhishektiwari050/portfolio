@@ -513,6 +513,7 @@ export function App() {
   const [isExploreActivated, setIsExploreActivated] = useState(false);
   const [transitionProgress, setTransitionProgress] = useState(0);
   const [isTransitioning, setIsTransitioning]       = useState(false);
+  const [curtainState, setCurtainState]             = useState<'idle' | 'down' | 'up'>('idle');
   
   const horizontalRef = useRef<HTMLDivElement>(null);
   const lenisRefRef   = useRef<any>(null);
@@ -641,25 +642,33 @@ export function App() {
     };
   }, [isLoaded, isExploreActivated, isTransitioning]);
 
-  // ── Cinematic Transition Trigger (Button click/command line explore option) ─
+  // ── Cinematic Transition Trigger (Curtain Wipe Explore Option) ──
   const triggerExploreTransition = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
+    
+    // 1. Curtain slides down to cover the screen
+    setCurtainState('down');
 
-    if (lenisRefRef.current) {
-      lenisRefRef.current.start(); // Ensure scroll is unlocked
-      lenisRefRef.current.scrollTo(window.innerHeight * 1.25, {
-        duration: 2.5,
-        easing: (t: number) => t * (2 - t),
-        onComplete: () => {
-          setIsExploreActivated(true);
-          setIsTransitioning(false);
-          setTimeout(() => {
-            ScrollTrigger.refresh();
-          }, 100);
-        }
-      });
-    }
+    setTimeout(() => {
+      // 2. Once covered, swap active states instantly behind the curtain
+      setIsExploreActivated(true);
+      
+      if (lenisRefRef.current) {
+        lenisRefRef.current.start();
+        lenisRefRef.current.scrollTo(window.innerHeight * 1.25, { duration: 0 });
+      }
+
+      // 3. Roll curtain back up to the top
+      setCurtainState('up');
+
+      setTimeout(() => {
+        // 4. Reset curtain state and release transition blocks
+        setCurtainState('idle');
+        setIsTransitioning(false);
+        ScrollTrigger.refresh();
+      }, 800);
+    }, 800);
   };
 
   // ── GSAP Reveal & Horizontal Scrolling Animations ──────────────────────────
@@ -717,6 +726,9 @@ export function App() {
     <>
       <Preloader onComplete={() => setIsLoaded(true)} />
       
+      {/* Curtain overlay for exploration scene pivot */}
+      <div className={`curtain-overlay curtain-overlay--${curtainState}`} />
+
       <StoryCanvas 
         scrollProgress={scrollProgress} 
         scrollVelocity={scrollVelocity}

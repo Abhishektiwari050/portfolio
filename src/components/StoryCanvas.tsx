@@ -1,51 +1,44 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
-import { MeshSurfaceSampler } from 'three/examples/jsm/math/MeshSurfaceSampler.js';
 
-// ─── Vertex Shader (100% GPU-based Morphing) ──────────────────────────────────
+// ─── Vertex Shader (GPU Morphing across 4 states) ──────────────────────────────
 const vertexShader = `
   uniform float uTime;
   uniform float uPixelRatio;
   uniform vec2  uMouse;
   uniform float uMouseInfluence;
   uniform float uScrollVelocity;
-  uniform float uChapterMix; // 0.0 to 4.0
+  uniform float uChapterMix; // 0.0 to 3.0
   
   attribute float aSize;
   attribute vec3  aColor;
-  attribute float aMorphT;    // per-particle phase offset
+  attribute float aMorphT;
   
-  attribute vec3  aPos0;      // Face/Intellect
-  attribute vec3  aPos1;      // "AI" Letters
-  attribute vec3  aPos2;      // Neural Network Layers
-  attribute vec3  aPos3;      // Computer Science Binary Matrix Stream
-  attribute vec3  aPos4;      // Computer Circuit Board
+  attribute vec3  aPos0;      // "AI" Letters
+  attribute vec3  aPos1;      // Neural Network Layers
+  attribute vec3  aPos2;      // Binary Matrix
+  attribute vec3  aPos3;      // Computer Circuit Board
   
   varying vec3  vColor;
   varying float vAlpha;
 
   vec3 getMorphedPosition() {
-    float mixVal = clamp(uChapterMix, 0.0, 4.0);
+    float mixVal = clamp(uChapterMix, 0.0, 3.0);
     if (mixVal < 1.0) {
       return mix(aPos0, aPos1, mixVal);
     } else if (mixVal < 2.0) {
       return mix(aPos1, aPos2, mixVal - 1.0);
-    } else if (mixVal < 3.0) {
-      return mix(aPos2, aPos3, mixVal - 2.0);
     } else {
-      return mix(aPos3, aPos4, mixVal - 3.0);
+      return mix(aPos2, aPos3, mixVal - 2.0);
     }
   }
   
   void main() {
     vColor = aColor;
     
-    // Morph position calculated entirely on the GPU
     vec3 pos = getMorphedPosition();
     
-    // Mouse repulsion (3D world space)
+    // Mouse repulsion
     vec3 mouse3D = vec3(uMouse.x * 55.0, uMouse.y * 55.0, 0.0);
     float dist    = distance(pos, mouse3D);
     if (dist < 28.0 && uMouseInfluence > 0.1) {
@@ -54,23 +47,20 @@ const vertexShader = `
       pos += dir * force;
     }
     
-    // Scroll turbulence (reactive stream wave)
-    // Dampen scroll velocity to prevent abnormal vibration/jittering
+    // Scroll turbulence
     float scrollV = clamp(abs(uScrollVelocity), 0.0, 10.0);
     if (scrollV > 0.05) {
-      float sf = scrollV * 0.035; // gentle, elegant ripple influence
+      float sf = scrollV * 0.035;
       pos.x += sin(pos.y * 0.12 + uTime * 2.0) * sf;
       pos.z += cos(pos.x * 0.12 + uTime * 2.0) * sf;
     }
     
-    // Binary matrix flow (only active in chapter 3 binary stream shape pos)
-    float mixVal = clamp(uChapterMix, 0.0, 4.0);
-    if (mixVal >= 2.0 && mixVal <= 4.0) {
-      // Create a vertical falling effect for matrix columns
+    // Binary matrix flow (active in matrix stream state)
+    float mixVal = clamp(uChapterMix, 0.0, 3.0);
+    if (mixVal >= 1.0 && mixVal <= 3.0) {
       float flowSpeed = 12.0;
       float yOffset = -mod(uTime * flowSpeed + aMorphT * 100.0, 80.0) + 40.0;
-      // Interpolate the y-axis drift depending on how active shape 3 is
-      float mixWeight = 1.0 - abs(mixVal - 3.0); // peak at 3.0
+      float mixWeight = 1.0 - abs(mixVal - 2.0); // peak at binary state (2.0)
       if (mixWeight > 0.0) {
         pos.y += yOffset * mixWeight * 0.45;
       }
@@ -85,12 +75,10 @@ const vertexShader = `
     gl_Position     = projectionMatrix * mvPosition;
     gl_PointSize    = aSize * uPixelRatio * (280.0 / -mvPosition.z);
     
-    // Soft depth edge fade
     vAlpha = smoothstep(-90.0, 90.0, pos.y);
   }
 `;
 
-// ─── Fragment Shader (Soft glowing points) ────────────────────────────────────
 const fragmentShader = `
   varying vec3  vColor;
   varying float vAlpha;
@@ -104,33 +92,18 @@ const fragmentShader = `
 `;
 
 export interface StoryCanvasProps {
-  scrollProgress: number;   // 0→1
+  scrollProgress: number;
   scrollVelocity: number;
   isExploreActivated: boolean;
-  transitionProgress: number; // 0→1
+  transitionProgress: number;
 }
 
-const N = 40_000; // Dense particle cloud
+const N = 40_000;
 
-// ─── Meaningful CS/AI Particle Shape Builders ────────────────────────────────
-function buildFaceSphere(): Float32Array {
-  const a = new Float32Array(N * 3);
-  for (let i = 0; i < N; i++) {
-    const theta = Math.random() * 2 * Math.PI;
-    const phi   = Math.acos(Math.random() * 2 - 1);
-    const r     = 20 + Math.random() * 2;
-    a[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
-    a[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) * 1.25;
-    a[i * 3 + 2] = r * Math.cos(phi) * 0.9;
-  }
-  return a;
-}
-
-// Spells the letters "A" and "I" (for Chapter 1 Transition)
+// Spells the letters "A" and "I"
 function buildAISpelling(): Float32Array {
   const a = new Float32Array(N * 3);
   
-  // Left letter 'A' bounds, Right letter 'I' bounds
   const aLeftLegStart = [-20, -18, 0];
   const aLeftLegEnd   = [-10, 18, 0];
   
@@ -159,7 +132,7 @@ function buildAISpelling(): Float32Array {
 
   for (let i = 0; i < N; i++) {
     let pt: [number, number, number] = [0, 0, 0];
-    const segment = i % 6; // 3 segments for A, 3 segments for I
+    const segment = i % 6;
     const t = Math.random();
     const noise = 1.6;
 
@@ -177,7 +150,6 @@ function buildAISpelling(): Float32Array {
       pt = lerpPoint(iBotBarStart, iBotBarEnd, t);
     }
 
-    // Add jitter
     a[i * 3]     = pt[0] + (Math.random() - 0.5) * noise;
     a[i * 3 + 1] = pt[1] + (Math.random() - 0.5) * noise;
     a[i * 3 + 2] = pt[2] + (Math.random() - 0.5) * noise * 0.5;
@@ -186,25 +158,23 @@ function buildAISpelling(): Float32Array {
   return a;
 }
 
-// AI Neural Network Layout (3 fully connected node grid layers)
+// AI Neural Network Layout
 function buildNeuralNetwork(): Float32Array {
   const a = new Float32Array(N * 3);
   const layers = 3;
   const nodesPerLayer = 18;
   
-  // Define positions of the network layers (input, hidden, output)
   const zCoords = [-24, 0, 24];
   const layerNodes: [number, number, number][][] = Array.from({ length: layers }, (_, lIdx) => {
     return Array.from({ length: nodesPerLayer }, (_, nIdx) => {
       const angle = (nIdx / nodesPerLayer) * Math.PI * 2;
-      const r = 18 + (lIdx === 1 ? -4 : 2); // Hidden layer slightly smaller
+      const r = 18 + (lIdx === 1 ? -4 : 2);
       return [r * Math.cos(angle), r * Math.sin(angle) * 0.8, zCoords[lIdx]];
     });
   });
 
   for (let i = 0; i < N; i++) {
     if (i < N * 0.4) {
-      // Cluster around actual layer nodes
       const layer = i % layers;
       const node = Math.floor(Math.random() * nodesPerLayer);
       const [nx, ny, nz] = layerNodes[layer][node];
@@ -213,7 +183,6 @@ function buildNeuralNetwork(): Float32Array {
       a[i * 3 + 1] = ny + (Math.random() - 0.5) * noise;
       a[i * 3 + 2] = nz + (Math.random() - 0.5) * noise;
     } else if (i < N * 0.8) {
-      // Synapses (lines connecting layer nodes)
       const l1 = Math.floor(Math.random() * (layers - 1));
       const l2 = l1 + 1;
       const n1 = Math.floor(Math.random() * nodesPerLayer);
@@ -227,7 +196,6 @@ function buildNeuralNetwork(): Float32Array {
       a[i * 3 + 1] = y1 + (y2 - y1) * t + (Math.random() - 0.5) * 1.0;
       a[i * 3 + 2] = z1 + (z2 - z1) * t;
     } else {
-      // Ambient floating parameter cloud
       const r = 25 + Math.random() * 8;
       const t = Math.random() * Math.PI * 2;
       a[i * 3]     = r * Math.cos(t);
@@ -238,7 +206,7 @@ function buildNeuralNetwork(): Float32Array {
   return a;
 }
 
-// Binary Code Matrix Stream (Falling vertical code arrays)
+// Binary Code Matrix Stream
 function buildBinaryMatrix(): Float32Array {
   const a = new Float32Array(N * 3);
   const cols = 28;
@@ -246,30 +214,25 @@ function buildBinaryMatrix(): Float32Array {
 
   for (let i = 0; i < N; i++) {
     const col = i % cols;
-    // Set fixed x/z coordinate columns
     a[i * 3]     = colX[col] + (Math.random() - 0.5) * 0.8;
-    a[i * 3 + 1] = (Math.random() - 0.5) * 45; // vertical height span
-    a[i * 3 + 2] = (Math.random() - 0.5) * 12; // slight depth blur
+    a[i * 3 + 1] = (Math.random() - 0.5) * 45;
+    a[i * 3 + 2] = (Math.random() - 0.5) * 12;
   }
   return a;
 }
 
-// Computer Circuit Board (2D Flat chip motherboard grid)
+// Computer Circuit Board
 function buildCircuitBoard(): Float32Array {
   const a = new Float32Array(N * 3);
   const paths = 8;
-  
-  // Define chip CPU center bounds
   const chipSize = 14.0;
   
   for (let i = 0; i < N; i++) {
     if (i < N * 0.45) {
-      // CPU Core Chip center grid (Flat square)
       a[i * 3]     = (Math.random() - 0.5) * chipSize * 2.0;
       a[i * 3 + 1] = (Math.random() - 0.5) * chipSize * 2.0;
       a[i * 3 + 2] = (Math.random() - 0.5) * 1.5;
     } else if (i < N * 0.85) {
-      // Circuit trace pathways extending outwards from chip edge
       const pathIdx = i % paths;
       const angle = (pathIdx / paths) * Math.PI * 2;
       const startR = chipSize;
@@ -281,7 +244,6 @@ function buildCircuitBoard(): Float32Array {
       a[i * 3 + 1] = r * Math.sin(angle) + (Math.random() - 0.5) * 0.8;
       a[i * 3 + 2] = (Math.random() - 0.5) * 1.0;
     } else {
-      // Tiny connection solder nodes on board
       const r = 34.0 + (Math.random() - 0.5) * 4.0;
       const t = Math.random() * Math.PI * 2;
       a[i * 3]     = r * Math.cos(t);
@@ -292,17 +254,14 @@ function buildCircuitBoard(): Float32Array {
   return a;
 }
 
-// ─── Color Palettes (Strictly Blue & Black) ───────────────────────────────────
 const PALETTES: THREE.Color[][] = [
-  // 0: Face – electric blue & black
-  [0x0055ff, 0x000000, 0x0077ff, 0x0022aa, 0x0099ff].map(h => new THREE.Color(h)),
-  // 1: AI Letters – vibrant-blue & cyan (no black/dark blue)
+  // 0: AI Letters
   [0x0077ff, 0x00d4ff, 0x0055ff, 0x0099ff, 0x38bdf8].map(h => new THREE.Color(h)),
-  // 2: Network – royal-blue & black
+  // 1: Network
   [0x0055ff, 0x000000, 0x001144, 0x0099ff, 0x002288].map(h => new THREE.Color(h)),
-  // 3: Helix – navy-blue & sky-blue
+  // 2: Matrix
   [0x0033aa, 0x000000, 0x0077ff, 0x0055ff, 0x001144].map(h => new THREE.Color(h)),
-  // 4: Orbit – vibrant-blue & black
+  // 3: Circuit Board
   [0x0099ff, 0x000000, 0x0055ff, 0x0033cc, 0x0077ff].map(h => new THREE.Color(h)),
 ];
 
@@ -337,54 +296,20 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
-    // Initial shape lists
     const shapes: Float32Array[] = [
-      buildFaceSphere(),     // 0: Face (Identity)
-      buildAISpelling(),     // 1: Spells "AI" (Transition)
-      buildNeuralNetwork(),  // 2: Neural Net (Evolution/AI)
-      buildBinaryMatrix(),   // 3: Binary Code Matrix (Computer Science)
-      buildCircuitBoard(),   // 4: Chip Motherboard Circuit (Engineering)
+      buildAISpelling(),
+      buildNeuralNetwork(),
+      buildBinaryMatrix(),
+      buildCircuitBoard(),
     ];
 
-    // Load real detailed head mesh for shape[0]
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
-    const gltfLoader  = new GLTFLoader();
-    gltfLoader.setDRACOLoader(dracoLoader);
-
-    gltfLoader.load('/LeePerrySmith.glb', (gltf) => {
-      let headMesh: THREE.Mesh | null = null;
-      gltf.scene.traverse(c => { if ((c as THREE.Mesh).isMesh) headMesh = c as THREE.Mesh; });
-      if (headMesh) {
-        const sampler = new MeshSurfaceSampler(headMesh!).build();
-        const tmp     = new THREE.Vector3();
-        const data    = new Float32Array(N * 3);
-        const scale   = 13.5;
-        for (let i = 0; i < N; i++) {
-          sampler.sample(tmp);
-          data[i * 3]     = tmp.x * scale;
-          data[i * 3 + 1] = (tmp.y - 1.1) * scale;
-          data[i * 3 + 2] = -tmp.z * scale;
-        }
-        shapes[0] = data;
-        
-        // Re-upload attributes to GPU to reflect head loader complete state
-        geometry.setAttribute('aPos0', new THREE.BufferAttribute(shapes[0], 3));
-      }
-    }, undefined, () => {});
-
-    // ── Buffer Geometry ───────────────────────────────────────────────────────
     const geometry = new THREE.BufferGeometry();
-    
-    // Pass ALL 5 positions as discrete GPU attributes to prevent CPU looping overhead
-    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(N * 3), 3)); // shader will override with morphed pos
+    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(N * 3), 3));
     geometry.setAttribute('aPos0',    new THREE.BufferAttribute(shapes[0], 3));
     geometry.setAttribute('aPos1',    new THREE.BufferAttribute(shapes[1], 3));
     geometry.setAttribute('aPos2',    new THREE.BufferAttribute(shapes[2], 3));
     geometry.setAttribute('aPos3',    new THREE.BufferAttribute(shapes[3], 3));
-    geometry.setAttribute('aPos4',    new THREE.BufferAttribute(shapes[4], 3));
 
-    // Dynamic sizes & phases
     const sizes = new Float32Array(N);
     const phases = new Float32Array(N);
     const colors = new Float32Array(N * 3);
@@ -403,7 +328,6 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
     geometry.setAttribute('aMorphT', new THREE.BufferAttribute(phases, 1));
     geometry.setAttribute('aColor',  new THREE.BufferAttribute(colors, 3));
 
-    // ── Shader Material ──────────────────────────────────────────────────────
     const material = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
@@ -423,7 +347,6 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
     const cloud = new THREE.Points(geometry, material);
     scene.add(cloud);
 
-    // ── Color transition loop (runs occasionally to change colors) ───────────
     let currentChapter = -1;
     function updateColors(srcPal: THREE.Color[], tgtPal: THREE.Color[], mix: number) {
       const colAttr = geometry.getAttribute('aColor') as THREE.BufferAttribute;
@@ -440,14 +363,12 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
       colAttr.needsUpdate = true;
     }
 
-    // ── Mouse listener ───────────────────────────────────────────────────────
     const onMouseMove = (e: MouseEvent) => {
       mouseRef.current.tx = (e.clientX / window.innerWidth)  * 2 - 1;
       mouseRef.current.ty = -(e.clientY / window.innerHeight) * 2 + 1;
     };
     window.addEventListener('mousemove', onMouseMove);
 
-    // ── Animate Loop ──────────────────────────────────────────────────────────
     let raf: number;
     let t0 = performance.now();
 
@@ -470,60 +391,46 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
       const scroll = scrollRef.current;
 
       if (tProg > 0 && tProg < 0.98) {
-        // Run Cinematic morphing sequence
-        // 0.0 to 0.4 transitionProgress: Face centers and shrinks INSIDE the terminal
-        // 0.4 to 0.8 transitionProgress: Face -> "AI" letters inside terminal
-        // 0.8 to 1.0 transitionProgress: "AI" -> Neural Net (chapter 2) as terminal dissolves
-        if (tProg < 0.4) {
-          const t = tProg / 0.4; // 0 to 1
-          rawIdx = 0; // Keep Face shape
+        if (tProg < 0.5) {
+          const t = tProg / 0.5;
+          rawIdx = 0; // Spell "AI"
           targetZ = 130;
-          targetX = 54 - t * 54; // center the cloud
-          cloud.scale.setScalar(0.8 - t * 0.55); // shrink down to 25% size so it gets inside the terminal!
-        } else if (tProg < 0.8) {
-          const t = (tProg - 0.4) / 0.4; // 0 to 1
-          rawIdx = t * 1.0; // Morph Face -> "AI" letters
-          targetZ = 130 - t * 85; // zoom camera forward
-          targetX = 0;
-          cloud.scale.setScalar(0.25 + t * 0.75); // scale back up as we zoom past
+          targetX = 54 - t * 54;
+          cloud.scale.setScalar(1.0 - t * 0.45);
         } else {
-          const t = (tProg - 0.8) / 0.18; // 0 to 1
-          rawIdx = 1.0 + t * 1.0; // Morph "AI" -> Neural Net
-          targetZ = 45 + t * 85; // zoom camera back out
-          targetX = t * 12; // place on the right side for the next section
-          cloud.scale.setScalar(1.0);
+          const t = (tProg - 0.5) / 0.48;
+          rawIdx = t * 1.0; // Morph "AI" -> Neural Net
+          targetZ = 130 - t * 85;
+          targetX = 0;
+          cloud.scale.setScalar(0.55 + t * 0.45);
         }
       } else if (!exploreActive && tProg >= 0.98) {
-        // Hold the "AI" letters inside the terminal while waiting for explore activation
         rawIdx = 1.0;
         targetZ = 45;
         targetX = 0;
         cloud.scale.setScalar(1.0);
       } else {
-        // Main page scroll mapping: morph from Neural Net (2.0) to Circuit Board (4.0)
-        // Let's map scrollProgress from 0.08 (hero fold) to 1.0 smoothly to rawIdx 2.0 to 4.0
         const startScroll = 0.08;
         if (scroll < startScroll) {
-          rawIdx = 0;
+          rawIdx = 0; // AI shape on hero
           targetZ = 130;
           targetX = 54;
-          cloud.scale.setScalar(0.8);
+          cloud.scale.setScalar(1.0);
         } else {
           const normalizedScroll = Math.min(1.0, Math.max(0.0, (scroll - startScroll) / (1.0 - startScroll)));
-          rawIdx = 2.0 + normalizedScroll * 2.0; // goes from 2.0 (Neural Net) to 4.0 (Circuit Board)
+          rawIdx = 1.0 + normalizedScroll * 2.0; // 1.0 to 3.0
           
           targetZ = 130;
-          targetX = rawIdx >= 3.6 ? 0 : 12;
+          targetX = rawIdx >= 2.6 ? 0 : 12;
           cloud.scale.setScalar(1.0);
         }
       }
 
-      const CHAPTERS    = 5;
+      const CHAPTERS    = 4;
       const srcIdx      = Math.min(Math.floor(rawIdx), CHAPTERS - 2);
       const tgtIdx      = srcIdx + 1;
       const mix         = rawIdx - srcIdx;
 
-      // Pass the chapter mix directly to the GPU for 60fps morphing
       material.uniforms.uChapterMix.value = rawIdx;
 
       if (srcIdx !== currentChapter) {
@@ -531,19 +438,17 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
       }
       updateColors(PALETTES[srcIdx], PALETTES[tgtIdx], mix);
 
-      // Slide cloud dynamically to coordinates
       if (!exploreActive) {
         if (tProg >= 0.98) {
           targetX = 0;
           cloud.scale.setScalar(1.0);
         } else {
           targetX = srcIdx === 0 ? 54 : (srcIdx < 3 ? 12 : 0);
-          cloud.scale.setScalar(srcIdx === 0 ? 0.8 : 1.0);
+          cloud.scale.setScalar(1.0);
         }
       }
       cloud.position.x += (targetX - cloud.position.x) * 0.05;
 
-      // Camera drift & rotation
       cloud.rotation.y  = elapsed * 0.06 + m.x * 0.3;
       cloud.rotation.x  = Math.sin(elapsed * 0.05) * 0.03 + m.y * 0.15;
       

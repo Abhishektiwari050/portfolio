@@ -1272,9 +1272,33 @@ body.explore-active .three-container {
 .terminal-wrapper {
   position: relative;
   width: 100%;
-  max-width: 580px;
-  height: 320px; /* Matches default dimensions of the chat console */
+  max-width: 620px;
+  height: 460px; /* Taller ChatGPT console centered in lower hero */
   margin-top: 2rem;
+}
+
+/* ── Curtain Transition Overlay ────────────────────────────── */
+.curtain-overlay {
+  position: fixed;
+  top: -100%;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #171717; /* Solid ChatGPT dark grey curtain */
+  z-index: 99999;
+  pointer-events: none;
+  transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1);
+  transform: translateY(0);
+}
+
+.curtain-overlay.curtain-overlay--down {
+  transform: translateY(100%);
+  pointer-events: auto;
+}
+
+.curtain-overlay.curtain-overlay--up {
+  transform: translateY(0);
+  pointer-events: none;
 }
 
 .chat-widget {
