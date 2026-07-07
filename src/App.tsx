@@ -253,6 +253,20 @@ interface ChatProps {
   transitionProgress: number;
 }
 
+function getClientFallbackReply(message: string) {
+  const lower = message.toLowerCase();
+  if (lower.includes('skill') || lower.includes('stack') || lower.includes('tech')) {
+    return "Abhishek's skills cover LLM engineering (OpenAI, Gemini, Claude, LangGraph, LlamaIndex), backend development (FastAPI, Python, TypeScript, PostgreSQL), and distributed agents orchestrated via RabbitMQ.";
+  }
+  if (lower.includes('project') || lower.includes('work') || lower.includes('ship')) {
+    return "Abhishek has shipped several production projects: an Agentic B2B Lead Gen platform with LLM compliance scoring, the VayuWays aviation compliance auditing tool, and WhatsApp RAG agents.";
+  }
+  if (lower.includes('contact') || lower.includes('email') || lower.includes('phone') || lower.includes('connect')) {
+    return `You can contact Abhishek Tiwari directly via email at ${profile.email}, phone at ${profile.phone}, or connect on LinkedIn (${profile.linkedin}).`;
+  }
+  return "I am Abhishek's AI assistant co-pilot. I can answer questions about his skills, shipped projects, work history, and contact details. How can I help you today?";
+}
+
 interface ChatMessage {
   sender: 'ai' | 'user';
   text: string;
@@ -273,22 +287,23 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
     ]);
   }, []);
 
-  const handleSend = (text: string) => {
+  const handleSend = async (text: string) => {
     const cleanText = text.trim();
     if (!cleanText) return;
 
     // Add user message
-    setMessages(prev => [...prev, { sender: 'user', text: cleanText }]);
+    const newMessages: ChatMessage[] = [...messages, { sender: 'user', text: cleanText }];
+    setMessages(newMessages);
     setInput('');
     setIsTyping(true);
 
-    setTimeout(() => {
-      setIsTyping(false);
-      const lower = cleanText.toLowerCase();
-      let reply = '';
+    const lower = cleanText.toLowerCase();
 
-      if (lower === 'hey' || lower === 'hi' || lower === 'hello') {
-        reply = `Hey, this is a chatbot system. This is ${profile.name}. You can explore my capabilities through the pages, or you can ask questions directly to me.`;
+    // Standard starting greetings bypass LLM call for instant response
+    if (lower === 'hey' || lower === 'hi' || lower === 'hello') {
+      setTimeout(() => {
+        setIsTyping(false);
+        const reply = `Hey, this is a chatbot system. This is ${profile.name}. You can explore my capabilities through the pages, or you can ask questions directly to me.`;
         setMessages(prev => [
           ...prev, 
           { 
@@ -300,20 +315,36 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
             ]
           }
         ]);
+      }, 800);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: cleanText,
+          history: newMessages.filter(m => m.text !== 'Welcome')
+        })
+      });
+
+      setIsTyping(false);
+
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(prev => [...prev, { sender: 'ai', text: data.text }]);
       } else {
-        // Chatbot conversation replies
-        if (lower.includes('skill') || lower.includes('stack') || lower.includes('tech')) {
-          reply = `Here is my system engine stack:\n• Languages: Python, TypeScript, SQL\n• AI/LLM: OpenAI, Claude, Gemini APIs, LangGraph, LlamaIndex\n• Backend/DB: FastAPI, PostgreSQL, Vector DBs, RabbitMQ`;
-        } else if (lower.includes('project') || lower.includes('work') || lower.includes('ship')) {
-          reply = `Some of my shipped work:\n• Agentic Sales Intel: B2B lead generation & LLM compliance scoring\n• VayuWays: DGCA regulatory compliance tool\n• WhatsApp Intelligence Agent: Whatsapp automation`;
-        } else if (lower.includes('contact') || lower.includes('email') || lower.includes('phone')) {
-          reply = `Connect with me directly at:\n• Email: ${profile.email}\n• LinkedIn: ${profile.linkedin}\n• Phone: ${profile.phone}`;
-        } else {
-          reply = `I can answer questions about my "skills", "projects", and "contact" info, or you can click "Explore" to scroll through the full resume story.`;
-        }
-        setMessages(prev => [...prev, { sender: 'ai', text: reply }]);
+        const fallbackText = getClientFallbackReply(cleanText);
+        setMessages(prev => [...prev, { sender: 'ai', text: fallbackText }]);
       }
-    }, 800);
+    } catch (e) {
+      setIsTyping(false);
+      const fallbackText = getClientFallbackReply(cleanText);
+      setMessages(prev => [...prev, { sender: 'ai', text: fallbackText }]);
+    }
   };
 
   useEffect(() => {
