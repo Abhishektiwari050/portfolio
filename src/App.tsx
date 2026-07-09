@@ -980,10 +980,13 @@ export function App() {
               alignItems: 'center', 
               justifyContent: 'flex-start',
               width: '100%',
-              paddingLeft: HERO_PADDING_LEFT
+              boxSizing: 'border-box',
+              paddingLeft: window.innerWidth <= 768 ? '20px' : HERO_PADDING_LEFT,
+              paddingRight: window.innerWidth <= 768 ? '20px' : '0',
             }}>
               <div className="hero-text-col" style={{ 
-                maxWidth: isExploreActivated ? '50vw' : '640px',
+                maxWidth: window.innerWidth <= 768 ? '100%' : (isExploreActivated ? '50vw' : '640px'),
+                width: window.innerWidth <= 768 ? '100%' : undefined,
                 margin: '0',
                 transition: 'all 1.0s cubic-bezier(0.16, 1, 0.3, 1)'
               }}>

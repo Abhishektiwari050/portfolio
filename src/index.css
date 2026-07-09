@@ -4,7 +4,7 @@
    STRICTLY BLUE & BLACK COLOR PALETTE
    ═══════════════════════════════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@500;700;800&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@500;700;800;900&family=Space+Mono:wght@400;700&display=swap');
 
 :root {
   --bg:           #f5f5f7;    /* Apple Premium Off-White */
@@ -380,30 +380,28 @@ body.explore-active .three-container {
 }
 
 .hero-title {
-  font-family: var(--font-display);
-  font-size: clamp(3.8rem, 8.5vw, 6.8rem);
-  font-weight: 800;
-  line-height: 0.92;
-  letter-spacing: -0.05em;
-  color: var(--text-primary);
-  margin-bottom: 2rem;
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(4.2rem, 9vw, 8rem);
+  font-weight: 900;
+  line-height: 0.88;
+  letter-spacing: -0.04em;
+  color: #000000;
+  margin-bottom: 1.8rem;
 }
 
 .hero-word {
   display: inline-block;
-  background: linear-gradient(135deg, var(--text-primary) 30%, var(--blue-primary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #000000;
+  -webkit-text-fill-color: #000000;
 }
 
 .hero-desc {
-  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  font-size: clamp(0.95rem, 1.4vw, 1.15rem);
   font-weight: 500;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 3rem;
-  max-width: 540px;
+  color: #1d1d1f;
+  line-height: 1.65;
+  margin-bottom: 2rem;
+  max-width: 520px;
 }
 
 .hero-cta {
@@ -2060,4 +2058,196 @@ body.explore-active .three-container {
     height: 300px !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE OVERHAUL
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Tablet (≤ 1024px) ──────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .site-nav {
+    gap: 1.5rem;
+    padding: 0 20px;
+  }
+  .site-nav__links {
+    gap: 1.2rem;
+  }
+  .hero-title {
+    font-size: clamp(3.5rem, 7.5vw, 6rem) !important;
+  }
+  .chapter__inner {
+    padding: 0 1.5rem;
+  }
+  .terminal-wrapper {
+    max-width: 420px !important;
+    height: 310px !important;
+  }
+}
+
+/* ── Mobile (≤ 768px) ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Nav becomes a slim horizontal strip */
+  .site-nav {
+    top: 12px;
+    width: calc(100% - 32px);
+    left: 16px;
+    transform: none;
+    padding: 0 16px;
+    height: 48px;
+    gap: 0;
+    justify-content: space-between;
+    border-radius: 16px;
+  }
+  .site-nav__links {
+    gap: 0.8rem;
+  }
+  .site-nav__link {
+    font-size: 0.65rem;
+  }
+  /* Hide less important nav links on mobile */
+  .site-nav__links .site-nav__link:not(.site-nav__link--cta):not(:last-child) {
+    display: none;
+  }
+
+  /* Hero: single column, full-width */
+  .chapter__inner--hero {
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    padding: 100px 20px 120px !important;
+    gap: 0 !important;
+    box-sizing: border-box !important;
+  }
+  .hero-text-col {
+    max-width: calc(100vw - 40px) !important;
+    width: calc(100vw - 40px) !important;
+    overflow: hidden !important;
+  }
+  .hero-title {
+    font-size: clamp(1.5rem, 7.5vw, 2.8rem) !important;
+    line-height: 0.92 !important;
+    letter-spacing: -0.03em !important;
+    margin-bottom: 1.2rem !important;
+    word-break: normal !important;
+    white-space: normal !important;
+  }
+  .hero-eyebrow {
+    font-size: 0.6rem !important;
+    margin-bottom: 1rem !important;
+  }
+  .role-badges {
+    gap: 8px !important;
+    margin-bottom: 1rem !important;
+    flex-wrap: wrap !important;
+  }
+  .role-badge {
+    font-size: 0.6rem !important;
+    padding: 5px 10px !important;
+  }
+  .hero-desc {
+    font-size: 0.9rem !important;
+    max-width: 100% !important;
+    margin-bottom: 1.2rem !important;
+  }
+
+  /* Terminal: full width on mobile */
+  .terminal-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 280px !important;
+    margin-top: 1rem !important;
+  }
+
+  /* Hero meta anchored bottom - smaller text */
+  .hero-meta {
+    left: 20px !important;
+    bottom: 16px !important;
+    font-size: 0.65rem !important;
+    gap: 1rem !important;
+    flex-wrap: wrap !important;
+  }
+  .hero-meta__item {
+    font-size: 0.65rem !important;
+  }
+
+  /* Chapters: reduce padding */
+  .chapter {
+    padding: 5rem 0 !important;
+  }
+  .chapter__inner {
+    padding: 0 20px !important;
+  }
+
+  /* Glass cards: full width stack */
+  .glass-card {
+    border-radius: 16px !important;
+  }
+
+  /* 3D canvas: hide on very small screens to save performance */
+  /* Keep it for tablet but reduce opacity */
+  .three-container {
+    opacity: 0.5 !important;
+  }
+
+  /* Chatbot fullscreen on mobile */
+  .terminal-wrapper.chat-active-full {
+    border-radius: 0 !important;
+  }
+  .chat-body {
+    padding: 16px !important;
+  }
+  .chat-input-row {
+    padding: 12px 16px 20px !important;
+  }
+  .chat-body-inner,
+  .chat-input-row-inner {
+    max-width: 100% !important;
+  }
+}
+
+/* ── Small Mobile (≤ 480px) ─────────────────────────────────── */
+@media (max-width: 480px) {
+  .site-nav__brand {
+    font-size: 0.65rem !important;
+  }
+  .site-nav__link {
+    display: none !important;
+  }
+  .site-nav__link--cta {
+    display: inline-flex !important;
+    font-size: 0.6rem !important;
+    padding: 5px 12px !important;
+  }
+
+  .hero-title {
+    font-size: clamp(1.6rem, 7.8vw, 2.6rem) !important;
+    letter-spacing: -0.03em !important;
+  }
+
+  .terminal-wrapper {
+    height: 260px !important;
+  }
+
+  /* Chapter headings smaller */
+  .chapter-heading__index {
+    font-size: 4rem !important;
+  }
+  .chapter-heading__title {
+    font-size: 1.6rem !important;
+  }
+}
+
+/* ── Horizontal scroll fix for all widths ───────────────────── */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* ── Touch device: disable custom cursor ────────────────────── */
+@media (hover: none) {
+  .custom-cursor, .cursor-dot, .cursor-ring {
+    display: none !important;
+  }
+}
+
 
