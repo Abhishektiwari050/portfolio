@@ -301,9 +301,7 @@ function LiquidTelemetryWave() {
 interface ChatProps {
   onExplore: () => void;
   isExploreActivated: boolean;
-  transitionProgress: number;
-  chatActive: boolean;
-  setChatActive: (active: boolean) => void;
+  onExitChat: () => void;
 }
 
 function getClientFallbackReply(message: string) {
@@ -338,7 +336,7 @@ interface ChatMessage {
   options?: { label: string; action: () => void }[];
 }
 
-function InteractiveChatSystem({ onExplore, isExploreActivated, setChatActive }: ChatProps) {
+function InteractiveChatSystem({ onExplore, isExploreActivated, onExitChat }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -487,7 +485,7 @@ Answer the user's latest query accurately using the above context.`;
     <div className="chat-widget">
       <div className="chat-header">
         <div className="chat-dots">
-          <span className="chat-dot chat-dot--red" onClick={() => setChatActive(false)} style={{ cursor: 'pointer' }} title="Exit Chat" />
+          <span className="chat-dot chat-dot--red" onClick={onExitChat} style={{ cursor: 'pointer' }} title="Exit Chat" />
           <span className="chat-dot chat-dot--yellow" />
           <span className="chat-dot chat-dot--green" />
         </div>
@@ -498,7 +496,7 @@ Answer the user's latest query accurately using the above context.`;
         <button 
           type="button" 
           className="chat-header-back-btn" 
-          onClick={() => setChatActive(false)}
+          onClick={onExitChat}
         >
           BACK TO START ↩
         </button>
@@ -639,12 +637,57 @@ export function App() {
   
   const exploreActiveRef = useRef(isExploreActivated);
   const transitioningRef = useRef(isTransitioning);
+  const chatActiveRef = useRef(chatActive);
   useEffect(() => { exploreActiveRef.current = isExploreActivated; }, [isExploreActivated]);
   useEffect(() => { transitioningRef.current = isTransitioning; }, [isTransitioning]);
+  useEffect(() => { chatActiveRef.current = chatActive; }, [chatActive]);
   
   const horizontalRef = useRef<HTMLDivElement>(null);
   const lenisRefRef   = useRef<any>(null);
   const scrollProgressRef = useRef(0);
+  const isProgrammaticScrollRef = useRef(false);
+
+  const handleExitChat = () => {
+    isProgrammaticScrollRef.current = true;
+    setChatActive(false);
+  };
+
+  // Programmatic scroll toggle on chat active
+  useEffect(() => {
+    const st = ScrollTrigger.getById('hero-pin');
+    if (!st) return;
+
+    if (chatActive) {
+      if (isProgrammaticScrollRef.current) {
+        if (lenisRefRef.current) {
+          lenisRefRef.current.start();
+          lenisRefRef.current.scrollTo(st.start + (st.end - st.start) * 0.98, {
+            duration: 0.8,
+            easing: (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+            onComplete: () => {
+              isProgrammaticScrollRef.current = false;
+              if (lenisRefRef.current && !isExploreActivated && !isTransitioning) {
+                lenisRefRef.current.stop();
+              }
+            }
+          });
+        }
+      }
+    } else {
+      if (isProgrammaticScrollRef.current) {
+        if (lenisRefRef.current) {
+          lenisRefRef.current.start();
+          lenisRefRef.current.scrollTo(0, {
+            duration: 0.8,
+            easing: (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+            onComplete: () => {
+              isProgrammaticScrollRef.current = false;
+            }
+          });
+        }
+      }
+    }
+  }, [chatActive, isExploreActivated, isTransitioning]);
 
   // Synchronize body class for canvas layering
   useEffect(() => {
@@ -718,6 +761,7 @@ export function App() {
     // Pin Hero section to scrub terminal maximize and particle morph
     const tl = gsap.timeline({
       scrollTrigger: {
+        id: 'hero-pin',
         trigger: '#ch-0',
         start: 'top top',
         end: '+=120%', // Pin for 120% of viewport height
@@ -734,12 +778,25 @@ export function App() {
               lenisRefRef.current.stop();
             }
           }
+
+          // Sync chatActive state with scroll progress (only if not programmatic)
+          if (!isProgrammaticScrollRef.current) {
+            if (self.progress >= 0.95) {
+              if (!chatActiveRef.current) {
+                setChatActive(true);
+              }
+            } else {
+              if (chatActiveRef.current && !isExploreActivated && !isTransitioning) {
+                setChatActive(false);
+              }
+            }
+          }
         }
       }
     });
 
     // 1. Fade out Hero details as we scroll down
-    tl.to('.hero-eyebrow, .hero-title, .hero-desc, .hero-meta, .hero-scroll-hint', {
+    tl.to('.hero-eyebrow, .hero-title, .hero-desc, .hero-cta, .hero-meta, .hero-scroll-hint', {
       opacity: 0,
       y: -30,
       stagger: 0.05,
@@ -909,71 +966,75 @@ export function App() {
 
           {/* ─── CHAPTER 0: IDENTITY / HERO ──────────────────────────────── */}
           <section id="ch-0" className={`chapter chapter--hero ${isExploreActivated || isTransitioning ? 'explore-active' : ''}`} style={{ height: '100vh' }}>
-            {chatActive ? (
-              <div className="terminal-wrapper chat-active-full">
+            <div className="chapter__inner chapter__inner--hero" style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              width: '100%',
+              paddingLeft: HERO_PADDING_LEFT,
+              paddingRight: '5vw'
+            }}>
+              <div className="hero-text-col" style={{ 
+                maxWidth: isExploreActivated ? '50vw' : '640px',
+                margin: '0',
+                transition: 'all 1.0s cubic-bezier(0.16, 1, 0.3, 1)'
+              }}>
+                <div className="hero-eyebrow story-reveal">
+                  <span className="hero-eyebrow__dot" />
+                  <span>AI Systems & LLM Architect</span>
+                </div>
+
+                <h1 className="hero-title">
+                  <span className="hero-word">ABHISHEK</span>
+                  <span className="hero-word" style={{ display: 'block' }}>TIWARI.</span>
+                </h1>
+
+                <div className="role-badges story-reveal" data-delay="0.25">
+                  <span className="role-badge">
+                    <span className="role-badge__dot" />
+                    AI Systems Engineer
+                  </span>
+                  <span className="role-badge">
+                    <span className="role-badge__dot" />
+                    LLM Architect
+                  </span>
+                </div>
+
+                <p className="hero-desc story-reveal" data-delay="0.4">
+                  Building production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. 
+                  Delivering intelligent client AI solutions at Vistar.
+                </p>
+
+                <div className="hero-cta story-reveal" data-delay="0.55" style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
+                  <button onClick={() => triggerExploreTransition()} className="btn-primary">
+                    🚀 Explore Profile
+                  </button>
+                  <button 
+                    onClick={() => {
+                      isProgrammaticScrollRef.current = true;
+                      setChatActive(true);
+                    }} 
+                    className="btn-ghost chat-btn"
+                  >
+                    💬 Chat within System
+                  </button>
+                </div>
+
+                <div className="hero-meta story-reveal" data-delay="0.7">
+                  <span className="hero-meta__item">📍 DELHI, INDIA</span>
+                  <span className="hero-meta__item">✉ abhishektiwari53910@gmail.com</span>
+                </div>
+              </div>
+
+              {/* Interactive developer entrance portal chat system */}
+              <div className="terminal-wrapper">
                 <InteractiveChatSystem 
                   onExplore={triggerExploreTransition} 
                   isExploreActivated={isExploreActivated || isTransitioning} 
-                  transitionProgress={transitionProgress}
-                  chatActive={chatActive}
-                  setChatActive={setChatActive}
+                  onExitChat={handleExitChat}
                 />
               </div>
-            ) : (
-              <div className="chapter__inner chapter__inner--hero" style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'flex-start',
-                width: '100%',
-                paddingLeft: HERO_PADDING_LEFT
-              }}>
-                <div className="hero-text-col" style={{ 
-                  maxWidth: isExploreActivated ? '50vw' : '640px',
-                  margin: '0',
-                  transition: 'all 1.0s cubic-bezier(0.16, 1, 0.3, 1)'
-                }}>
-                  <div className="hero-eyebrow story-reveal">
-                    <span className="hero-eyebrow__dot" />
-                    <span>AI Systems & LLM Architect</span>
-                  </div>
-
-                  <h1 className="hero-title">
-                    <span className="hero-word">ABHISHEK</span>
-                    <span className="hero-word" style={{ display: 'block' }}>TIWARI.</span>
-                  </h1>
-
-                  <div className="role-badges story-reveal" data-delay="0.25">
-                    <span className="role-badge">
-                      <span className="role-badge__dot" />
-                      AI Systems Engineer
-                    </span>
-                    <span className="role-badge">
-                      <span className="role-badge__dot" />
-                      LLM Architect
-                    </span>
-                  </div>
-
-                  <p className="hero-desc story-reveal" data-delay="0.4">
-                    Building production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. 
-                    Delivering intelligent client AI solutions at Vistar.
-                  </p>
-
-                  <div className="hero-cta story-reveal" data-delay="0.55" style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
-                    <button onClick={() => triggerExploreTransition()} className="btn-primary">
-                      🚀 Explore Profile
-                    </button>
-                    <button onClick={() => setChatActive(true)} className="btn-ghost chat-btn">
-                      💬 Chat within System
-                    </button>
-                  </div>
-
-                  <div className="hero-meta story-reveal" data-delay="0.7">
-                    <span className="hero-meta__item">📍 DELHI, INDIA</span>
-                    <span className="hero-meta__item">✉ abhishektiwari53910@gmail.com</span>
-                  </div>
-                </div>
-              </div>
-            )}
+            </div>
 
             <div className="hero-scroll-hint" style={{ display: isExploreActivated ? 'flex' : 'none' }}>
               <div className="hero-scroll-hint__bar" />
