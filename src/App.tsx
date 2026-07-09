@@ -348,7 +348,7 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, onExitChat, onFo
     setMessages([
       { 
         sender: 'ai', 
-        text: `Hey! I am Abhishek's AI co-pilot. I can answer questions about his skills, shipped projects, work history, and contact details. How can I help you today?`,
+        text: `Hi! I'm Abhishek's AI. Ask me anything — skills, projects, work history.`,
         options: [
           { label: 'Explore Career Story 🚀', action: () => onExplore() }
         ]
@@ -978,10 +978,9 @@ export function App() {
             <div className="chapter__inner chapter__inner--hero" style={{ 
               display: 'flex', 
               alignItems: 'center', 
-              justifyContent: 'space-between',
+              justifyContent: 'flex-start',
               width: '100%',
-              paddingLeft: HERO_PADDING_LEFT,
-              paddingRight: '5vw'
+              paddingLeft: HERO_PADDING_LEFT
             }}>
               <div className="hero-text-col" style={{ 
                 maxWidth: isExploreActivated ? '50vw' : '640px',
@@ -1014,21 +1013,30 @@ export function App() {
                   Delivering intelligent client AI solutions at Vistar.
                 </p>
 
-                <div className="hero-meta story-reveal" data-delay="0.7">
-                  <span className="hero-meta__item">📍 DELHI, INDIA</span>
-                  <span className="hero-meta__item">✉ abhishektiwari53910@gmail.com</span>
+                {/* Interactive developer entrance portal chat system in place of CTA buttons */}
+                <div className="terminal-wrapper" style={{ marginTop: '1.2rem' }}>
+                  <InteractiveChatSystem 
+                    onExplore={triggerExploreTransition} 
+                    isExploreActivated={isExploreActivated || isTransitioning} 
+                    onExitChat={handleExitChat}
+                    onFocus={handleChatFocus}
+                  />
                 </div>
               </div>
+            </div>
 
-              {/* Interactive developer entrance portal chat system on the right */}
-              <div className="terminal-wrapper">
-                <InteractiveChatSystem 
-                  onExplore={triggerExploreTransition} 
-                  isExploreActivated={isExploreActivated || isTransitioning} 
-                  onExitChat={handleExitChat}
-                  onFocus={handleChatFocus}
-                />
-              </div>
+            {/* Anchored bottom footer for metadata */}
+            <div className="hero-meta story-reveal" data-delay="0.7" style={{ 
+              position: 'absolute',
+              bottom: '3vh',
+              left: HERO_PADDING_LEFT,
+              display: 'flex',
+              gap: '2rem',
+              margin: '0',
+              zIndex: 10
+            }}>
+              <span className="hero-meta__item">📍 DELHI, INDIA</span>
+              <span className="hero-meta__item">✉ abhishektiwari53910@gmail.com</span>
             </div>
 
             <div className="hero-scroll-hint" style={{ display: isExploreActivated ? 'flex' : 'none' }}>
