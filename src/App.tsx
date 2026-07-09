@@ -978,9 +978,10 @@ export function App() {
             <div className="chapter__inner chapter__inner--hero" style={{ 
               display: 'flex', 
               alignItems: 'center', 
-              justifyContent: 'flex-start',
+              justifyContent: 'space-between',
               width: '100%',
-              paddingLeft: HERO_PADDING_LEFT
+              paddingLeft: HERO_PADDING_LEFT,
+              paddingRight: '5vw'
             }}>
               <div className="hero-text-col" style={{ 
                 maxWidth: isExploreActivated ? '50vw' : '640px',
@@ -1013,20 +1014,20 @@ export function App() {
                   Delivering intelligent client AI solutions at Vistar.
                 </p>
 
-                {/* Interactive developer entrance portal chat system in place of CTA buttons */}
-                <div className="terminal-wrapper" style={{ marginTop: '2.5rem' }}>
-                  <InteractiveChatSystem 
-                    onExplore={triggerExploreTransition} 
-                    isExploreActivated={isExploreActivated || isTransitioning} 
-                    onExitChat={handleExitChat}
-                    onFocus={handleChatFocus}
-                  />
-                </div>
-
-                <div className="hero-meta story-reveal" data-delay="0.7" style={{ marginTop: '2.5rem' }}>
+                <div className="hero-meta story-reveal" data-delay="0.7">
                   <span className="hero-meta__item">📍 DELHI, INDIA</span>
                   <span className="hero-meta__item">✉ abhishektiwari53910@gmail.com</span>
                 </div>
+              </div>
+
+              {/* Interactive developer entrance portal chat system on the right */}
+              <div className="terminal-wrapper">
+                <InteractiveChatSystem 
+                  onExplore={triggerExploreTransition} 
+                  isExploreActivated={isExploreActivated || isTransitioning} 
+                  onExitChat={handleExitChat}
+                  onFocus={handleChatFocus}
+                />
               </div>
             </div>
 

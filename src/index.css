@@ -1323,9 +1323,8 @@ body.explore-active .three-container {
 .terminal-wrapper {
   position: relative;
   width: 100%;
-  max-width: 500px;
-  height: 320px;
-  margin-top: 1.5rem;
+  max-width: 600px;
+  height: 460px;
 }
 
 /* ── Curtain Transition Overlay ────────────────────────────── */
@@ -2017,16 +2016,15 @@ body.explore-active .three-container {
   }
   .hero-desc {
     font-size: 0.9rem !important;
-    margin-bottom: 1.5rem !important;
+    margin-bottom: 1.8rem !important;
   }
   .terminal-wrapper {
-    max-width: 480px !important;
-    height: 300px !important;
-    margin-top: 1rem !important;
+    max-width: 560px !important;
+    height: 420px !important;
   }
-  .hero-meta {
-    margin-top: 1.5rem !important;
-    font-size: 0.7rem !important;
+  .chat-bubble {
+    font-size: 0.88rem !important;
+    padding: 10px 14px !important;
   }
 }
 
@@ -2040,16 +2038,19 @@ body.explore-active .three-container {
   }
   .hero-desc {
     font-size: 0.85rem !important;
-    margin-bottom: 1rem !important;
+    margin-bottom: 1.2rem !important;
   }
   .terminal-wrapper {
-    max-width: 440px !important;
-    height: 250px !important;
-    margin-top: 0.8rem !important;
+    max-width: 520px !important;
+    height: 380px !important;
   }
-  .hero-meta {
-    margin-top: 1rem !important;
-    font-size: 0.65rem !important;
+  .chat-bubble {
+    font-size: 0.82rem !important;
+    padding: 8px 12px !important;
+  }
+  .chat-input {
+    font-size: 0.82rem !important;
+    padding: 10px 14px !important;
   }
 }
 
@@ -2067,13 +2068,16 @@ body.explore-active .three-container {
     line-height: 1.4 !important;
   }
   .terminal-wrapper {
-    max-width: 400px !important;
-    height: 200px !important;
-    margin-top: 0.5rem !important;
+    max-width: 480px !important;
+    height: 320px !important;
   }
-  .hero-meta {
-    margin-top: 0.8rem !important;
-    font-size: 0.6rem !important;
+  .chat-bubble {
+    font-size: 0.78rem !important;
+    padding: 6px 10px !important;
+  }
+  .chat-input {
+    font-size: 0.78rem !important;
+    padding: 8px 12px !important;
   }
 }
 
