@@ -302,6 +302,7 @@ interface ChatProps {
   onExplore: () => void;
   isExploreActivated: boolean;
   onExitChat: () => void;
+  onFocus: () => void;
 }
 
 function getClientFallbackReply(message: string) {
@@ -336,7 +337,7 @@ interface ChatMessage {
   options?: { label: string; action: () => void }[];
 }
 
-function InteractiveChatSystem({ onExplore, isExploreActivated, onExitChat }: ChatProps) {
+function InteractiveChatSystem({ onExplore, isExploreActivated, onExitChat, onFocus }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -562,6 +563,7 @@ Answer the user's latest query accurately using the above context.`;
               placeholder="Message Abhishek..."
               value={input}
               onChange={e => setInput(e.target.value)}
+              onFocus={onFocus}
               disabled={isExploreActivated}
             />
             <button 
@@ -650,6 +652,13 @@ export function App() {
   const handleExitChat = () => {
     isProgrammaticScrollRef.current = true;
     setChatActive(false);
+  };
+
+  const handleChatFocus = () => {
+    if (!chatActiveRef.current) {
+      isProgrammaticScrollRef.current = true;
+      setChatActive(true);
+    }
   };
 
   // Programmatic scroll toggle on chat active
@@ -796,7 +805,7 @@ export function App() {
     });
 
     // 1. Fade out Hero details as we scroll down
-    tl.to('.hero-eyebrow, .hero-title, .hero-desc, .hero-cta, .hero-meta, .hero-scroll-hint', {
+    tl.to('.hero-eyebrow, .hero-title, .hero-desc, .hero-meta, .hero-scroll-hint', {
       opacity: 0,
       y: -30,
       stagger: 0.05,
@@ -969,10 +978,9 @@ export function App() {
             <div className="chapter__inner chapter__inner--hero" style={{ 
               display: 'flex', 
               alignItems: 'center', 
-              justifyContent: 'space-between',
+              justifyContent: 'flex-start',
               width: '100%',
-              paddingLeft: HERO_PADDING_LEFT,
-              paddingRight: '5vw'
+              paddingLeft: HERO_PADDING_LEFT
             }}>
               <div className="hero-text-col" style={{ 
                 maxWidth: isExploreActivated ? '50vw' : '640px',
@@ -1005,34 +1013,20 @@ export function App() {
                   Delivering intelligent client AI solutions at Vistar.
                 </p>
 
-                <div className="hero-cta story-reveal" data-delay="0.55" style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
-                  <button onClick={() => triggerExploreTransition()} className="btn-primary">
-                    🚀 Explore Profile
-                  </button>
-                  <button 
-                    onClick={() => {
-                      isProgrammaticScrollRef.current = true;
-                      setChatActive(true);
-                    }} 
-                    className="btn-ghost chat-btn"
-                  >
-                    💬 Chat within System
-                  </button>
+                {/* Interactive developer entrance portal chat system in place of CTA buttons */}
+                <div className="terminal-wrapper" style={{ marginTop: '2.5rem' }}>
+                  <InteractiveChatSystem 
+                    onExplore={triggerExploreTransition} 
+                    isExploreActivated={isExploreActivated || isTransitioning} 
+                    onExitChat={handleExitChat}
+                    onFocus={handleChatFocus}
+                  />
                 </div>
 
-                <div className="hero-meta story-reveal" data-delay="0.7">
+                <div className="hero-meta story-reveal" data-delay="0.7" style={{ marginTop: '2.5rem' }}>
                   <span className="hero-meta__item">📍 DELHI, INDIA</span>
                   <span className="hero-meta__item">✉ abhishektiwari53910@gmail.com</span>
                 </div>
-              </div>
-
-              {/* Interactive developer entrance portal chat system */}
-              <div className="terminal-wrapper">
-                <InteractiveChatSystem 
-                  onExplore={triggerExploreTransition} 
-                  isExploreActivated={isExploreActivated || isTransitioning} 
-                  onExitChat={handleExitChat}
-                />
               </div>
             </div>
 
