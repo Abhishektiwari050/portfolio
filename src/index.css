@@ -1323,9 +1323,9 @@ body.explore-active .three-container {
 .terminal-wrapper {
   position: relative;
   width: 100%;
-  max-width: 620px;
-  height: 460px; /* Taller ChatGPT console centered in lower hero */
-  margin-top: 2rem;
+  max-width: 500px;
+  height: 320px;
+  margin-top: 1.5rem;
 }
 
 /* ── Curtain Transition Overlay ────────────────────────────── */
