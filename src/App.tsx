@@ -338,24 +338,28 @@ interface ChatMessage {
   options?: { label: string; action: () => void }[];
 }
 
-function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgress, chatActive, setChatActive }: ChatProps) {
+function InteractiveChatSystem({ onExplore, isExploreActivated, setChatActive }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Initialize chat with Welcome
+  // Initialize chat with Welcome message
   useEffect(() => {
     setMessages([
-      { sender: 'ai', text: 'Welcome' }
+      { 
+        sender: 'ai', 
+        text: `Hey! I am Abhishek's AI co-pilot. I can answer questions about his skills, shipped projects, work history, and contact details. How can I help you today?`,
+        options: [
+          { label: 'Explore Career Story 🚀', action: () => onExplore() }
+        ]
+      }
     ]);
-  }, []);
+  }, [onExplore]);
 
   const handleSend = async (text: string) => {
     const cleanText = text.trim();
     if (!cleanText) return;
-
-    setChatActive(true);
 
     // Add user message
     const newMessages: ChatMessage[] = [...messages, { sender: 'user', text: cleanText }];
@@ -369,15 +373,14 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
     if (lower === 'hey' || lower === 'hi' || lower === 'hello') {
       setTimeout(() => {
         setIsTyping(false);
-        const reply = `Hey, this is a chatbot system. This is ${profile.name}. You can explore my capabilities through the pages, or you can ask questions directly to me.`;
+        const reply = `Hey, this is a chatbot system. This is Abhishek Tiwari. You can explore my capabilities through the pages, or you can ask questions directly to me.`;
         setMessages(prev => [
           ...prev, 
           { 
             sender: 'ai', 
             text: reply,
             options: [
-              { label: 'Chat with AI Assistant', action: () => setChatActive(true) },
-              { label: 'Explore Work & Career Story', action: () => onExplore() }
+              { label: 'Explore Work & Career Story 🚀', action: () => onExplore() }
             ]
           }
         ]);
@@ -386,14 +389,69 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
     }
 
     try {
-      const response = await fetch('/api/chat', {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error('Gemini API key not found');
+      }
+
+      // Convert history to Gemini format (user/model)
+      const geminiHistory = newMessages
+        .map(m => ({
+          role: m.sender === 'user' ? 'user' : 'model',
+          parts: [{ text: m.text }]
+        }));
+
+      const systemPrompt = `You are the AI assistant co-pilot for Abhishek Tiwari's interactive portfolio website.
+Your name is AI assistant.
+Your job is to answer questions about Abhishek Tiwari's professional background, skills, projects, and contact info in a polite, helpful, and professional manner.
+
+Aesthetics/Style:
+- Be concise. Keep responses under 3 paragraphs.
+- Use clear bullet points when explaining multiple items.
+- Maintain a premium, world-class developer tone.
+
+Professional Guardrails:
+- You ONLY answer questions related to Abhishek's profile, career, skills, and projects.
+- If a user asks an off-topic question (e.g. general coding questions not related to Abhishek's projects, personal life, or trivia), decline politely and guide them back to exploring Abhishek's portfolio.
+  Example: "I only answer questions about Abhishek's professional background, skills, and shipped projects. How can I help you explore his work?"
+
+Here is the information about Abhishek Tiwari:
+Name: Abhishek Tiwari
+Title: AI Systems Engineer & LLM Architect
+Location: Delhi, India
+Email: abhishektiwari53910@gmail.com
+Phone: +919717140880
+GitHub: github.com/abhishektiwari53
+LinkedIn: linkedin.com/in/abhishek-tiwari-84841b258
+
+Key Skills:
+- AI Systems & LLM Architectures (RAG pipelines, Vector Databases, Prompt Engineering)
+- Agent Frameworks (LangGraph, LlamaIndex, CrewAI, Autogen)
+- Scalable Backends (FastAPI, Python, PostgreSQL, RabbitMQ, Redis, Docker)
+- Speech & Voice Systems (Text-to-Speech, Speech-to-Text, Voice Agent development)
+- Workflow Automations (Custom orchestration pipelines, web scraping, data collection)
+
+Shipped Projects:
+1. Agentic B2B Lead Gen scoring platform: Multi-agent lead gen system with customized scoring algorithms, built using FastAPI, PostgreSQL, RabbitMQ, and React.
+2. VayuWays aviation compliance tool: Aviation document parser and compliance verifier, utilizing RAG with hybrid search and PDF parsers.
+3. WhatsApp RAG agents: Specialized chat assistant with multi-lingual support, built using Meta Cloud API and LangChain.
+4. Game engine research: Published research paper on procedural runner chase mechanics.
+
+Work Experience:
+- AI Engineer at Vistar (Delhi, India): Led development of multi-agent RAG pipelines, voice assistants, and custom backends, improving client performance metrics.
+
+Answer the user's latest query accurately using the above context.`;
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          message: cleanText,
-          history: newMessages.filter(m => m.text !== 'Welcome')
+          contents: geminiHistory,
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          }
         })
       });
 
@@ -401,7 +459,8 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
 
       if (response.ok) {
         const data = await response.json();
-        setMessages(prev => [...prev, { sender: 'ai', text: data.text }]);
+        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I couldn't process that response. Please try again.";
+        setMessages(prev => [...prev, { sender: 'ai', text: replyText }]);
       } else {
         const fallbackText = getClientFallbackReply(cleanText);
         setMessages(prev => [...prev, { sender: 'ai', text: fallbackText }]);
@@ -421,24 +480,14 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!chatActive && input.trim().toLowerCase() !== 'hey') {
-      handleSend('Hey');
-      return;
-    }
     handleSend(input);
   };
 
-  const showHeyOption = messages.length === 1 && !isTyping;
-
   return (
-    <div className="chat-widget" style={{
-      display: (isExploreActivated && transitionProgress >= 0.95) ? 'none' : 'block',
-      opacity: isExploreActivated ? 0 : 1,
-      transition: 'opacity 0.8s ease'
-    }}>
+    <div className="chat-widget">
       <div className="chat-header">
         <div className="chat-dots">
-          <span className="chat-dot chat-dot--red" />
+          <span className="chat-dot chat-dot--red" onClick={() => setChatActive(false)} style={{ cursor: 'pointer' }} title="Exit Chat" />
           <span className="chat-dot chat-dot--yellow" />
           <span className="chat-dot chat-dot--green" />
         </div>
@@ -446,88 +495,91 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, transitionProgre
           <span className="chat-status-dot" />
           assistant - {profile.name.toLowerCase().replace(' ', '')}@ai-node
         </div>
+        <button 
+          type="button" 
+          className="chat-header-back-btn" 
+          onClick={() => setChatActive(false)}
+        >
+          BACK TO START ↩
+        </button>
       </div>
       
       <div className="chat-body" ref={containerRef}>
-        {messages.map((m, idx) => (
-          <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-            <div className="chat-bubble-container" style={{ display: 'flex', justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start', width: '100%' }}>
-              {m.sender === 'ai' && (
-                <div className="chat-avatar">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>
+        <div className="chat-body-inner">
+          {messages.map((m, idx) => (
+            <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+              <div className="chat-bubble-container" style={{ display: 'flex', justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start', width: '100%' }}>
+                {m.sender === 'ai' && (
+                  <div className="chat-avatar">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>
+                  </div>
+                )}
+                <div className={`chat-bubble chat-bubble--${m.sender}`}>
+                  {m.text}
+                </div>
+                {m.sender === 'user' && (
+                  <div className="chat-avatar chat-avatar--user" style={{ marginLeft: 8 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  </div>
+                )}
+              </div>
+              {m.options && (
+                <div className="chat-options-row">
+                  {m.options.map((opt, i) => (
+                    <button 
+                      key={i} 
+                      type="button"
+                      className={`chat-btn ${i === 1 ? 'chat-btn--secondary' : ''}`}
+                      onClick={opt.action}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
               )}
-              <div className={`chat-bubble chat-bubble--${m.sender}`}>
-                {m.text}
-              </div>
-              {m.sender === 'user' && (
-                <div className="chat-avatar chat-avatar--user" style={{ marginLeft: 8 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </div>
-              )}
             </div>
-            {m.options && (
-              <div className="chat-options-row">
-                {m.options.map((opt, i) => (
-                  <button 
-                    key={i} 
-                    type="button"
-                    className={`chat-btn ${i === 1 ? 'chat-btn--secondary' : ''}`}
-                    onClick={opt.action}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+          ))}
 
-        {isTyping && (
-          <div className="chat-bubble-container" style={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
-            <div className="chat-avatar">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>
+          {isTyping && (
+            <div className="chat-bubble-container" style={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
+              <div className="chat-avatar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>
+              </div>
+              <div className="chat-bubble chat-bubble--ai typing-indicator">
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+              </div>
             </div>
-            <div className="chat-bubble chat-bubble--ai typing-indicator">
-              <span className="typing-dot" />
-              <span className="typing-dot" />
-              <span className="typing-dot" />
-            </div>
-          </div>
-        )}
-
-        {showHeyOption && (
-          <div className="chat-options-row">
-            <button type="button" className="chat-btn" onClick={() => handleSend('Hey')}>
-              Click to send "Hey"
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="chat-input-row">
-        <div className="chat-input-container">
-          <input
-            type="text"
-            className="chat-input"
-            placeholder={chatActive ? "Message Abhishek..." : "Type 'Hey' to connect..."}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            disabled={isExploreActivated}
-          />
-          <button 
-            type="submit" 
-            className="chat-send-btn" 
-            disabled={isExploreActivated || (!chatActive && input.trim().toLowerCase() !== 'hey' && input.trim() !== '')}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="19" x2="12" y2="5"></line>
-              <polyline points="5 12 12 5 19 12"></polyline>
-            </svg>
-          </button>
-        </div>
-        <div className="chat-footer-note">
-          Abhishek Tiwari may make mistakes. Verify important info.
+        <div className="chat-input-row-inner">
+          <div className="chat-input-container">
+            <input
+              type="text"
+              className="chat-input"
+              placeholder="Message Abhishek..."
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              disabled={isExploreActivated}
+            />
+            <button 
+              type="submit" 
+              className="chat-send-btn" 
+              disabled={isExploreActivated || input.trim() === ''}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="19" x2="12" y2="5"></line>
+                <polyline points="5 12 12 5 19 12"></polyline>
+              </svg>
+            </button>
+          </div>
+          <div className="chat-footer-note">
+            Abhishek Tiwari may make mistakes. Verify important info.
+          </div>
         </div>
       </form>
     </div>
@@ -857,66 +909,71 @@ export function App() {
 
           {/* ─── CHAPTER 0: IDENTITY / HERO ──────────────────────────────── */}
           <section id="ch-0" className={`chapter chapter--hero ${isExploreActivated || isTransitioning ? 'explore-active' : ''}`} style={{ height: '100vh' }}>
-            <div className="chapter__inner chapter__inner--hero" style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'flex-start',
-              width: '100%',
-              paddingLeft: HERO_PADDING_LEFT
-            }}>
-              <div className="hero-text-col" style={{ 
-                maxWidth: isExploreActivated ? '50vw' : '640px',
-                margin: '0',
-                transition: 'all 1.0s cubic-bezier(0.16, 1, 0.3, 1)'
+            {chatActive ? (
+              <div className="terminal-wrapper chat-active-full">
+                <InteractiveChatSystem 
+                  onExplore={triggerExploreTransition} 
+                  isExploreActivated={isExploreActivated || isTransitioning} 
+                  transitionProgress={transitionProgress}
+                  chatActive={chatActive}
+                  setChatActive={setChatActive}
+                />
+              </div>
+            ) : (
+              <div className="chapter__inner chapter__inner--hero" style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'flex-start',
+                width: '100%',
+                paddingLeft: HERO_PADDING_LEFT
               }}>
-                <div className="hero-eyebrow story-reveal">
-                  <span className="hero-eyebrow__dot" />
-                  <span>AI Systems & LLM Architect</span>
-                </div>
+                <div className="hero-text-col" style={{ 
+                  maxWidth: isExploreActivated ? '50vw' : '640px',
+                  margin: '0',
+                  transition: 'all 1.0s cubic-bezier(0.16, 1, 0.3, 1)'
+                }}>
+                  <div className="hero-eyebrow story-reveal">
+                    <span className="hero-eyebrow__dot" />
+                    <span>AI Systems & LLM Architect</span>
+                  </div>
 
-                <h1 className="hero-title">
-                  <span className="hero-word">ABHISHEK</span>
-                  <span className="hero-word" style={{ display: 'block' }}>TIWARI.</span>
-                </h1>
+                  <h1 className="hero-title">
+                    <span className="hero-word">ABHISHEK</span>
+                    <span className="hero-word" style={{ display: 'block' }}>TIWARI.</span>
+                  </h1>
 
-                <div className="role-badges story-reveal" data-delay="0.25">
-                  <span className="role-badge">
-                    <span className="role-badge__dot" />
-                    AI Systems Engineer
-                  </span>
-                  <span className="role-badge">
-                    <span className="role-badge__dot" />
-                    LLM Architect
-                  </span>
-                </div>
+                  <div className="role-badges story-reveal" data-delay="0.25">
+                    <span className="role-badge">
+                      <span className="role-badge__dot" />
+                      AI Systems Engineer
+                    </span>
+                    <span className="role-badge">
+                      <span className="role-badge__dot" />
+                      LLM Architect
+                    </span>
+                  </div>
 
-                <p className="hero-desc story-reveal" data-delay="0.4">
-                  Building production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. 
-                  Delivering intelligent client AI solutions at Vistar.
-                </p>
+                  <p className="hero-desc story-reveal" data-delay="0.4">
+                    Building production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. 
+                    Delivering intelligent client AI solutions at Vistar.
+                  </p>
 
-                <div className="hero-cta story-reveal" data-delay="0.55" style={{ display: isExploreActivated ? 'flex' : 'none' }}>
-                  <a href="#ch-1" className="btn-primary">DISCOVER STORY ↓</a>
-                  <a href="mailto:abhishektiwari53910@gmail.com" className="btn-ghost">GET IN TOUCH</a>
-                </div>
+                  <div className="hero-cta story-reveal" data-delay="0.55" style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
+                    <button onClick={() => triggerExploreTransition()} className="btn-primary">
+                      🚀 Explore Profile
+                    </button>
+                    <button onClick={() => setChatActive(true)} className="btn-ghost chat-btn">
+                      💬 Chat within System
+                    </button>
+                  </div>
 
-                {/* Interactive developer entrance portal chat system */}
-                <div className="terminal-wrapper">
-                  <InteractiveChatSystem 
-                    onExplore={triggerExploreTransition} 
-                    isExploreActivated={isExploreActivated || isTransitioning} 
-                    transitionProgress={transitionProgress}
-                    chatActive={chatActive}
-                    setChatActive={setChatActive}
-                  />
-                </div>
-
-                <div className="hero-meta story-reveal" data-delay="0.7">
-                  <span className="hero-meta__item">📍 DELHI, INDIA</span>
-                  <span className="hero-meta__item">✉ abhishektiwari53910@gmail.com</span>
+                  <div className="hero-meta story-reveal" data-delay="0.7">
+                    <span className="hero-meta__item">📍 DELHI, INDIA</span>
+                    <span className="hero-meta__item">✉ abhishektiwari53910@gmail.com</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div className="hero-scroll-hint" style={{ display: isExploreActivated ? 'flex' : 'none' }}>
               <div className="hero-scroll-hint__bar" />

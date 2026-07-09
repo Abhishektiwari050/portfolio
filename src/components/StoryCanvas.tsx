@@ -105,7 +105,7 @@ export interface StoryCanvasProps {
   isChatActive: boolean;
 }
 
-const N = 40_000;
+const N = 15_000;
 
 // FaceSphere placeholder before head model GLB loads
 function buildFaceSphere(): Float32Array {
@@ -121,28 +121,9 @@ function buildFaceSphere(): Float32Array {
   return a;
 }
 
-// Spells the letters "A" and "I"
-function buildAISpelling(): Float32Array {
+// Spells a high-fidelity robot face flanked by "A" and "I" letters
+function buildRobotFace(): Float32Array {
   const a = new Float32Array(N * 3);
-  
-  const aLeftLegStart = [-20, -18, 0];
-  const aLeftLegEnd   = [-10, 18, 0];
-  
-  const aRightLegStart = [-10, 18, 0];
-  const aRightLegEnd   = [0, -18, 0];
-  
-  const aCrossbarStart = [-15, -3, 0];
-  const aCrossbarEnd   = [-5, -3, 0];
-
-  const iStemStart     = [15, -18, 0];
-  const iStemEnd       = [15, 18, 0];
-  
-  const iTopBarStart   = [8, 18, 0];
-  const iTopBarEnd     = [22, 18, 0];
-  
-  const iBotBarStart   = [8, -18, 0];
-  const iBotBarEnd     = [22, -18, 0];
-
   const lerpPoint = (start: number[], end: number[], t: number): [number, number, number] => {
     return [
       start[0] + (end[0] - start[0]) * t,
@@ -151,31 +132,120 @@ function buildAISpelling(): Float32Array {
     ];
   };
 
+  // Letters flanking the sides:
+  // "A" on the left (x around -26, y from -10 to 10)
+  const aLeftLegStart = [-32, -10, 0];
+  const aLeftLegEnd   = [-27, 10, 0];
+  const aRightLegStart = [-27, 10, 0];
+  const aRightLegEnd   = [-22, -10, 0];
+  const aCrossbarStart = [-30, -1, 0];
+  const aCrossbarEnd   = [-24, -1, 0];
+
+  // "I" on the right (x around 26, y from -10 to 10)
+  const iStemStart     = [27, -10, 0];
+  const iStemEnd       = [27, 10, 0];
+  const iTopBarStart   = [23, 10, 0];
+  const iTopBarEnd     = [31, 10, 0];
+  const iBotBarStart   = [23, -10, 0];
+  const iBotBarEnd     = [31, -10, 0];
+
   for (let i = 0; i < N; i++) {
     let pt: [number, number, number] = [0, 0, 0];
-    const segment = i % 6;
-    const t = Math.random();
-    const noise = 1.6;
-
-    if (segment === 0) {
-      pt = lerpPoint(aLeftLegStart, aLeftLegEnd, t);
-    } else if (segment === 1) {
-      pt = lerpPoint(aRightLegStart, aRightLegEnd, t);
-    } else if (segment === 2) {
-      pt = lerpPoint(aCrossbarStart, aCrossbarEnd, t);
-    } else if (segment === 3) {
-      pt = lerpPoint(iStemStart, iStemEnd, t);
-    } else if (segment === 4) {
-      pt = lerpPoint(iTopBarStart, iTopBarEnd, t);
+    const noise = 1.0;
+    const rand = Math.random();
+    
+    if (rand < 0.20) {
+      // 1. Letters AI flanking the sides (20% of particles)
+      const letterRand = Math.random();
+      if (letterRand < 0.5) {
+        // "A"
+        const seg = Math.floor(Math.random() * 3);
+        const t = Math.random();
+        if (seg === 0) {
+          pt = lerpPoint(aLeftLegStart, aLeftLegEnd, t);
+        } else if (seg === 1) {
+          pt = lerpPoint(aRightLegStart, aRightLegEnd, t);
+        } else {
+          pt = lerpPoint(aCrossbarStart, aCrossbarEnd, t);
+        }
+      } else {
+        // "I"
+        const seg = Math.floor(Math.random() * 3);
+        const t = Math.random();
+        if (seg === 0) {
+          pt = lerpPoint(iStemStart, iStemEnd, t);
+        } else if (seg === 1) {
+          pt = lerpPoint(iTopBarStart, iTopBarEnd, t);
+        } else {
+          pt = lerpPoint(iBotBarStart, iBotBarEnd, t);
+        }
+      }
     } else {
-      pt = lerpPoint(iBotBarStart, iBotBarEnd, t);
+      // 2. Robot Face (80% of particles)
+      const faceRand = Math.random();
+      if (faceRand < 0.30) {
+        // Head squircle
+        const t = Math.random() * 2 * Math.PI;
+        const cosT = Math.cos(t);
+        const sinT = Math.sin(t);
+        const r = 15;
+        pt = [
+          r * Math.sign(cosT) * Math.pow(Math.abs(cosT), 0.5),
+          r * Math.sign(sinT) * Math.pow(Math.abs(sinT), 0.5),
+          (Math.random() - 0.5) * 3
+        ];
+      } else if (faceRand < 0.60) {
+        // Glowing Eyes (Concentric circles)
+        const isLeft = Math.random() < 0.5;
+        const centerX = isLeft ? -6 : 6;
+        const centerY = 3;
+        const maxR = 3.0;
+        const ring = Math.random() * maxR;
+        const t = Math.random() * 2 * Math.PI;
+        pt = [
+          centerX + ring * Math.cos(t),
+          centerY + ring * Math.sin(t),
+          (Math.random() - 0.5) * 2
+        ];
+      } else if (faceRand < 0.75) {
+        // Mouth Grill (3 horizontal bars)
+        const stripeIdx = Math.floor(Math.random() * 3);
+        const startX = -7;
+        const endX = 7;
+        const y = -5 - stripeIdx * 2;
+        const t = Math.random();
+        pt = lerpPoint([startX, y, 0], [endX, y, 0], t);
+      } else if (faceRand < 0.90) {
+        // Antennas
+        const isLeft = Math.random() < 0.5;
+        const start = isLeft ? [-10, 10, 0] : [10, 10, 0];
+        const end = isLeft ? [-15, 17, 0] : [15, 17, 0];
+        const t = Math.random();
+        pt = lerpPoint(start, end, t);
+        if (Math.random() < 0.25) {
+          const center = end;
+          const rad = 1.2;
+          const ang = Math.random() * 2 * Math.PI;
+          pt = [
+            center[0] + rad * Math.cos(ang),
+            center[1] + rad * Math.sin(ang),
+            (Math.random() - 0.5) * 1
+          ];
+        }
+      } else {
+        // Side bolts (ears)
+        const isLeft = Math.random() < 0.5;
+        const start = isLeft ? [-15, -3, 0] : [15, -3, 0];
+        const end = isLeft ? [-15, 3, 0] : [15, 3, 0];
+        const t = Math.random();
+        pt = lerpPoint(start, end, t);
+      }
     }
-
+    
     a[i * 3]     = pt[0] + (Math.random() - 0.5) * noise;
     a[i * 3 + 1] = pt[1] + (Math.random() - 0.5) * noise;
-    a[i * 3 + 2] = pt[2] + (Math.random() - 0.5) * noise * 0.5;
+    a[i * 3 + 2] = pt[2] + (Math.random() - 0.5) * noise;
   }
-
   return a;
 }
 
@@ -324,7 +394,7 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
 
     const shapes: Float32Array[] = [
       buildFaceSphere(),
-      buildAISpelling(),
+      buildRobotFace(),
       buildNeuralNetwork(),
       buildBinaryMatrix(),
       buildCircuitBoard(),
