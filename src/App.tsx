@@ -588,7 +588,7 @@ Answer the user's latest query accurately using the above context.`;
 
 const CHAPTERS = ['IDENTITY', 'EXPERIENCE', 'SKILLS', 'PROJECTS', 'CONNECT'];
 
-function ChapterDots({ progress, isExploreActivated }: { progress: number; isExploreActivated: boolean }) {
+function ChapterDots({ progress, isExploreActivated, onNavClick }: { progress: number; isExploreActivated: boolean; onNavClick: (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => void }) {
   if (!isExploreActivated) return null;
   const active = Math.min(Math.floor(progress * CHAPTERS.length), CHAPTERS.length - 1);
   return (
@@ -597,15 +597,21 @@ function ChapterDots({ progress, isExploreActivated }: { progress: number; isExp
       display: 'flex', flexDirection: 'column', gap: 12, zIndex: 500,
     }}>
       {CHAPTERS.map((ch, i) => (
-        <a key={ch} href={`#ch-${i}`} title={ch} style={{
-          width: i === active ? 10 : 6,
-          height: i === active ? 10 : 6,
-          borderRadius: '50%',
-          background: i === active ? 'var(--blue-primary)' : 'rgba(0,0,0,0.15)',
-          display: 'block',
-          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-          boxShadow: i === active ? '0 0 10px rgba(0, 85, 255, 0.5)' : 'none',
-        }} />
+        <a 
+          key={ch} 
+          href={`#ch-${i}`} 
+          title={ch} 
+          onClick={(e) => onNavClick(e, `#ch-${i}`)}
+          style={{
+            width: i === active ? 10 : 6,
+            height: i === active ? 10 : 6,
+            borderRadius: '50%',
+            background: i === active ? 'var(--blue-primary)' : 'rgba(0,0,0,0.15)',
+            display: 'block',
+            transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+            boxShadow: i === active ? '0 0 10px rgba(0, 85, 255, 0.5)' : 'none',
+          }} 
+        />
       ))}
     </div>
   );
@@ -658,6 +664,35 @@ export function App() {
     if (!chatActiveRef.current) {
       isProgrammaticScrollRef.current = true;
       setChatActive(true);
+    }
+  };
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    if (targetId === '#ch-0') {
+      e.preventDefault();
+      if (isTransitioning) return;
+      
+      // Go back to Identity mode
+      setIsExploreActivated(false);
+      setChatActive(false);
+      
+      // Re-show ch-0 and scroll to top
+      setTimeout(() => {
+        if (lenisRefRef.current) {
+          lenisRefRef.current.scrollTo(0, { immediate: true });
+        }
+        ScrollTrigger.refresh();
+      }, 50);
+    } else {
+      // If it's another chapter, scroll to it via Lenis
+      e.preventDefault();
+      const el = document.querySelector(targetId);
+      if (el && lenisRefRef.current) {
+        lenisRefRef.current.scrollTo(el, {
+          duration: 1.2,
+          easing: (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+        });
+      }
     }
   };
 
@@ -739,10 +774,8 @@ export function App() {
     };
     const handleTouchMove = (e: TouchEvent) => {
       if (lenisRefRef.current && !exploreActiveRef.current && !transitioningRef.current) {
-        const touchY = e.touches[0].clientY;
-        const deltaY = touchStartY - touchY;
-        // Unlock scroll when swiping down (scrolling up)
-        if (deltaY < 0) {
+        const deltaY = e.touches[0].clientY - touchStartY;
+        if (deltaY > 0) {
           lenisRefRef.current.start();
         }
       }
@@ -765,7 +798,7 @@ export function App() {
 
   // ── Hero Zoom ScrollTrigger Pin ─────────────────────────────────────────────
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || isExploreActivated) return;
 
     // Pin Hero section to scrub terminal maximize and particle morph
     const tl = gsap.timeline({
@@ -962,7 +995,11 @@ export function App() {
         <div className="scroll-progress-bar" style={{ width: `${scrollProgress * 100}%` }} />
       </div>
 
-      <ChapterDots progress={scrollProgress} isExploreActivated={isExploreActivated} />
+      <ChapterDots 
+        progress={scrollProgress} 
+        isExploreActivated={isExploreActivated} 
+        onNavClick={handleNavClick}
+      />
 
       {/* Aesthetic Liquid Background Blur Overlays */}
       <div className="aurora-container">
@@ -979,10 +1016,23 @@ export function App() {
         pointerEvents: isExploreActivated ? 'auto' : 'none',
         transition: 'opacity 0.8s ease'
       }}>
-        <a href="#ch-0" className="site-nav__brand">[ ABHISHEK TIWARI ]</a>
+        <a 
+          href="#ch-0" 
+          className="site-nav__brand"
+          onClick={(e) => handleNavClick(e, '#ch-0')}
+        >
+          [ ABHISHEK TIWARI ]
+        </a>
         <nav className="site-nav__links">
           {CHAPTERS.map((ch, i) => (
-            <a key={ch} href={`#ch-${i}`} className="site-nav__link">{ch}</a>
+            <a 
+              key={ch} 
+              href={`#ch-${i}`} 
+              className="site-nav__link"
+              onClick={(e) => handleNavClick(e, `#ch-${i}`)}
+            >
+              {ch}
+            </a>
           ))}
           <a href="https://github.com/Abhishektiwari050" target="_blank" rel="noopener noreferrer" className="site-nav__link site-nav__link--cta">GITHUB ↗</a>
         </nav>
@@ -992,7 +1042,17 @@ export function App() {
         <main className="story-main">
 
           {/* ─── CHAPTER 0: IDENTITY / HERO ──────────────────────────────── */}
-          <section id="ch-0" className={`chapter chapter--hero ${isExploreActivated || isTransitioning ? 'explore-active' : ''}`} style={{ height: '100vh' }}>
+          <section 
+            id="ch-0" 
+            className={`chapter chapter--hero ${isExploreActivated || isTransitioning ? 'explore-active' : ''}`} 
+            style={{ 
+              height: isExploreActivated ? '0px' : '100vh',
+              minHeight: isExploreActivated ? '0px' : undefined,
+              overflow: isExploreActivated ? 'hidden' : 'visible',
+              display: (isExploreActivated && !isTransitioning) ? 'none' : 'flex',
+              padding: isExploreActivated ? '0px' : undefined
+            }}
+          >
             <div className="chapter__inner chapter__inner--hero" style={{ 
               display: 'flex', 
               alignItems: 'center', 
