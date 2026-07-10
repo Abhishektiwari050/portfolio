@@ -839,7 +839,14 @@ export function App() {
   const triggerExploreTransition = () => {
     if (isTransitioning) return;
     setIsTransitioning(true);
-    
+
+    // 0. Kill hero-pin ScrollTrigger and instantly clear any GSAP inline
+    //    transforms on the chat widget so it doesn't bleed into career section
+    const heroPinST = ScrollTrigger.getById('hero-pin');
+    if (heroPinST) heroPinST.kill();
+    gsap.set('.chat-widget', { clearProps: 'all' });
+    gsap.set('.terminal-wrapper', { clearProps: 'all' });
+
     // 1. Push down the AI page (#ch-0)
     gsap.to('#ch-0', {
       y: '6vh',
@@ -866,14 +873,25 @@ export function App() {
           ease: 'power3.inOut',
           onComplete: () => {
             setIsTransitioning(false);
-            // Clear inline transforms for future re-entry stability
-            gsap.set('#ch-0', { clearProps: 'all' });
+            // Collapse hero to zero height so nothing is scrollable above ch-1
+            gsap.set('#ch-0', {
+              height: 0,
+              minHeight: 0,
+              padding: 0,
+              overflow: 'hidden',
+              y: 0,
+            });
+            // Snap scroll back to top — career section is now at scrollY=0
+            if (lenisRefRef.current) {
+              lenisRefRef.current.scrollTo(0, { immediate: true });
+            }
             ScrollTrigger.refresh();
           }
         });
       }
     });
   };
+
 
   // ── GSAP Reveal & Horizontal Scrolling Animations ──────────────────────────
   useEffect(() => {
