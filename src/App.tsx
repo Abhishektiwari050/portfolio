@@ -317,25 +317,116 @@ function getClientFallbackReply(message: string) {
                      !lower.includes('hello') && !lower.includes('about') && !lower.includes('experience');
 
   if (isOffTopic) {
-    return "I only answer questions about my professional background, skills, and shipped projects. How can I help you explore my work?";
+    return "[METADATA: CONFIDENCE=100% | AREA=GUARDRAILS]\n[STATUS: SECURITY_REFUSED]\n---\nI only answer questions about Abhishek's professional background, skills, and shipped projects. How can I help you explore his work?";
   }
 
   if (lower.includes('skill') || lower.includes('stack') || lower.includes('tech')) {
-    return "My skills include LLM engineering (OpenAI, Gemini, Claude, prompt engineering), agent frameworks (LangGraph, LlamaIndex, CrewAI), and backend engineering (FastAPI, Python, PostgreSQL, RabbitMQ).";
+    return "[METADATA: CONFIDENCE=92% | AREA=SKILLS]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nHere is the technical stack:\n- AI Systems: LLM Orchestration, Prompt Design, Vector Embeddings\n- Frameworks: LangGraph, LlamaIndex, CrewAI\n- Architecture: FastAPI, Python, PostgreSQL, RabbitMQ, Docker, Redis";
   }
   if (lower.includes('project') || lower.includes('work') || lower.includes('ship')) {
-    return "I have shipped several production projects: an Agentic B2B Lead Gen scoring platform, the VayuWays aviation compliance tool, and WhatsApp RAG agents.";
+    return "[METADATA: CONFIDENCE=95% | AREA=PROJECTS]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nAbhishek has built and shipped:\n- B2B Lead Gen scoring platform: Multi-agent lead qualification and scoring\n- VayuWays aviation compliance tool: Hybrid search compliance checker\n- WhatsApp RAG agents: Specialized customer support agents";
   }
   if (lower.includes('contact') || lower.includes('email') || lower.includes('phone') || lower.includes('connect')) {
-    return `You can contact me directly via email at ${profile.email}, phone at ${profile.phone}, or connect on LinkedIn (${profile.linkedin}).`;
+    return `[METADATA: CONFIDENCE=100% | AREA=CONTACT]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nConnection details compiled:\n- Email: ${profile.email}\n- Phone: ${profile.phone}\n- GitHub: github.com/abhishektiwari050\n- LinkedIn: linkedin.com/in/abhishek-tiwari-84841b258`;
   }
-  return "I am Abhishek's AI assistant co-pilot. I can answer questions about my skills, shipped projects, work history, and contact details. How can I help you today?";
+  return `[METADATA: CONFIDENCE=90% | AREA=GENERAL]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nHi! I am Abhishek's AI assistant co-pilot. I can answer questions about my skills, shipped projects, work history, and contact details. How can I help you today?`;
 }
 
 interface ChatMessage {
   sender: 'ai' | 'user';
   text: string;
   options?: { label: string; action: () => void }[];
+}
+
+function AIEngineeringResponse({ text }: { text: string }) {
+  // Parse tags like [METADATA: CONFIDENCE=98% | AREA=Skills]
+  const metadataRegex = /\[METADATA:\s*CONFIDENCE=([^\|]+)\s*\|\s*AREA=([^\]]+)\]/i;
+  const statusRegex = /\[STATUS:\s*([^\]]+)\]/i;
+
+  const metadataMatch = text.match(metadataRegex);
+  const statusMatch = text.match(statusRegex);
+
+  let confidence = "98%";
+  let area = "SYSTEM_TELEMETRY";
+  let status = "COMPILING_SUCCESS";
+  let cleanText = text;
+
+  if (metadataMatch) {
+    confidence = metadataMatch[1].trim();
+    area = metadataMatch[2].trim().toUpperCase();
+    cleanText = cleanText.replace(metadataRegex, '');
+  }
+  if (statusMatch) {
+    status = statusMatch[1].trim().toUpperCase();
+    cleanText = cleanText.replace(statusRegex, '');
+  }
+
+  // Strip leading separator lines (e.g. ---)
+  cleanText = cleanText.replace(/^\s*-{3,}\s*/, '').trim();
+
+  // Split text by newlines and format lists
+  const lines = cleanText.split('\n');
+
+  return (
+    <div className="ai-system-response">
+      {/* Telemetry Status Bar */}
+      <div className="response-telemetry">
+        <span className="telemetry-item"><span className="telemetry-dot" /> {status}</span>
+        <span className="telemetry-item">CONFIDENCE: {confidence}</span>
+        <span className="telemetry-item">CLASS: {area}</span>
+      </div>
+
+      {/* Structured Content Panel */}
+      <div className="response-content-panel">
+        {lines.map((line, i) => {
+          const trimmed = line.trim();
+          if (!trimmed) return <div key={i} style={{ height: '8px' }} />;
+
+          // Detect headers (e.g. ### Header or **Header**)
+          if (trimmed.startsWith('###') || (trimmed.startsWith('**') && trimmed.endsWith('**') && trimmed.length < 50)) {
+            const headerText = trimmed.replace(/[#\*]+/g, '').trim();
+            return (
+              <h4 key={i} className="response-header">
+                ▶ {headerText}
+              </h4>
+            );
+          }
+
+          // Detect bullet points
+          if (trimmed.startsWith('- ') || trimmed.startsWith('* ') || /^\d+\.\s/.test(trimmed)) {
+            const content = trimmed.replace(/^[-*\d.]+\s*/, '').trim();
+            
+            // Format key-value pairings in bullet points (e.g. "Key: Value")
+            const colonIndex = content.indexOf(':');
+            if (colonIndex > 0 && colonIndex < 35) {
+              const key = content.substring(0, colonIndex);
+              const val = content.substring(colonIndex + 1);
+              return (
+                <div key={i} className="response-row">
+                  <span className="response-row__key">{key}:</span>
+                  <span className="response-row__val">{val}</span>
+                </div>
+              );
+            }
+
+            return (
+              <div key={i} className="response-bullet">
+                <span className="response-bullet__icon">↳</span>
+                <span className="response-bullet__text">{content}</span>
+              </div>
+            );
+          }
+
+          // Regular text paragraph
+          return (
+            <p key={i} className="response-para">
+              {trimmed}
+            </p>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 function InteractiveChatSystem({ onExplore, isExploreActivated, onExitChat, onFocus }: ChatProps) {
@@ -349,7 +440,7 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, onExitChat, onFo
     setMessages([
       { 
         sender: 'ai', 
-        text: `Hi! I'm Abhishek's AI. Ask me anything — skills, projects, work history.`,
+        text: `[METADATA: CONFIDENCE=100% | AREA=WELCOME]\n[STATUS: ACTIVE]\n---\nAI Agent Copilot online. Ready to retrieve candidate profile details.\nAsk me anything about Abhishek's skills, shipped projects, work history, or click below to start:`,
         options: [
           { label: 'Explore Career Story 🚀', action: () => onExplore() }
         ]
@@ -403,17 +494,22 @@ function InteractiveChatSystem({ onExplore, isExploreActivated, onExitChat, onFo
 
       const systemPrompt = `You are the AI assistant co-pilot for Abhishek Tiwari's interactive portfolio website.
 Your name is AI assistant.
-Your job is to answer questions about Abhishek Tiwari's professional background, skills, projects, and contact info in a polite, helpful, and professional manner.
+Your job is to answer questions about Abhishek Tiwari's professional background, skills, projects, and contact info.
+
+CRITICAL FORMAT REQUIREMENT:
+You MUST start your response with a telemetry metadata block in this exact format:
+[METADATA: CONFIDENCE=<percentage>% | AREA=<SKILLS/EXPERIENCE/PROJECTS/CONTACT/GENERAL>]
+[STATUS: <SYSTEM_READY/RETRIEVAL_SUCCESS/SECURITY_REFUSED>]
+---
 
 Aesthetics/Style:
 - Be concise. Keep responses under 3 paragraphs.
-- Use clear bullet points when explaining multiple items.
+- Use clear bullet points (- Key: Value) when explaining multiple items, as the UI will parse this into structured telemetry data cards.
 - Maintain a premium, world-class developer tone.
 
 Professional Guardrails:
 - You ONLY answer questions related to Abhishek's profile, career, skills, and projects.
-- If a user asks an off-topic question (e.g. general coding questions not related to Abhishek's projects, personal life, or trivia), decline politely and guide them back to exploring Abhishek's portfolio.
-  Example: "I only answer questions about Abhishek's professional background, skills, and shipped projects. How can I help you explore his work?"
+- If a user asks an off-topic question, you must set STATUS to SECURITY_REFUSED and decline politely.
 
 Here is the information about Abhishek Tiwari:
 Name: Abhishek Tiwari
@@ -515,7 +611,14 @@ Answer the user's latest query accurately using the above context.`;
                   </div>
                 )}
                 <div className={`chat-bubble chat-bubble--${m.sender}`}>
-                  {m.text}
+                  {m.sender === 'ai' ? (
+                    <AIEngineeringResponse text={m.text} />
+                  ) : (
+                    <span>
+                      <span style={{ color: '#00e5ff', marginRight: '4px' }}>guest@portfolio:~$</span>
+                      {m.text}
+                    </span>
+                  )}
                 </div>
                 {m.sender === 'user' && (
                   <div className="chat-avatar chat-avatar--user" style={{ marginLeft: 8 }}>
