@@ -6,6 +6,7 @@ import { Preloader } from './components/Preloader';
 import { StoryCanvas } from './components/StoryCanvas';
 import { CustomCursor } from './components/CustomCursor';
 import { profile, timeline, skillGroups, projects, vistarMetrics } from './data/resume';
+import { AsciiSunsetCanvas } from './components/AsciiSunsetCanvas';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -1337,6 +1338,8 @@ export function App() {
                       </form>
                     </div>
                   </div>
+
+                  <AsciiSunsetCanvas />
 
                   <div className="footer-sign story-reveal" data-delay="0.5">
                     <div className="footer-sign__name">{profile.name}</div>
