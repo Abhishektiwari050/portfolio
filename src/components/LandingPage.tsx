@@ -1,6 +1,13 @@
+import { useState, useEffect, useRef } from 'react';
+import Lenis from 'lenis';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { profile } from '../data/resume';
 import { StoryCanvas } from './StoryCanvas';
 import { InteractiveChatSystem } from './InteractiveChatSystem';
+import { WorkPreviewWidgets } from './WorkPreviewWidgets';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const HERO_PADDING_LEFT = '5vw';
 
@@ -12,18 +19,180 @@ interface LandingPageProps {
   handleExitChat: () => void;
 }
 
-export function LandingPage({ onExplore, chatActive, handleChatFocus, handleExitChat }: LandingPageProps) {
+export function LandingPage({ 
+  onExplore, 
+  chatActive, 
+  setChatActive, 
+  handleChatFocus, 
+  handleExitChat 
+}: LandingPageProps) {
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [scrollVelocity, setScrollVelocity] = useState(0);
+  const [transitionProgress, setTransitionProgress] = useState(0);
+  const [chatExpanded, setChatExpanded] = useState(false);
+
+  const lenisRef = useRef<Lenis | null>(null);
+  const isProgrammaticScrollRef = useRef(false);
+
+  // Sync expanded state with progress
+  // Keep compact pill layout during the GSAP grow animation.
+  // Only flip to expanded layout when wrapper is almost full-screen (>= 95%).
+  useEffect(() => {
+    if (transitionProgress >= 0.95 && !chatExpanded) {
+      setChatExpanded(true);
+    } else if (transitionProgress < 0.05 && chatExpanded) {
+      setChatExpanded(false);
+    }
+  }, [transitionProgress, chatExpanded]);
+
+  const localExitChat = () => {
+    isProgrammaticScrollRef.current = true;
+    if (lenisRef.current) {
+      lenisRef.current.start();
+      lenisRef.current.scrollTo(0, {
+        duration: 0.8,
+        easing: (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+        onComplete: () => {
+          isProgrammaticScrollRef.current = false;
+          setChatActive(false);
+        }
+      });
+    }
+  };
+
+  const localChatFocus = () => {
+    handleChatFocus();
+    isProgrammaticScrollRef.current = true;
+    if (lenisRef.current) {
+      const pinTrigger = ScrollTrigger.getById('hero-pin');
+      if (pinTrigger) {
+        lenisRef.current.scrollTo(pinTrigger.start + (pinTrigger.end - pinTrigger.start) * 0.98, {
+          duration: 0.8,
+          easing: (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+          onComplete: () => {
+            isProgrammaticScrollRef.current = false;
+            setChatActive(true);
+          }
+        });
+      }
+    }
+  };
+
+  const chatActiveRef = useRef(chatActive);
+  useEffect(() => {
+    chatActiveRef.current = chatActive;
+  }, [chatActive]);
+
+  // Setup main scroll engines
+  useEffect(() => {
+    // 1. Initialize Lenis scroll
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 0.95,
+      touchMultiplier: 1.5,
+    });
+    lenisRef.current = lenis;
+
+    lenis.on('scroll', (e: any) => {
+      setScrollProgress(e.progress);
+      setScrollVelocity(e.velocity);
+    });
+
+    const raf = (t: number) => {
+      lenis.raf(t);
+      requestAnimationFrame(raf);
+    };
+    requestAnimationFrame(raf);
+
+    // 2. Setup hero pin timeline
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        id: 'hero-pin',
+        trigger: '#ch-0',
+        start: 'top top',
+        end: '+=120%', // Pin for 120% viewport height to morph
+        scrub: true,
+        pin: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          setTransitionProgress(self.progress);
+          
+          // Lock scrolling once terminal is fully maximized
+          if (self.progress >= 0.99) {
+            if (lenisRef.current && !isProgrammaticScrollRef.current) {
+              lenisRef.current.stop();
+            }
+          }
+
+          // Sync chat states with scroll progress using refs
+          if (!isProgrammaticScrollRef.current) {
+            if (self.progress >= 0.95) {
+              if (!chatActiveRef.current) {
+                setChatActive(true);
+              }
+            } else {
+              if (chatActiveRef.current) {
+                setChatActive(false);
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Fade out Hero details as we scroll down
+    tl.to('.hero-eyebrow, .hero-title, .role-badges, .hero-desc, .hero-meta, .hero-scroll-hint', {
+      opacity: 0,
+      y: -30,
+      stagger: 0.05,
+      ease: 'none'
+    }, 0);
+
+    // Smoothly grow the input wrapper to full-screen desk as we scroll
+    tl.to('.chatgpt-input-wrap', {
+      width: '100vw',
+      maxWidth: '100vw',
+      height: '100vh',
+      bottom: '0px',
+      left: '50%',
+      borderRadius: '0px',
+      ease: 'none'
+    }, 0);
+
+    return () => {
+      lenis.destroy();
+      tl.kill();
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    };
+  }, [setChatActive]);
+
   return (
-    <div className="landing-page-mount">
-      <StoryCanvas 
-        scrollProgress={0} 
-        scrollVelocity={0}
-        isExploreActivated={false}
-        transitionProgress={0}
-        isChatActive={chatActive}
-      />
+    <div className="landing-page-mount" style={{ width: '100%', minHeight: '220vh', overflowX: 'hidden' }}>
       
-      <main className="story-main" style={{ height: '100vh', overflow: 'hidden' }}>
+      {/* Sticky 3D Particle Face Background (Fades out partially to let the face spin behind blurred glass) */}
+      <div 
+        style={{ 
+          opacity: Math.max(0.35, 1 - transitionProgress * 1.2), 
+          transition: 'opacity 0.4s ease',
+          pointerEvents: 'none'
+        }}
+      >
+        <StoryCanvas 
+          scrollProgress={scrollProgress} 
+          scrollVelocity={scrollVelocity}
+          isExploreActivated={transitionProgress >= 0.98}
+          transitionProgress={transitionProgress}
+          isChatActive={chatActive}
+        />
+      </div>
+
+      <main className="story-main" style={{ width: '100%' }}>
+        
+        {/* ─── CHAPTER 0: IDENTITY & CHAT ─────────────────────────────── */}
         <section 
           id="ch-0" 
           className="chapter chapter--hero" 
@@ -34,55 +203,101 @@ export function LandingPage({ onExplore, chatActive, handleChatFocus, handleExit
             position: 'relative'
           }}
         >
+          {/* Popping previews of shipped projects */}
+          <WorkPreviewWidgets chatActive={chatActive} />
           <div className="chapter__inner chapter__inner--hero" style={{ 
             display: 'flex', 
             alignItems: 'center', 
-            justifyContent: 'flex-start',
+            justifyContent: 'center',
             width: '100%',
             boxSizing: 'border-box',
-            paddingLeft: window.innerWidth <= 768 ? '20px' : HERO_PADDING_LEFT,
-            paddingRight: window.innerWidth <= 768 ? '20px' : '0',
+            paddingLeft: '20px',
+            paddingRight: '20px',
+            textAlign: 'center'
           }}>
-            <div className="hero-text-col" style={{ 
-              maxWidth: window.innerWidth <= 768 ? '100%' : '640px',
-              width: window.innerWidth <= 768 ? '100%' : undefined,
-              margin: '0',
+            <div className="hero-flex-container" style={{ 
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              transform: 'translateY(-20px)',
+              transition: 'transform 0.3s ease'
             }}>
-              <div className="hero-eyebrow">
-                <span className="hero-eyebrow__dot" />
-                <span>AI Systems & LLM Architect</span>
+              {/* Premium Frosted Glass Text Console Panel */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.45)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.55)',
+                borderRadius: '24px',
+                padding: '24px 32px',
+                maxWidth: '560px',
+                margin: '0 auto 1.2rem auto',
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}>
+                <div className="hero-eyebrow" style={{ 
+                  justifyContent: 'center', 
+                  fontSize: '0.64rem', 
+                  letterSpacing: '0.16em',
+                  color: 'var(--color-text-secondary)',
+                  opacity: 0.75,
+                  marginBottom: '1rem'
+                }}>
+                  <span className="hero-eyebrow__dot" style={{ background: '#00cc66', boxShadow: '0 0 6px #00cc66' }} />
+                  <span>// PORTFOLIO INITIALIZED • ACTIVE SESSION</span>
+                </div>
+
+                <h1 className="hero-title" style={{ display: 'none' }}>Abhishek Tiwari — AI Engineer</h1>
+
+                <div className="role-badges" style={{ justifyContent: 'center', gap: '8px', marginBottom: '0.8rem' }}>
+                  <span className="role-badge" style={{ fontSize: '0.62rem', padding: '5px 12px' }}>
+                    <span className="role-badge__dot" />
+                    AI Engineer
+                  </span>
+                </div>
+
+                <p className="hero-desc" style={{ 
+                  textAlign: 'center', 
+                  margin: '0', 
+                  maxWidth: '500px',
+                  fontSize: '0.94rem',
+                  lineHeight: 1.6,
+                  color: '#2c3e50',
+                  fontWeight: 500
+                }}>
+                  Building production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. 
+                  Delivering intelligent client AI solutions at Vistar.
+                </p>
               </div>
 
-              <h1 className="hero-title">
-                <span className="hero-word">ABHISHEK</span>
-                <span className="hero-word" style={{ display: 'block' }}>TIWARI.</span>
-              </h1>
-
-              <div className="role-badges">
-                <span className="role-badge">
-                  <span className="role-badge__dot" />
-                  AI Systems Engineer
-                </span>
-                <span className="role-badge">
-                  <span className="role-badge__dot" />
-                  LLM Architect
-                </span>
-              </div>
-
-              <p className="hero-desc">
-                Building production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. 
-                Delivering intelligent client AI solutions at Vistar.
-              </p>
-
-              <div className="terminal-wrapper" style={{ marginTop: '1.2rem' }}>
-                <InteractiveChatSystem 
-                  onExplore={onExplore} 
-                  isExploreActivated={false} 
-                  onExitChat={handleExitChat}
-                  onFocus={handleChatFocus}
-                />
-              </div>
+              {/* Layout placeholder to reserve space for absolute input wrap */}
+              <div style={{ width: '60vw', height: '126px', marginBottom: '1rem', visibility: 'hidden' }} />
             </div>
+          </div>
+
+          {/* ── Absolutely Positioned Expanding Chat Input/Desk ──────────────── */}
+          <div
+            className={`chatgpt-input-wrap ${chatExpanded ? 'expanded' : ''}`}
+            style={{
+              opacity: 1,
+              pointerEvents: 'auto',
+            }}
+          >
+            <InteractiveChatSystem
+              onExplore={onExplore}
+              isExploreActivated={false}
+              onExitChat={() => {
+                handleExitChat();
+                localExitChat();
+              }}
+              onFocus={localChatFocus}
+              isExpanded={chatExpanded}
+            />
           </div>
 
           <div className="hero-meta" style={{ 
@@ -96,6 +311,27 @@ export function LandingPage({ onExplore, chatActive, handleChatFocus, handleExit
           }}>
             <span className="hero-meta__item">📍 DELHI, INDIA</span>
             <span className="hero-meta__item">✉ {profile.email}</span>
+          </div>
+
+          <div className="hero-scroll-hint" style={{
+            position: 'absolute',
+            bottom: '3vh',
+            right: HERO_PADDING_LEFT,
+            display: chatActive ? 'none' : 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.62rem',
+            color: 'var(--text-muted)',
+            zIndex: 10
+          }}>
+            <div className="hero-scroll-hint__bar" style={{
+              width: '30px',
+              height: '1px',
+              background: 'currentColor',
+              opacity: 0.5
+            }} />
+            <span>SCROLL TO ENTER TERMINAL</span>
           </div>
         </section>
       </main>

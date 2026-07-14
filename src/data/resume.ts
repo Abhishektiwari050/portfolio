@@ -35,13 +35,13 @@ export interface Project {
 
 export const profile = {
   name: 'Abhishek Tiwari',
-  title: 'AI Engineer · LLM Engineer · Generative AI Developer',
+  title: 'AI Engineer',
   location: 'Delhi, India',
   phone: '+91 8860110144',
   email: 'abhishektiwari53910@gmail.com',
   linkedin: 'linkedin.com/in/abhishek-tiwari-84841b258',
   github: 'github.com/Abhishektiwari050',
-  objective: 'AI/LLM Engineer with production experience building RAG pipelines, multi-agent systems, and FastAPI-based AI services — seeking full-time GenAI, LLM, and Agentic AI Engineer roles.',
+  objective: 'AI Engineer with production experience building RAG pipelines, multi-agent systems, and FastAPI-based AI services — seeking full-time GenAI, LLM, and Agentic AI roles.',
 };
 
 export const timeline: TimelineItem[] = [

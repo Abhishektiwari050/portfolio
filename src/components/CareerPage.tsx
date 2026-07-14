@@ -360,6 +360,11 @@ export function CareerPage({ onBack, currentHash }: CareerPageProps) {
 
   // Scroll and GSAP initialization
   useEffect(() => {
+    // Reset window scroll position to 0 immediately on mount to prevent trigger miscalculations
+    window.scrollTo(0, 0);
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+
     // 1. Initialize Lenis scroll
     const lenis = new Lenis({
       duration: 1.2,

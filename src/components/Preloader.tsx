@@ -1,55 +1,38 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface PreloaderProps {
   onComplete: () => void;
 }
 
 export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
-  const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState<'loading' | 'complete' | 'exit'>('loading');
 
-  const handleComplete = useCallback(() => {
-    onComplete();
-  }, [onComplete]);
-
   useEffect(() => {
-    let current = 0;
-    const interval = setInterval(() => {
-      // Simulate realistic loading with variable speed
-      const increment = current < 30 
-        ? Math.random() * 6 + 3 
-        : current < 70 
-          ? Math.random() * 4 + 1 
-          : Math.random() * 2 + 0.5;
-      
-      current = Math.min(current + increment, 100);
-      setProgress(current);
-      
-      if (current >= 100) {
-        clearInterval(interval);
-        setTimeout(() => setPhase('complete'), 200);
-        setTimeout(() => {
-          setPhase('exit');
-          handleComplete();
-        }, 1000);
-      }
-    }, 40);
+    // Show the pencil animation for a full loop of 3 seconds, then complete
+    const timer1 = setTimeout(() => {
+      setPhase('complete');
+    }, 3000);
+    const timer2 = setTimeout(() => {
+      setPhase('exit');
+      onComplete();
+    }, 3800);
 
-    return () => clearInterval(interval);
-  }, [handleComplete]);
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [onComplete]);
 
   if (phase === 'exit') return null;
 
-  const displayNum = Math.floor(progress);
-
   return (
     <div
-      className="preloader"
+      className="preloader-container"
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 10000,
-        background: '#030406',
+        background: '#f5f5f7', // Clean off-white background
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -57,113 +40,236 @@ export const Preloader: React.FC<PreloaderProps> = ({ onComplete }) => {
         opacity: phase === 'complete' ? 0 : 1,
         transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
         willChange: 'opacity',
+        overflow: 'hidden',
       }}
     >
-      {/* Faint grid background */}
-      <div style={{
-        position: 'absolute',
-        inset: 0,
-        backgroundSize: '40px 40px',
-        backgroundImage: 
-          'linear-gradient(to right, rgba(0, 240, 255, 0.015) 1px, transparent 1px),' +
-          'linear-gradient(to bottom, rgba(0, 240, 255, 0.015) 1px, transparent 1px)',
-        pointerEvents: 'none',
-      }} />
+      <style>{`
+        .pencil {
+          display: block;
+          width: 10em;
+          height: 10em;
+        }
 
-      {/* Corner brackets */}
-      {[
-        { top: '24px', left: '24px', borderTop: '1px solid', borderLeft: '1px solid' },
-        { top: '24px', right: '24px', borderTop: '1px solid', borderRight: '1px solid' },
-        { bottom: '24px', left: '24px', borderBottom: '1px solid', borderLeft: '1px solid' },
-        { bottom: '24px', right: '24px', borderBottom: '1px solid', borderRight: '1px solid' },
-      ].map((pos, i) => (
-        <div key={i} style={{
-          position: 'absolute',
-          width: '20px',
-          height: '20px',
-          ...pos,
-          borderColor: 'rgba(0, 240, 255, 0.2)',
-        } as React.CSSProperties} />
-      ))}
+        .pencil__body1,
+        .pencil__body2,
+        .pencil__body3,
+        .pencil__eraser,
+        .pencil__eraser-skew,
+        .pencil__point,
+        .pencil__rotate,
+        .pencil__stroke {
+          animation-duration: 3s;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+        }
 
-      {/* Large counter */}
-      <div style={{
-        fontFamily: "'Syne', sans-serif",
-        fontSize: 'clamp(4rem, 12vw, 8rem)',
-        fontWeight: 800,
-        letterSpacing: '-0.06em',
-        color: '#f3f4f6',
-        lineHeight: 1,
-        marginBottom: '2.5rem',
-        position: 'relative',
-      }}>
-        <span style={{ opacity: displayNum < 100 ? 0.15 : 1, transition: 'opacity 0.3s' }}>
-          {displayNum < 10 ? '0' : ''}
-        </span>
-        {displayNum < 100 && displayNum >= 10 ? '' : ''}
-        {displayNum}
-        <span style={{
-          position: 'absolute',
-          right: '-2rem',
-          top: '0.2em',
-          fontSize: '0.15em',
-          fontFamily: "'Geist Mono', monospace",
-          fontWeight: 400,
-          color: '#0055ff',
-          letterSpacing: '0',
-        }}>%</span>
-      </div>
+        .pencil__body1,
+        .pencil__body2,
+        .pencil__body3 {
+          transform: rotate(-90deg);
+        }
 
-      {/* Progress bar */}
-      <div style={{
-        width: 'min(240px, 60vw)',
-        height: '1px',
-        background: 'rgba(255,255,255,0.06)',
-        position: 'relative',
-        marginBottom: '2rem',
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          height: '100%',
-          width: `${progress}%`,
-          background: 'linear-gradient(90deg, #0055ff, #0033aa)',
-          transition: 'width 0.08s linear',
-          boxShadow: '0 0 12px rgba(0, 85, 255, 0.4)',
-        }} />
-      </div>
+        .pencil__body1 {
+          animation-name: pencilBody1;
+        }
 
-      {/* Status lines */}
-      <div style={{
-        fontFamily: "'Geist Mono', monospace",
-        fontSize: '0.65rem',
-        color: '#4b5563',
-        letterSpacing: '0.12em',
-        textTransform: 'uppercase',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '6px',
-      }}>
-        <span style={{ 
-          color: progress > 30 ? '#8a93a6' : '#4b5563',
-          transition: 'color 0.5s',
-        }}>
-          {progress < 30 ? 'LOADING ASSETS' 
-            : progress < 60 ? 'INITIALIZING WebGL' 
-            : progress < 90 ? 'COMPILING SHADERS' 
-            : 'SYSTEMS ONLINE'}
-        </span>
-        <span style={{
-          color: '#0055ff',
-          opacity: progress >= 100 ? 1 : 0.4,
-          transition: 'opacity 0.3s',
-          fontSize: '0.6rem',
-        }}>
-          {progress >= 100 ? '● READY' : '○ STANDBY'}
-        </span>
+        .pencil__body2 {
+          animation-name: pencilBody2;
+        }
+
+        .pencil__body3 {
+          animation-name: pencilBody3;
+        }
+
+        .pencil__eraser {
+          animation-name: pencilEraser;
+          transform: rotate(-90deg) translate(49px,0);
+        }
+
+        .pencil__eraser-skew {
+          animation-name: pencilEraserSkew;
+          animation-timing-function: ease-in-out;
+        }
+
+        .pencil__point {
+          animation-name: pencilPoint;
+          transform: rotate(-90deg) translate(49px,-30px);
+        }
+
+        .pencil__rotate {
+          animation-name: pencilRotate;
+        }
+
+        .pencil__stroke {
+          animation-name: pencilStroke;
+          transform: translate(100px,100px) rotate(-113deg);
+        }
+
+        /* Animations */
+        @keyframes pencilBody1 {
+          from,
+          to {
+            stroke-dashoffset: 351.86;
+            transform: rotate(-90deg);
+          }
+          50% {
+            stroke-dashoffset: 150.8;
+            transform: rotate(-225deg);
+          }
+        }
+
+        @keyframes pencilBody2 {
+          from,
+          to {
+            stroke-dashoffset: 406.84;
+            transform: rotate(-90deg);
+          }
+          50% {
+            stroke-dashoffset: 174.36;
+            transform: rotate(-225deg);
+          }
+        }
+
+        @keyframes pencilBody3 {
+          from,
+          to {
+            stroke-dashoffset: 296.88;
+            transform: rotate(-90deg);
+          }
+          50% {
+            stroke-dashoffset: 127.23;
+            transform: rotate(-225deg);
+          }
+        }
+
+        @keyframes pencilEraser {
+          from,
+          to {
+            transform: rotate(-45deg) translate(49px,0);
+          }
+          50% {
+            transform: rotate(0deg) translate(49px,0);
+          }
+        }
+
+        @keyframes pencilEraserSkew {
+          from,
+          32.5%,
+          67.5%,
+          to {
+            transform: skewX(0);
+          }
+          35%,
+          65% {
+            transform: skewX(-4deg);
+          }
+          37.5%, 
+          62.5% {
+            transform: skewX(8deg);
+          }
+          40%,
+          45%,
+          50%,
+          55%,
+          60% {
+            transform: skewX(-15deg);
+          }
+          42.5%,
+          47.5%,
+          52.5%,
+          57.5% {
+            transform: skewX(15deg);
+          }
+        }
+
+        @keyframes pencilPoint {
+          from,
+          to {
+            transform: rotate(-90deg) translate(49px,-30px);
+          }
+          50% {
+            transform: rotate(-225deg) translate(49px,-30px);
+          }
+        }
+
+        @keyframes pencilRotate {
+          from {
+            transform: translate(100px,100px) rotate(0);
+          }
+          to {
+            transform: translate(100px,100px) rotate(720deg);
+          }
+        }
+
+        @keyframes pencilStroke {
+          from {
+            stroke-dashoffset: 439.82;
+            transform: translate(100px,100px) rotate(-113deg);
+          }
+          50% {
+            stroke-dashoffset: 164.93;
+            transform: translate(100px,100px) rotate(-113deg);
+          }
+          75%,
+          to {
+            stroke-dashoffset: 439.82;
+            transform: translate(100px,100px) rotate(112deg);
+          }
+        }
+        
+        .loading-text {
+          font-family: 'Geist Mono', monospace;
+          font-size: 0.65rem;
+          font-weight: 700;
+          color: #86868b;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          margin-top: 2rem;
+          animation: fadePulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes fadePulse {
+          0%, 100% { opacity: 0.4; }
+          50% { opacity: 1; }
+        }
+      `}</style>
+
+      {/* Drawing Pencil SVG Loader */}
+      <svg xmlns="http://www.w3.org/2000/svg" height="200px" width="200px" viewBox="0 0 200 200" className="pencil">
+        <defs>
+          <clipPath id="pencil-eraser">
+            <rect height={30} width={30} ry={5} rx={5} />
+          </clipPath>
+        </defs>
+        <circle transform="rotate(-113,100,100)" strokeLinecap="round" strokeDashoffset="439.82" strokeDasharray="439.82 439.82" strokeWidth={2} stroke="rgba(0, 85, 255, 0.4)" fill="none" r={70} className="pencil__stroke" />
+        <g transform="translate(100,100)" className="pencil__rotate">
+          <g fill="none">
+            <circle transform="rotate(-90)" strokeDashoffset={402} strokeDasharray="402.12 402.12" strokeWidth={30} stroke="hsl(223,90%,50%)" r={64} className="pencil__body1" />
+            <circle transform="rotate(-90)" strokeDashoffset={465} strokeDasharray="464.96 464.96" strokeWidth={10} stroke="hsl(223,90%,60%)" r={74} className="pencil__body2" />
+            <circle transform="rotate(-90)" strokeDashoffset={339} strokeDasharray="339.29 339.29" strokeWidth={10} stroke="hsl(223,90%,40%)" r={54} className="pencil__body3" />
+          </g>
+          <g transform="rotate(-90) translate(49,0)" className="pencil__eraser">
+            <g className="pencil__eraser-skew">
+              <rect height={30} width={30} ry={5} rx={5} fill="hsl(223,90%,70%)" />
+              <rect clipPath="url(#pencil-eraser)" height={30} width={5} fill="hsl(223,90%,60%)" />
+              <rect height={20} width={30} fill="hsl(223,10%,90%)" />
+              <rect height={20} width={15} fill="hsl(223,10%,70%)" />
+              <rect height={20} width={5} fill="hsl(223,10%,80%)" />
+              <rect height={2} width={30} y={6} fill="hsla(223,10%,10%,0.2)" />
+              <rect height={2} width={30} y={13} fill="hsla(223,10%,10%,0.2)" />
+            </g>
+          </g>
+          <g transform="rotate(-90) translate(49,-30)" className="pencil__point">
+            <polygon points="15 0,30 30,0 30" fill="hsl(33,90%,70%)" />
+            <polygon points="15 0,6 30,0 30" fill="hsl(33,90%,50%)" />
+            <polygon points="15 0,20 10,10 10" fill="hsl(223,10%,10%)" />
+          </g>
+        </g>
+      </svg>
+
+      {/* Technical Tag */}
+      <div className="loading-text">
+        INITIALIZING CORE DESIGN LAYER
       </div>
     </div>
   );

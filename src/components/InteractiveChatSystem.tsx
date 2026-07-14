@@ -6,6 +6,7 @@ interface ChatProps {
   isExploreActivated: boolean;
   onExitChat: () => void;
   onFocus: () => void;
+  isExpanded: boolean;
 }
 
 interface ChatMessage {
@@ -24,19 +25,19 @@ function getClientFallbackReply(message: string) {
                      !lower.includes('hello') && !lower.includes('about') && !lower.includes('experience');
 
   if (isOffTopic) {
-    return "[METADATA: CONFIDENCE=100% | AREA=GUARDRAILS]\n[STATUS: SECURITY_REFUSED]\n---\nI only answer questions about Abhishek's professional background, skills, and shipped projects. How can I help you explore his work?";
+    return "[METADATA: CONFIDENCE=100% | AREA=GUARDRAILS]\n[STATUS: SECURITY_REFUSED]\n---\nI only answer questions about my professional background, skills, and shipped projects. How can I help you explore my work today?";
   }
 
   if (lower.includes('skill') || lower.includes('stack') || lower.includes('tech')) {
-    return "[METADATA: CONFIDENCE=92% | AREA=SKILLS]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nHere is the technical stack:\n- AI Systems: LLM Orchestration, Prompt Design, Vector Embeddings\n- Frameworks: LangGraph, LlamaIndex, CrewAI\n- Architecture: FastAPI, Python, PostgreSQL, RabbitMQ, Docker, Redis";
+    return "[METADATA: CONFIDENCE=95% | AREA=SKILLS]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nMy core technical stack includes:\n- AI Systems: LLM Orchestration, Prompt Design, Vector Embeddings\n- Frameworks: LangGraph, LlamaIndex, CrewAI\n- Architecture: FastAPI, Python, PostgreSQL, RabbitMQ, Docker, Redis";
   }
   if (lower.includes('project') || lower.includes('work') || lower.includes('ship')) {
-    return "[METADATA: CONFIDENCE=95% | AREA=PROJECTS]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nAbhishek has built and shipped:\n- B2B Lead Gen scoring platform: Multi-agent lead qualification and scoring\n- VayuWays aviation compliance tool: Hybrid search compliance checker\n- WhatsApp RAG agents: Specialized customer support agents";
+    return "[METADATA: CONFIDENCE=95% | AREA=PROJECTS]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nSome of my key projects include:\n- B2B Lead Gen scoring platform: Multi-agent lead qualification and scoring\n- VayuWays aviation compliance tool: Hybrid search compliance checker\n- WhatsApp RAG agents: Specialized customer support agents";
   }
   if (lower.includes('contact') || lower.includes('email') || lower.includes('phone') || lower.includes('connect')) {
-    return `[METADATA: CONFIDENCE=100% | AREA=CONTACT]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nConnection details compiled:\n- Email: ${profile.email}\n- Phone: ${profile.phone}\n- GitHub: github.com/abhishektiwari050\n- LinkedIn: linkedin.com/in/abhishek-tiwari-84841b258`;
+    return `[METADATA: CONFIDENCE=100% | AREA=CONTACT]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nHere are my contact details:\n- Email: ${profile.email}\n- Phone: ${profile.phone}\n- GitHub: github.com/abhishektiwari050\n- LinkedIn: linkedin.com/in/abhishek-tiwari-84841b258`;
   }
-  return `[METADATA: CONFIDENCE=90% | AREA=GENERAL]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nHi! I am Abhishek's AI assistant co-pilot. I can answer questions about my skills, shipped projects, work history, and contact details. How can I help you today?`;
+  return `[METADATA: CONFIDENCE=90% | AREA=GENERAL]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nHi! I'm Abhishek Tiwari. I'm an AI Engineer. Ask me anything about my skills, projects, work experience, or contact details!`;
 }
 
 function AIEngineeringResponse({ text }: { text: string }) {
@@ -65,23 +66,50 @@ function AIEngineeringResponse({ text }: { text: string }) {
   const lines = cleanText.split('\n');
 
   return (
-    <div className="ai-system-response">
-      <div className="response-telemetry">
-        <span className="telemetry-item"><span className="telemetry-dot" /> {status}</span>
-        <span className="telemetry-item">CONFIDENCE: {confidence}</span>
-        <span className="telemetry-item">CLASS: {area}</span>
+    <div className="apple-system-response">
+      {/* Liquid Glass Telemetry Console Header */}
+      <div className="apple-response-badge">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '4px' }}>
+          <span style={{ 
+            background: status === 'SECURITY_REFUSED' ? 'rgba(255, 59, 48, 0.08)' : 'rgba(0, 85, 255, 0.08)',
+            color: status === 'SECURITY_REFUSED' ? '#ff3b30' : '#0055ff',
+            border: status === 'SECURITY_REFUSED' ? '1px solid rgba(255,59,48,0.2)' : '1px solid rgba(0,85,255,0.2)',
+            padding: '2px 8px',
+            borderRadius: '6px',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.58rem',
+            fontWeight: 800
+          }}>
+            [ {status} ]
+          </span>
+          <span style={{ color: '#86868b', fontSize: '0.58rem', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+            {area}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+          <span style={{ minWidth: '85px', fontSize: '0.58rem', fontFamily: 'var(--font-mono)' }}>CONFIDENCE: {confidence}</span>
+          <div style={{ flex: 1, height: '4px', background: 'rgba(0,0,0,0.04)', borderRadius: '2px', overflow: 'hidden' }}>
+            <div style={{ 
+              width: confidence.includes('%') ? confidence : `${confidence}%`, 
+              height: '100%', 
+              background: '#0055ff', 
+              boxShadow: '0 0 4px #0055ff',
+              borderRadius: '2px'
+            }} />
+          </div>
+        </div>
       </div>
 
-      <div className="response-content-panel">
+      <div className="apple-response-content">
         {lines.map((line, i) => {
           const trimmed = line.trim();
-          if (!trimmed) return <div key={i} style={{ height: '8px' }} />;
+          if (!trimmed) return <div key={i} style={{ height: '6px' }} />;
 
           if (trimmed.startsWith('###') || (trimmed.startsWith('**') && trimmed.endsWith('**') && trimmed.length < 50)) {
             const headerText = trimmed.replace(/[#\*]+/g, '').trim();
             return (
-              <h4 key={i} className="response-header">
-                ▶ {headerText}
+              <h4 key={i} className="apple-response-header">
+                {headerText}
               </h4>
             );
           }
@@ -93,23 +121,23 @@ function AIEngineeringResponse({ text }: { text: string }) {
               const key = content.substring(0, colonIndex);
               const val = content.substring(colonIndex + 1);
               return (
-                <div key={i} className="response-row">
-                  <span className="response-row__key">{key}:</span>
-                  <span className="response-row__val">{val}</span>
+                <div key={i} className="apple-response-row">
+                  <span className="apple-response-row__key">{key}</span>
+                  <span className="apple-response-row__val">{val}</span>
                 </div>
               );
             }
 
             return (
-              <div key={i} className="response-bullet">
-                <span className="response-bullet__icon">↳</span>
-                <span className="response-bullet__text">{content}</span>
+              <div key={i} className="apple-response-bullet">
+                <span className="apple-response-bullet__icon">•</span>
+                <span className="apple-response-bullet__text">{content}</span>
               </div>
             );
           }
 
           return (
-            <p key={i} className="response-para">
+            <p key={i} className="apple-response-para">
               {trimmed}
             </p>
           );
@@ -119,50 +147,58 @@ function AIEngineeringResponse({ text }: { text: string }) {
   );
 }
 
-export function InteractiveChatSystem({ onExplore, isExploreActivated, onExitChat, onFocus }: ChatProps) {
+export function InteractiveChatSystem({ onExplore, isExploreActivated, onExitChat, onFocus, isExpanded }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const getBootSequence = (): ChatMessage => {
+    return { 
+      sender: 'ai', 
+      text: `[METADATA: CONFIDENCE=100% | AREA=BOOT_SEQUENCE]\n[STATUS: AUTHORIZED]\n---\nHi! I'm Abhishek Tiwari. I build production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. Ask me anything about my work, skills, projects, or select a quick action below to explore.`,
+      options: [
+        { label: 'Explore Career 🚀', action: () => onExplore() },
+        { label: 'Technical Skills 🛠️', action: () => handleSend('Tell me about your skills') },
+        { label: 'Shipped Projects 📦', action: () => handleSend('What projects have you built?') },
+        { label: 'Contact Info ✉️', action: () => handleSend('How can I contact you?') }
+      ]
+    };
+  };
+
   useEffect(() => {
-    setMessages([
-      { 
-        sender: 'ai', 
-        text: `[METADATA: CONFIDENCE=100% | AREA=WELCOME]\n[STATUS: ACTIVE]\n---\nAI Agent Copilot online. Ready to retrieve candidate profile details.\nAsk me anything about Abhishek's skills, shipped projects, work history, or click below to start:`,
-        options: [
-          { label: 'Explore Career Story 🚀', action: () => onExplore() }
-        ]
-      }
-    ]);
+    setMessages([getBootSequence()]);
   }, [onExplore]);
 
   const handleSend = async (text: string) => {
     const cleanText = text.trim();
     if (!cleanText) return;
 
+    const lower = cleanText.toLowerCase();
+
+    if (lower === 'clear' || lower === 'reset') {
+      setMessages([getBootSequence()]);
+      setInput('');
+      return;
+    }
+
+    if (lower === 'explore' || lower === 'run explore') {
+      onExplore();
+      setInput('');
+      return;
+    }
+
     const newMessages: ChatMessage[] = [...messages, { sender: 'user', text: cleanText }];
     setMessages(newMessages);
     setInput('');
     setIsTyping(true);
 
-    const lower = cleanText.toLowerCase();
-
     if (lower === 'hey' || lower === 'hi' || lower === 'hello') {
       setTimeout(() => {
         setIsTyping(false);
-        const reply = `Hey, this is a chatbot system. This is Abhishek Tiwari. You can explore my capabilities through the pages, or you can ask questions directly to me.`;
-        setMessages(prev => [
-          ...prev, 
-          { 
-            sender: 'ai', 
-            text: reply,
-            options: [
-              { label: 'Explore Work & Career Story 🚀', action: () => onExplore() }
-            ]
-          }
-        ]);
-      }, 800);
+        const reply = `[METADATA: CONFIDENCE=100% | AREA=GENERAL]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nHi! I'm Abhishek Tiwari. Ask me anything about my skills, projects, work history, or contact details. Feel free to browse files or ask any questions!`;
+        setMessages(prev => [...prev, { sender: 'ai', text: reply }]);
+      }, 400);
       return;
     }
 
@@ -178,9 +214,8 @@ export function InteractiveChatSystem({ onExplore, isExploreActivated, onExitCha
           parts: [{ text: m.text }]
         }));
 
-      const systemPrompt = `You are the AI assistant co-pilot for Abhishek Tiwari's interactive portfolio website.
-Your name is AI assistant.
-Your job is to answer questions about Abhishek Tiwari's professional background, skills, projects, and contact info.
+      const systemPrompt = `You are Abhishek Tiwari, the AI Engineer whose interactive portfolio website this is.
+You MUST speak in the first person ("I", "me", "my", "we"). Do NOT refer to yourself as an assistant or co-pilot, and do NOT say "Abhishek has built..." or "Abhishek's skills". Instead, say "I have built..." or "my skills".
 
 CRITICAL FORMAT REQUIREMENT:
 You MUST start your response with a telemetry metadata block in this exact format:
@@ -190,39 +225,35 @@ You MUST start your response with a telemetry metadata block in this exact forma
 
 Aesthetics/Style:
 - Be concise. Keep responses under 3 paragraphs.
-- Use clear bullet points (- Key: Value) when explaining multiple items, as the UI will parse this into structured telemetry data cards.
+- Use clear bullet points (- Key: Value) when explaining multiple items, as the UI will parse this into structured cards.
 - Maintain a premium, world-class developer tone.
 
 Professional Guardrails:
-- You ONLY answer questions related to Abhishek's profile, career, skills, and projects.
-- If a user asks an off-topic question, you must set STATUS to SECURITY_REFUSED and decline politely.
+- You ONLY answer questions related to your own profile, career, skills, and projects.
+- If a user asks an off-topic question, you must set STATUS to SECURITY_REFUSED and decline politely, saying you only answer questions about your own professional work.
 
-Here is the information about Abhishek Tiwari:
+Here is the information about me:
 Name: Abhishek Tiwari
-Title: AI Systems Engineer & LLM Architect
+Title: AI Engineer
 Location: Delhi, India
 Email: abhishektiwari53910@gmail.com
 Phone: +919717140880
-GitHub: github.com/abhishektiwari53
+GitHub: github.com/abhishektiwari050
 LinkedIn: linkedin.com/in/abhishek-tiwari-84841b258
 
 Key Skills:
-- AI Systems & LLM Architectures (RAG pipelines, Vector Databases, Prompt Engineering)
-- Agent Frameworks (LangGraph, LlamaIndex, CrewAI, Autogen)
+- LLM Engineering (Prompt engineering, Function calling, Structured outputs, Gemini/Claude/OpenAI APIs)
+- Agent Frameworks & AI Systems (LangGraph, LlamaIndex, CrewAI, RAG pipelines, Multi-Agent orchestration)
 - Scalable Backends (FastAPI, Python, PostgreSQL, RabbitMQ, Redis, Docker)
-- Speech & Voice Systems (Text-to-Speech, Speech-to-Text, Voice Agent development)
-- Workflow Automations (Custom orchestration pipelines, web scraping, data collection)
+- Speech & Voice Systems (Text-to-Speech, Speech-to-Text, Voice Agent development, ElevenLabs)
+- Workflow Automations (Custom orchestration pipelines, web scraping, data collection, n8n)
 
 Shipped Projects:
 1. Agentic B2B Lead Gen scoring platform: Multi-agent lead gen system with customized scoring algorithms, built using FastAPI, PostgreSQL, RabbitMQ, and React.
 2. VayuWays aviation compliance tool: Aviation document parser and compliance verifier, utilizing RAG with hybrid search and PDF parsers.
-3. WhatsApp RAG agents: Specialized chat assistant with multi-lingual support, built using Meta Cloud API and LangChain.
-4. Game engine research: Published research paper on procedural runner chase mechanics.
-
-Work Experience:
-- AI Engineer at Vistar (Delhi, India): Led development of multi-agent RAG pipelines, voice assistants, and custom backends, improving client performance metrics.
-
-Answer the user's latest query accurately using the above context.`;
+3. WhatsApp RAG Agent: Dedicated business support chatbot running on Vistar's official business WhatsApp channel.
+4. Multi-Agent Vital Anomaly Detector: Isolation forest telemetry parser over CloudAMQP TLS message queues.
+`;
 
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
@@ -266,112 +297,402 @@ Answer the user's latest query accurately using the above context.`;
   };
 
   return (
-    <div className="chat-widget">
-      <div className="chat-header">
-        <div className="chat-dots">
-          <span className="chat-dot chat-dot--red" onClick={onExitChat} style={{ cursor: 'pointer' }} title="Exit Chat" />
-          <span className="chat-dot chat-dot--yellow" />
-          <span className="chat-dot chat-dot--green" />
+    <div className={`chat-widget ${isExpanded ? 'expanded' : ''}`}>
+      {/* Self-contained style overrides for futuristic Liquid Glass look */}
+      <style>{`
+        .chat-widget {
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          /* Default: content anchors to bottom so footer stays pinned */
+          justify-content: flex-end;
+          box-sizing: border-box;
+        }
+
+        /* When expanded, let content flow from top */
+        .chat-widget.expanded {
+          justify-content: flex-start !important;
+        }
+
+        /* Floating Glass Header */
+        .apple-chat-header {
+          background: rgba(255, 255, 255, 0.45) !important;
+          backdrop-filter: blur(25px) !important;
+          -webkit-backdrop-filter: blur(25px) !important;
+          border: 1px solid rgba(255, 255, 255, 0.55) !important;
+          border-radius: 20px !important;
+          margin: 16px 24px 8px 24px !important;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02) !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          height: 56px !important;
+          padding: 0 20px !important;
+          transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        .chat-widget:not(.expanded) .apple-chat-header {
+          height: 0px !important;
+          opacity: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          pointer-events: none !important;
+          overflow: hidden !important;
+        }
+
+        /* Messages container — fills available space only when expanded */
+        .apple-chat-body {
+          padding: 24px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 20px !important;
+          overflow-y: auto !important;
+          flex: 1 !important;
+          background: transparent !important;
+          min-height: 0 !important; /* critical for flex overflow */
+        }
+
+        /* Collapsed: body is invisible and takes no space */
+        .chat-widget:not(.expanded) .apple-chat-body {
+          flex: 0 !important;
+          height: 0px !important;
+          opacity: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+          pointer-events: none !important;
+        }
+
+        /* Message bubbles */
+        .apple-message-container {
+          display: flex !important;
+          width: 100% !important;
+          margin-bottom: 4px !important;
+        }
+
+        /* User Message bubble: Sleek blue liquid glass */
+        .apple-chat-bubble--user {
+          background: linear-gradient(135deg, rgba(0, 85, 255, 0.12) 0%, rgba(0, 85, 255, 0.03) 100%) !important;
+          backdrop-filter: blur(10px) saturate(160%) !important;
+          -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
+          border: 1px solid rgba(0, 85, 255, 0.3) !important;
+          border-right-color: rgba(0, 85, 255, 0.15) !important;
+          border-bottom-color: rgba(0, 85, 255, 0.15) !important;
+          border-radius: 20px 20px 4px 20px !important;
+          padding: 12px 18px !important;
+          color: #0055ff !important;
+          font-family: var(--font-sans) !important;
+          font-size: 0.9rem !important;
+          font-weight: 600 !important;
+          box-shadow: 
+            inset 0 1px 1px rgba(255, 255, 255, 0.4),
+            0 4px 15px rgba(0, 85, 255, 0.03) !important;
+          margin-left: auto !important;
+          max-width: 75% !important;
+          text-align: left !important;
+        }
+
+        /* AI Message bubble: High-shine liquid glass pane */
+        .apple-chat-bubble--ai {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.15) 100%) !important;
+          backdrop-filter: blur(14px) saturate(180%) !important;
+          -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
+          border: 1px solid rgba(255, 255, 255, 0.6) !important;
+          border-right-color: rgba(255, 255, 255, 0.3) !important;
+          border-bottom-color: rgba(255, 255, 255, 0.3) !important;
+          border-radius: 20px 20px 20px 4px !important;
+          padding: 18px 22px !important;
+          color: #1d1d1f !important;
+          font-family: var(--font-sans) !important;
+          box-shadow: 
+            inset 0 1.5px 1.5px rgba(255, 255, 255, 0.9), /* Edge light */
+            inset 0 -1px 3px rgba(0, 0, 0, 0.04),
+            0 8px 30px rgba(0, 0, 0, 0.02) !important;
+          max-width: 82% !important;
+        }
+
+        /* Metadata telemetry header inside AI responses */
+        .apple-response-badge {
+          font-family: var(--font-mono) !important;
+          font-size: 0.65rem !important;
+          font-weight: 700 !important;
+          color: #86868b !important;
+          letter-spacing: 0.08em !important;
+          text-transform: uppercase !important;
+          margin-bottom: 14px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 6px !important;
+          width: 100% !important;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+          padding-bottom: 10px !important;
+        }
+
+        /* Structured response rows (parsed - Key: Value bullet items) */
+        .apple-response-row {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%) !important;
+          backdrop-filter: blur(10px) saturate(160%) !important;
+          border: 1px solid rgba(255, 255, 255, 0.65) !important;
+          border-right-color: rgba(255, 255, 255, 0.3) !important;
+          border-bottom-color: rgba(255, 255, 255, 0.3) !important;
+          border-radius: 14px !important;
+          padding: 10px 14px !important;
+          margin-top: 8px !important;
+          margin-bottom: 8px !important;
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          gap: 12px !important;
+          box-shadow: 
+            inset 0 1px 1px rgba(255, 255, 255, 0.7),
+            0 4px 10px rgba(0,0,0,0.01) !important;
+        }
+
+        .apple-response-row__key {
+          font-family: var(--font-sans) !important;
+          font-weight: 700 !important;
+          color: #1d1d1f !important;
+          font-size: 0.82rem !important;
+        }
+
+        .apple-response-row__val {
+          font-family: var(--font-sans) !important;
+          font-weight: 500 !important;
+          color: #0055ff !important;
+          font-size: 0.82rem !important;
+        }
+
+        /* Structured response bullet lists */
+        .apple-response-bullet {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%) !important;
+          backdrop-filter: blur(10px) saturate(160%) !important;
+          border: 1px solid rgba(255, 255, 255, 0.65) !important;
+          border-right-color: rgba(255, 255, 255, 0.3) !important;
+          border-bottom-color: rgba(255, 255, 255, 0.3) !important;
+          border-radius: 14px !important;
+          padding: 10px 14px !important;
+          margin-top: 8px !important;
+          margin-bottom: 8px !important;
+          display: flex !important;
+          align-items: flex-start !important;
+          gap: 8px !important;
+          box-shadow: 
+            inset 0 1px 1px rgba(255, 255, 255, 0.7),
+            0 4px 10px rgba(0,0,0,0.01) !important;
+        }
+
+        .apple-response-bullet__icon {
+          color: #0055ff !important;
+          font-weight: bold !important;
+        }
+
+        .apple-response-bullet__text {
+          font-family: var(--font-sans) !important;
+          font-size: 0.82rem !important;
+          line-height: 1.4 !important;
+          color: #2c3e50 !important;
+          font-weight: 500 !important;
+        }
+
+        /* Response paragraph */
+        .apple-response-para {
+          font-size: 0.86rem !important;
+          line-height: 1.55 !important;
+          color: #2c3e50 !important;
+          font-weight: 500 !important;
+          margin-bottom: 12px !important;
+        }
+
+        /* Response header */
+        .apple-response-header {
+          font-size: 0.94rem !important;
+          font-weight: 700 !important;
+          color: #1d1d1f !important;
+          margin: 18px 0 10px 0 !important;
+          letter-spacing: -0.01em !important;
+        }
+
+        /* Pill options row */
+        .apple-options-row {
+          display: flex !important;
+          flex-wrap: wrap !important;
+          gap: 8px !important;
+          margin-top: 8px !important;
+          margin-bottom: 16px !important;
+          padding-left: 4px !important;
+        }
+
+        .apple-pill-btn {
+          background: rgba(255, 255, 255, 0.45) !important;
+          backdrop-filter: blur(10px) !important;
+          border: 1px solid rgba(255, 255, 255, 0.6) !important;
+          border-radius: 20px !important;
+          padding: 8px 16px !important;
+          font-family: var(--font-sans) !important;
+          font-size: 0.76rem !important;
+          font-weight: 600 !important;
+          color: #0055ff !important;
+          cursor: pointer !important;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.01) !important;
+        }
+
+        .apple-pill-btn:hover {
+          background: rgba(0, 85, 255, 0.08) !important;
+          border-color: rgba(0, 85, 255, 0.25) !important;
+          transform: translateY(-1px) !important;
+        }
+
+        /* Footer layout */
+        .apple-chat-footer {
+          padding: 8px 16px 16px 16px !important;
+          background: transparent !important;
+          border-top: none !important;
+          height: auto !important;
+          flex-shrink: 0 !important;
+        }
+
+        /* Collapsed: footer fills entire wrapper so input-box can fill it */
+        .chat-widget:not(.expanded) .apple-chat-footer {
+          height: 100% !important;
+          padding: 0 !important;
+        }
+
+        /* Collapsed: input box fills footer completely */
+        .chat-widget:not(.expanded) .chatgpt-input-box {
+          height: 100% !important;
+          border-radius: 28px !important;
+        }
+      `}</style>
+
+      {/* Header */}
+      <div className="apple-chat-header">
+        <div className="apple-window-dots">
+          <span className="apple-window-dot apple-window-dot--red" onClick={onExitChat} title="Exit" />
+          <span className="apple-window-dot apple-window-dot--grey1" />
+          <span className="apple-window-dot apple-window-dot--grey2" />
         </div>
-        <div className="chat-title">
-          <span className="chat-status-dot" />
-          assistant - {profile.name.toLowerCase().replace(' ', '')}@ai-node
+        <div className="apple-chat-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)', fontSize: '0.74rem', letterSpacing: '0.12em', color: '#1d1d1f', fontWeight: 700, textTransform: 'uppercase' }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00cc66', boxShadow: '0 0 6px #00cc66' }} />
+          Liquid Glass
         </div>
         <button 
           type="button" 
-          className="chat-header-back-btn" 
+          className="apple-header-exit-btn" 
           onClick={onExitChat}
+          style={{
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.62rem',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            color: '#86868b',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+            fontWeight: 700
+          }}
         >
-          BACK TO START ↩
+          Exit
         </button>
       </div>
-      
-      <div className="chat-body" ref={containerRef}>
-        <div className="chat-body-inner">
-          {messages.map((m, idx) => (
-            <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-              <div className="chat-bubble-container" style={{ display: 'flex', justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start', width: '100%' }}>
-                {m.sender === 'ai' && (
-                  <div className="chat-avatar">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>
-                  </div>
-                )}
-                <div className={`chat-bubble chat-bubble--${m.sender}`}>
-                  {m.sender === 'ai' ? (
-                    <AIEngineeringResponse text={m.text} />
-                  ) : (
-                    <span>
-                      <span style={{ color: '#00e5ff', marginRight: '4px' }}>guest@portfolio:~$</span>
-                      {m.text}
-                    </span>
-                  )}
-                </div>
-                {m.sender === 'user' && (
-                  <div className="chat-avatar chat-avatar--user" style={{ marginLeft: 8 }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                  </div>
-                )}
-              </div>
-              {m.options && (
-                <div className="chat-options-row">
-                  {m.options.map((opt, i) => (
-                    <button 
-                      key={i} 
-                      type="button"
-                      className={`chat-btn ${i === 1 ? 'chat-btn--secondary' : ''}`}
-                      onClick={opt.action}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
 
-          {isTyping && (
-            <div className="chat-bubble-container" style={{ display: 'flex', justifyContent: 'flex-start', width: '100%' }}>
-              <div className="chat-avatar">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>
-              </div>
-              <div className="chat-bubble chat-bubble--ai typing-indicator">
-                <span className="typing-dot" />
-                <span className="typing-dot" />
-                <span className="typing-dot" />
+      {/* Messages */}
+      <div className="apple-chat-body" ref={containerRef}>
+        {messages.map((m, idx) => (
+          <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+            <div className="apple-message-container" style={{ justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+              <div className={`apple-chat-bubble apple-chat-bubble--${m.sender}`}>
+                {m.sender === 'ai' ? (
+                  <AIEngineeringResponse text={m.text} />
+                ) : (
+                  m.text
+                )}
               </div>
             </div>
-          )}
-        </div>
+            {m.options && (
+              <div className="apple-options-row">
+                {m.options.map((opt, i) => (
+                  <button 
+                    key={i} 
+                    type="button"
+                    className="apple-pill-btn"
+                    onClick={opt.action}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+
+        {isTyping && (
+          <div className="apple-message-container">
+            <div className="speeder-bubble-mini">
+              <div className="loader-mini">
+                <span>
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </span>
+                <div className="base-mini">
+                  <span />
+                  <div className="face-mini" />
+                </div>
+              </div>
+              <div className="longfazers-mini">
+                <span />
+                <span />
+                <span />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      <form onSubmit={handleSubmit} className="chat-input-row">
-        <div className="chat-input-row-inner">
-          <div className="chat-input-container">
-            <input
-              type="text"
-              className="chat-input"
-              placeholder="Message Abhishek..."
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onFocus={onFocus}
-              disabled={isExploreActivated}
-            />
-            <button 
-              type="submit" 
-              className="chat-send-btn" 
-              disabled={isExploreActivated || input.trim() === ''}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="19" x2="12" y2="5"></line>
-                <polyline points="5 12 12 5 19 12"></polyline>
-              </svg>
-            </button>
+      {/* Input Form */}
+      <div className="apple-chat-footer">
+        <form onSubmit={handleSubmit} className="chatgpt-input-box" onClick={!isExpanded ? onFocus : undefined} style={!isExpanded ? { cursor: 'pointer' } : undefined}>
+          <textarea
+            className="chatgpt-text-area"
+            placeholder="Message Liquid Glass..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onFocus={onFocus}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (input.trim() !== '' && !isExploreActivated) {
+                  handleSend(input);
+                }
+              }
+            }}
+            disabled={isExploreActivated || !isExpanded}
+            style={!isExpanded ? { pointerEvents: 'none' } : undefined}
+          />
+          <div className="chatgpt-actions-row">
+            <div className="chatgpt-action-btn-group">
+              {/* Attachment Button */}
+              <button type="button" className="chatgpt-btn-circle" title="Add attachment">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+              {/* Blue Search Pill Button */}
+              <button type="button" className="chatgpt-btn-blue-pill" title="Search web">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                Search
+              </button>
+            </div>
           </div>
-          <div className="chat-footer-note">
-            Abhishek Tiwari may make mistakes. Verify important info.
-          </div>
+        </form>
+        <div className="apple-footer-note">
+          Liquid Glass • Secured Local Assistant Session
         </div>
-      </form>
+      </div>
     </div>
   );
 }

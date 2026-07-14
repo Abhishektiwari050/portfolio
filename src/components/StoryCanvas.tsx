@@ -81,7 +81,7 @@ const vertexShader = `
     gl_Position     = projectionMatrix * mvPosition;
     gl_PointSize    = aSize * uPixelRatio * (280.0 / -mvPosition.z);
     
-    vAlpha = smoothstep(-90.0, 90.0, pos.y);
+    vAlpha = 1.0; /* Keep particles fully solid throughout the model */
   }
 `;
 
@@ -385,7 +385,7 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
 
     const scene  = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(0, 0, 130);
+    camera.position.set(0, 8, 150); /* Pulled back + slightly up so head+chest fits in frame */
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -425,7 +425,7 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
         for (let i = 0; i < N; i++) {
           sampler.sample(tmp);
           data[i * 3]     = tmp.x * scale;
-          data[i * 3 + 1] = (tmp.y - 1.1) * scale;
+          data[i * 3 + 1] = (tmp.y - 0.2) * scale; /* Shifted up: shows head + chest/shoulders */
           data[i * 3 + 2] = -tmp.z * scale;
         }
         shapes[0] = data;
@@ -532,11 +532,11 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
           // Center and zoom inside terminal wrapper
           const t = Math.min(1.0, tProg / 0.8);
           targetZ = 130 - t * 85;
-          targetX = 54 - t * 54;
+          targetX = 0; // Centered
           cloud.scale.setScalar(0.8 - t * 0.3);
         } else {
           targetZ = 130;
-          targetX = 54;
+          targetX = 0; // Centered
           cloud.scale.setScalar(0.8);
         }
       }
@@ -558,10 +558,10 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
       if (!exploreActive) {
         if (tProg >= 0.98) {
           targetX = 0;
-          cloud.scale.setScalar(1.0);
+          cloud.scale.setScalar(1.4);
         } else {
-          targetX = srcIdx === 0 ? 54 : (srcIdx < 3 ? 12 : 0);
-          cloud.scale.setScalar(srcIdx === 0 ? 0.8 : 1.0);
+          targetX = 0; // Centered on all screen sizes
+          cloud.scale.setScalar(srcIdx === 0 ? 1.1 : 1.4); /* Smaller landing scale: head fits ring, chest visible */
         }
       }
       cloud.position.x += (targetX - cloud.position.x) * 0.05;
@@ -569,7 +569,7 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
       cloud.rotation.y  = elapsed * 0.06 + m.x * 0.3;
       cloud.rotation.x  = Math.sin(elapsed * 0.05) * 0.03 + m.y * 0.15;
       
-      const targetCamZ = exploreActive ? targetZ : 130 + Math.sin(elapsed * 0.12) * 3;
+      const targetCamZ = exploreActive ? targetZ : 150 + Math.sin(elapsed * 0.12) * 3; /* Wider view to fit head+chest */
       camera.position.z += (targetCamZ - camera.position.z) * 0.08;
 
       renderer.render(scene, camera);
@@ -597,7 +597,59 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
     };
   }, []);
 
-  return <div ref={containerRef} className="three-container" />;
+  return (
+    <div className="three-container">
+      {/* Circular Marquee spinning behind the particle face */}
+      <div 
+        className="circular-marquee-container"
+        style={{
+          opacity: scrollProgress > 0.05 || isExploreActivated ? 0 : 0.85,
+          pointerEvents: 'none'
+        }}
+      >
+        <svg viewBox="0 0 300 300" className="circular-marquee-svg">
+          {/* Outer dashed tech hairline track */}
+          <circle cx="150" cy="150" r="134" fill="none" stroke="rgba(0,0,0,0.12)" strokeWidth="0.6" strokeDasharray="2 4" />
+          
+          {/* Main Solid Matte Black ring band */}
+          <circle cx="150" cy="150" r="118" fill="none" stroke="#111115" strokeWidth="20" style={{ filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.06))' }} />
+          
+          {/* Precision inner/outer accent lines */}
+          <circle cx="150" cy="150" r="108" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="0.8" />
+          <circle cx="150" cy="150" r="128" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="0.8" />
+          
+          {/* Inner compass/telemetry ticks */}
+          <circle cx="150" cy="150" r="100" fill="none" stroke="rgba(0,0,0,0.2)" strokeWidth="1.2" strokeDasharray="1 3" />
+
+          {/* Text path follows the center of the band (r=118) */}
+          <path
+            id="circlePath"
+            d="M 150, 150 m -118, 0 a 118,118 0 1,1 236,0 a 118,118 0 1,1 -236,0"
+            fill="none"
+          />
+          <text className="circular-marquee-text">
+            <textPath href="#circlePath" startOffset="0%">
+              ABHISHEK TIWARI • AI ENGINEER • ABHISHEK TIWARI • AI ENGINEER • ABHISHEK TIWARI • AI ENGINEER •
+            </textPath>
+          </text>
+        </svg>
+      </div>
+
+      {/* WebGL Canvas Target */}
+      <div 
+        ref={containerRef} 
+        className="three-canvas-target" 
+        style={{ 
+          width: '100%', 
+          height: '100%', 
+          position: 'absolute', 
+          top: 0, 
+          left: 0, 
+          zIndex: 3 
+        }} 
+      />
+    </div>
+  );
 };
 
 export default StoryCanvas;

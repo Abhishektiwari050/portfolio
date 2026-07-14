@@ -47,15 +47,29 @@ export const Navbar: React.FC = () => {
       <a
         href={isAnatomyPage ? '/' : '#hero'}
         style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: '0.7rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontFamily: "var(--font-sans)",
+          fontSize: '0.8rem',
           fontWeight: 700,
           color: 'var(--color-text-primary)',
           textDecoration: 'none',
-          letterSpacing: '0.12em',
+          letterSpacing: '0.08em',
         }}
       >
-        [ ARCHITECT ]
+        <img 
+          src="/favicon.png" 
+          alt="AT Logo" 
+          style={{ 
+            height: '24px', 
+            width: '24px', 
+            borderRadius: '6px',
+            objectFit: 'contain',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+          }} 
+        />
+        <span style={{ textTransform: 'uppercase' }}>Abhishek Tiwari</span>
       </a>
 
       {/* Right: Navigation Links */}
