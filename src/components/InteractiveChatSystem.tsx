@@ -548,27 +548,55 @@ Shipped Projects:
 
         /* Footer layout */
         .apple-chat-footer {
-          padding: 8px 16px 16px 16px !important;
+          padding: 12px 24px 24px 24px !important;
           background: transparent !important;
           border-top: none !important;
-          height: auto !important;
           flex-shrink: 0 !important;
+          /* Gemini-style: center the input with max-width constraint */
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
         }
 
         /* Collapsed: footer fills entire wrapper so input-box can fill it */
         .chat-widget:not(.expanded) .apple-chat-footer {
           height: 100% !important;
           padding: 0 !important;
+          align-items: stretch !important;
+        }
+
+        /* Expanded input: Gemini-style floating pill */
+        .chat-widget.expanded .chatgpt-input-box {
+          max-width: 760px !important;
+          width: 100% !important;
+          height: auto !important;
+          min-height: 80px !important;
+          border-radius: 28px !important;
         }
 
         /* Collapsed: input box fills footer completely */
         .chat-widget:not(.expanded) .chatgpt-input-box {
           height: 100% !important;
           border-radius: 28px !important;
+          max-width: 100% !important;
+        }
+
+        /* Footer note only shows in expanded state */
+        .chat-widget:not(.expanded) .apple-footer-note {
+          display: none !important;
+        }
+
+        .apple-footer-note {
+          font-family: var(--font-mono) !important;
+          font-size: 0.6rem !important;
+          color: rgba(29, 29, 31, 0.35) !important;
+          text-align: center !important;
+          margin-top: 8px !important;
+          letter-spacing: 0.06em !important;
         }
       `}</style>
 
-      {/* Header */}
+      {/* ── Header bar — full width, slim top bar */}
       <div className="apple-chat-header">
         <div className="apple-window-dots">
           <span className="apple-window-dot apple-window-dot--red" onClick={onExitChat} title="Exit" />
@@ -579,118 +607,95 @@ Shipped Projects:
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00cc66', boxShadow: '0 0 6px #00cc66' }} />
           Liquid Glass
         </div>
-        <button 
-          type="button" 
-          className="apple-header-exit-btn" 
+        <button
+          type="button"
+          className="apple-header-exit-btn"
           onClick={onExitChat}
-          style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.62rem',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            color: '#86868b',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: 0,
-            fontWeight: 700
-          }}
+          style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#86868b', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 700 }}
         >
           Exit
         </button>
       </div>
 
-      {/* Messages */}
+      {/* ── Messages — centered column, scrollable */}
       <div className="apple-chat-body" ref={containerRef}>
-        {messages.map((m, idx) => (
-          <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-            <div className="apple-message-container" style={{ justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-              <div className={`apple-chat-bubble apple-chat-bubble--${m.sender}`}>
-                {m.sender === 'ai' ? (
-                  <AIEngineeringResponse text={m.text} />
-                ) : (
-                  m.text
-                )}
-              </div>
-            </div>
-            {m.options && (
-              <div className="apple-options-row">
-                {m.options.map((opt, i) => (
-                  <button 
-                    key={i} 
-                    type="button"
-                    className="apple-pill-btn"
-                    onClick={opt.action}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-
-        {isTyping && (
-          <div className="apple-message-container">
-            <div className="speeder-bubble-mini">
-              <div className="loader-mini">
-                <span>
-                  <span />
-                  <span />
-                  <span />
-                  <span />
-                </span>
-                <div className="base-mini">
-                  <span />
-                  <div className="face-mini" />
+        <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {messages.map((m, idx) => (
+            <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+              <div className="apple-message-container" style={{ justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div className={`apple-chat-bubble apple-chat-bubble--${m.sender}`}>
+                  {m.sender === 'ai' ? (
+                    <AIEngineeringResponse text={m.text} />
+                  ) : (
+                    m.text
+                  )}
                 </div>
               </div>
-              <div className="longfazers-mini">
-                <span />
-                <span />
-                <span />
+              {m.options && (
+                <div className="apple-options-row">
+                  {m.options.map((opt, i) => (
+                    <button key={i} type="button" className="apple-pill-btn" onClick={opt.action}>
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {isTyping && (
+            <div className="apple-message-container">
+              <div className="speeder-bubble-mini">
+                <div className="loader-mini">
+                  <span><span /><span /><span /><span /></span>
+                  <div className="base-mini"><span /><div className="face-mini" /></div>
+                </div>
+                <div className="longfazers-mini"><span /><span /><span /></div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Input Form */}
+      {/* ── Input footer — centered column, Gemini-style floating pill */}
       <div className="apple-chat-footer">
-        <form onSubmit={handleSubmit} className="chatgpt-input-box" onClick={!isExpanded ? onFocus : undefined} style={!isExpanded ? { cursor: 'pointer' } : undefined}>
-          <textarea
-            className="chatgpt-text-area"
-            placeholder="Message Liquid Glass..."
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onFocus={onFocus}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                if (input.trim() !== '' && !isExploreActivated) {
-                  handleSend(input);
+        <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto' }}>
+          <form
+            onSubmit={handleSubmit}
+            className="chatgpt-input-box"
+            onClick={!isExpanded ? onFocus : undefined}
+            style={!isExpanded ? { cursor: 'pointer' } : undefined}
+          >
+            <textarea
+              className="chatgpt-text-area"
+              placeholder="Message Liquid Glass..."
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onFocus={onFocus}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  if (input.trim() !== '' && !isExploreActivated) handleSend(input);
                 }
-              }
-            }}
-            disabled={isExploreActivated || !isExpanded}
-            style={!isExpanded ? { pointerEvents: 'none' } : undefined}
-          />
-          <div className="chatgpt-actions-row">
-            <div className="chatgpt-action-btn-group">
-              {/* Attachment Button */}
-              <button type="button" className="chatgpt-btn-circle" title="Add attachment">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-              </button>
-              {/* Blue Search Pill Button */}
-              <button type="button" className="chatgpt-btn-blue-pill" title="Search web">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                Search
-              </button>
+              }}
+              disabled={isExploreActivated || !isExpanded}
+              style={!isExpanded ? { pointerEvents: 'none' } : undefined}
+            />
+            <div className="chatgpt-actions-row">
+              <div className="chatgpt-action-btn-group">
+                <button type="button" className="chatgpt-btn-circle" title="Add attachment">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                </button>
+                <button type="button" className="chatgpt-btn-blue-pill" title="Search web">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                  Search
+                </button>
+              </div>
             </div>
+          </form>
+          <div className="apple-footer-note">
+            Liquid Glass • Secured Local Assistant Session
           </div>
-        </form>
-        <div className="apple-footer-note">
-          Liquid Glass • Secured Local Assistant Session
         </div>
       </div>
     </div>

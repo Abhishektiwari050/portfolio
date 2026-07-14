@@ -7,49 +7,41 @@ export const CustomCursor: React.FC = () => {
   const hasMoved = useRef(false);
 
   useEffect(() => {
-    // Only show custom cursor on devices that support hover
     const mediaQuery = window.matchMedia('(hover: hover)');
     if (!mediaQuery.matches) return;
+
+    document.documentElement.style.cursor = 'none';
 
     const dot = dotRef.current;
     const ring = ringRef.current;
     if (!dot || !ring) return;
 
-    // Set initial centering offsets in GSAP
-    gsap.set([dot, ring], { xPercent: -50, yPercent: -50 });
+    // Centre both elements on their hotspot
+    gsap.set(dot,  { xPercent: -50, yPercent: -50 });
+    gsap.set(ring, { xPercent: -50, yPercent: -50 });
 
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
     let activeTarget: HTMLElement | null = null;
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
+      const { clientX: x, clientY: y } = e;
 
       if (!hasMoved.current) {
         hasMoved.current = true;
         gsap.to([dot, ring], { opacity: 1, duration: 0.3 });
       }
 
-      // Small dot follows mouse instantly
-      gsap.to(dot, {
-        x: mouseX,
-        y: mouseY,
-        duration: 0.08,
-        ease: 'power2.out',
-      });
+      // Logo snaps to cursor instantly
+      gsap.to(dot, { x, y, duration: 0.06, ease: 'power2.out' });
 
-      // If not snapping, ring trails mouse
+      // Ring trails behind
       if (!activeTarget) {
         gsap.to(ring, {
-          x: mouseX,
-          y: mouseY,
-          width: 32,
-          height: 32,
+          x, y,
+          width: 52, height: 52,
           borderRadius: '50%',
-          backgroundColor: 'rgba(0, 85, 255, 0.02)',
-          borderColor: 'rgba(0, 85, 255, 0.3)',
-          duration: 0.3,
+          backgroundColor: 'rgba(10, 10, 10, 0.04)',
+          borderColor:     'rgba(10, 10, 10, 0.18)',
+          duration: 0.35,
           ease: 'power3.out',
         });
       }
@@ -57,57 +49,101 @@ export const CustomCursor: React.FC = () => {
 
     const handleMouseOver = (e: MouseEvent) => {
       const target = (e.target as HTMLElement).closest(
-        'a, button, [role="button"], .tech-tag, .connect-card, .apple-window-dot, .role-badge, .apple-pill-btn, .chatgpt-btn-circle, .chatgpt-btn-blue-pill'
+        'a, button, [role="button"], .tech-tag, .connect-card, .apple-window-dot, ' +
+        '.role-badge, .apple-pill-btn, .chatgpt-btn-circle, .chatgpt-btn-blue-pill'
       );
       if (target) {
         activeTarget = target as HTMLElement;
-        const rect = activeTarget.getBoundingClientRect();
-        const style = window.getComputedStyle(activeTarget);
-        const radius = style.borderRadius || '8px';
-
-        // Snap ring to target element bounds with a premium magnetic lock effect
+        const rect  = activeTarget.getBoundingClientRect();
+        const radius = window.getComputedStyle(activeTarget).borderRadius || '8px';
         gsap.to(ring, {
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-          width: rect.width + 12,
-          height: rect.height + 12,
+          x: rect.left + rect.width  / 2,
+          y: rect.top  + rect.height / 2,
+          width:  rect.width  + 14,
+          height: rect.height + 14,
           borderRadius: radius,
-          backgroundColor: 'rgba(0, 85, 255, 0.06)',
-          borderColor: 'rgba(0, 85, 255, 0.85)',
-          duration: 0.25,
+          backgroundColor: 'rgba(10, 10, 10, 0.06)',
+          borderColor:     'rgba(10, 10, 10, 0.65)',
+          duration: 0.22,
           ease: 'power2.out',
           overwrite: 'auto',
         });
-
-        // Hide or scale down the inner dot during magnetic snap
-        gsap.to(dot, { scale: 0, duration: 0.15 });
+        gsap.to(dot, { scale: 1.18, duration: 0.2, ease: 'back.out(2)' });
       } else {
         activeTarget = null;
         gsap.to(dot, { scale: 1, duration: 0.2 });
       }
     };
 
-    const handleScroll = () => {
-      // Release snap on scroll to prevent cursor sticking to moving elements
-      activeTarget = null;
-      gsap.to(dot, { scale: 1, duration: 0.2 });
-    };
+    const onLeave  = () => gsap.to([dot, ring], { opacity: 0, duration: 0.2 });
+    const onEnter  = () => { if (hasMoved.current) gsap.to([dot, ring], { opacity: 1, duration: 0.2 }); };
+    const onScroll = () => { activeTarget = null; gsap.to(dot, { scale: 1, duration: 0.2 }); };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseover', handleMouseOver);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('mousemove',    handleMouseMove);
+    document.addEventListener('mouseover',  handleMouseOver);
+    document.addEventListener('mouseleave', onLeave);
+    document.addEventListener('mouseenter', onEnter);
+    window.addEventListener('scroll',       onScroll);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseover', handleMouseOver);
-      window.removeEventListener('scroll', handleScroll);
+      document.documentElement.style.cursor = '';
+      window.removeEventListener('mousemove',    handleMouseMove);
+      document.removeEventListener('mouseover',  handleMouseOver);
+      document.removeEventListener('mouseleave', onLeave);
+      document.removeEventListener('mouseenter', onEnter);
+      window.removeEventListener('scroll',       onScroll);
     };
   }, []);
 
   return (
     <>
-      <div ref={dotRef} className="cursor-dot" style={{ opacity: 0 }} />
-      <div ref={ringRef} className="cursor-ring" style={{ opacity: 0 }} />
+      {/* Real AT logo — rendered from the actual SVG file */}
+      <div
+        ref={dotRef}
+        style={{
+          position:        'fixed',
+          top: 0, left: 0,
+          zIndex:          99999,
+          pointerEvents:   'none',
+          opacity:         0,
+          willChange:      'transform',
+          transformOrigin: 'center center',
+          width:  38,
+          height: 38,
+        }}
+      >
+        <img
+          src="/at-logo.svg"
+          alt=""
+          width={38}
+          height={38}
+          style={{
+            display:       'block',
+            mixBlendMode:  'multiply',   /* white SVG background → transparent */
+            filter:        'drop-shadow(0 1px 4px rgba(0,0,0,0.35))',
+            userSelect:    'none',
+            pointerEvents: 'none',
+            borderRadius:  0,
+          }}
+        />
+      </div>
+
+      {/* Trailing magnetic ring — neutral dark, no purple */}
+      <div
+        ref={ringRef}
+        style={{
+          position:        'fixed',
+          top: 0, left: 0,
+          width:  52, height: 52,
+          borderRadius:    '50%',
+          border:          '1px solid rgba(0, 0, 0, 0.15)',
+          backgroundColor: 'transparent',
+          zIndex:          99998,
+          pointerEvents:   'none',
+          opacity:         0,
+          willChange:      'transform',
+        }}
+      />
     </>
   );
 };

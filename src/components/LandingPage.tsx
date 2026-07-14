@@ -85,7 +85,7 @@ export function LandingPage({
 
   // Setup main scroll engines
   useEffect(() => {
-    // 1. Initialize Lenis scroll
+    // 1. Initialize Lenis smooth scroll
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -101,67 +101,68 @@ export function LandingPage({
       setScrollVelocity(e.velocity);
     });
 
-    const raf = (t: number) => {
-      lenis.raf(t);
-      requestAnimationFrame(raf);
-    };
+    const raf = (t: number) => { lenis.raf(t); requestAnimationFrame(raf); };
     requestAnimationFrame(raf);
 
-    // 2. Setup hero pin timeline
+    // 2. Give GSAP full ownership of the pill's transform/position
+    //    so CSS and GSAP never conflict.
+    gsap.set('.chatgpt-input-wrap', { xPercent: -50 });
+
+    // 3. Two-phase cinematic timeline
     const tl = gsap.timeline({
       scrollTrigger: {
         id: 'hero-pin',
         trigger: '#ch-0',
         start: 'top top',
-        end: '+=120%', // Pin for 120% viewport height to morph
-        scrub: true,
+        end: '+=140%',
+        scrub: 1.2,          // slight lag = buttery feel
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
           setTransitionProgress(self.progress);
-          
-          // Lock scrolling once terminal is fully maximized
+
           if (self.progress >= 0.99) {
             if (lenisRef.current && !isProgrammaticScrollRef.current) {
               lenisRef.current.stop();
             }
           }
 
-          // Sync chat states with scroll progress using refs
           if (!isProgrammaticScrollRef.current) {
             if (self.progress >= 0.95) {
-              if (!chatActiveRef.current) {
-                setChatActive(true);
-              }
+              if (!chatActiveRef.current) setChatActive(true);
             } else {
-              if (chatActiveRef.current) {
-                setChatActive(false);
-              }
+              if (chatActiveRef.current) setChatActive(false);
             }
           }
         }
       }
     });
 
-    // Fade out Hero details as we scroll down
-    tl.to('.hero-eyebrow, .hero-title, .role-badges, .hero-desc, .hero-meta, .hero-scroll-hint', {
-      opacity: 0,
-      y: -30,
-      stagger: 0.05,
-      ease: 'none'
-    }, 0);
+    // ── PHASE 1 (0 → 55%): hero exits UP, pill docks to bottom full-width ──
+    tl.to(
+      '.hero-eyebrow, .hero-title, .role-badges, .hero-desc, .hero-meta, .hero-scroll-hint',
+      { opacity: 0, y: -70, stagger: 0.04, ease: 'power2.in' },
+      0            // start at beginning
+    );
 
-    // Smoothly grow the input wrapper to full-screen desk as we scroll
     tl.to('.chatgpt-input-wrap', {
+      // Move to bottom-left corner, expand to full viewport width
+      xPercent: -0,          // cancel the -50% centering
+      left: '0%',
+      bottom: '0px',
       width: '100vw',
       maxWidth: '100vw',
+      borderRadius: '20px 20px 0 0',
+      ease: 'power2.inOut',
+    }, 0);                   // also starts at beginning, finishes at ~55%
+
+    // ── PHASE 2 (45% → 100%): full-width bar SLIDES UP to fill screen ──
+    tl.to('.chatgpt-input-wrap', {
       height: '100vh',
-      bottom: '0px',
-      left: '50%',
       borderRadius: '0px',
-      ease: 'none'
-    }, 0);
+      ease: 'power3.out',
+    }, '>-0.4');             // start 40% before phase 1 ends → overlap = fluid
 
     return () => {
       lenis.destroy();
@@ -169,6 +170,7 @@ export function LandingPage({
       ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, [setChatActive]);
+
 
   return (
     <div className="landing-page-mount" style={{ width: '100%', minHeight: '220vh', overflowX: 'hidden' }}>
