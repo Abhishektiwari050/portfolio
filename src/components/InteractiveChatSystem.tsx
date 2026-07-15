@@ -157,7 +157,7 @@ export function InteractiveChatSystem({ onExplore, isExploreActivated, onFocus, 
   const getBootSequence = (): ChatMessage => {
     return { 
       sender: 'ai', 
-      text: "Hey, I'm Abhishek. How can I help you today?",
+      text: "Hi, I'm Abhishek Tiwari AI Engineer.\nI build production-ready AI systems, RAG pipelines, multi-agent architectures, and FastAPI backend services.\nHow can I help you today?",
       isWelcome: true,
       time: '08:26 AM'
     };
@@ -342,7 +342,7 @@ Shipped Projects:
 
         /* Messages container — fills available space only when expanded */
         .apple-chat-body {
-          padding: 32px 36px 12px 36px !important;
+          padding: 54px 36px 12px 36px !important;
           display: flex !important;
           flex-direction: column !important;
           gap: 20px !important;
@@ -575,11 +575,21 @@ Shipped Projects:
           box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5), 0 8px 20px rgba(0, 85, 255, 0.04) !important;
         }
 
-        /* Expanded input: Gemini-style floating pill */
+        /* Expanded input: Taller card exactly matching the mockup */
         .chat-widget.expanded .chatgpt-input-box {
           max-width: 760px !important;
           width: 100% !important;
-          border-radius: 22px !important;
+          min-height: 106px !important;
+          height: 106px !important;
+          border-radius: 28px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: space-between !important;
+          padding: 16px 20px !important;
+          box-sizing: border-box !important;
+          background: rgba(255, 255, 255, 0.65) !important;
+          border: 1px solid rgba(255, 255, 255, 0.75) !important;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
         }
 
         /* Attachment Button */
@@ -599,6 +609,17 @@ Shipped Projects:
         }
         .chatgpt-attachment-btn:hover {
           color: #1d1d1f !important;
+        }
+
+        /* Expanded attachment wrapped in white circle */
+        .chat-widget.expanded .chatgpt-attachment-btn {
+          width: 32px !important;
+          height: 32px !important;
+          border-radius: 50% !important;
+          background: #ffffff !important;
+          border: 1px solid rgba(0,0,0,0.04) !important;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.02) !important;
+          color: #86868b !important;
         }
 
         /* Send Button */
@@ -624,6 +645,13 @@ Shipped Projects:
           cursor: not-allowed !important;
         }
 
+        /* Expanded send button size and shadow */
+        .chat-widget.expanded .chatgpt-send-btn {
+          width: 36px !important;
+          height: 36px !important;
+          box-shadow: 0 4px 10px rgba(0, 85, 255, 0.25) !important;
+        }
+
         /* Center Textarea */
         .chatgpt-text-area {
           flex: 1 !important;
@@ -638,14 +666,22 @@ Shipped Projects:
           line-height: 1.4 !important;
           color: #1d1d1f !important;
           font-family: var(--font-sans) !important;
-          padding: 2px 0 !important;
-          box-sizing: border-box !important;
+          padding: 0 !important;
         }
 
         .chatgpt-text-area::placeholder {
           color: #86868b !important;
-          opacity: 0.85 !important;
+          opacity: 1 !important;
         }
+
+        /* Hover animation for quick action pills */
+        .quick-action-pill:hover {
+          transform: translateY(-1.5px) scale(1.02);
+          border-color: rgba(0, 85, 255, 0.25) !important;
+          background-color: rgba(255, 255, 255, 0.9) !important;
+          box-shadow: 0 6px 15px rgba(0, 85, 255, 0.04) !important;
+        }
+
 
         /* Collapsed specific styles to overlay transparently and match card style */
         .chat-widget:not(.expanded) .chatgpt-input-box {
@@ -682,49 +718,100 @@ Shipped Projects:
 
 
 
+      {isExpanded && (
+        <div style={{ position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)', zIndex: 11 }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: 'rgba(0, 85, 255, 0.06)',
+            border: '1px solid rgba(0, 85, 255, 0.12)',
+            borderRadius: '12px',
+            padding: '4px 12px',
+            fontSize: '0.62rem',
+            fontWeight: 700,
+            color: '#0055ff',
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase'
+          }}>
+            <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#0055ff' }} />
+            AI ENGINEER
+          </div>
+        </div>
+      )}
+
       {/* ── Messages — centered column, scrollable */}
       <div className="apple-chat-body" ref={containerRef}>
         <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {isExpanded && <div style={{ height: '48px', flexShrink: 0 }} />}
           {messages.map((m, idx) => {
             if (m.isWelcome) {
               return (
-                <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', width: '100%', marginBottom: '4px' }}>
-                  {/* Sparkle Icon Circle Avatar */}
+                <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', width: '100%', marginBottom: '4px', gap: '20px' }}>
+                  {/* Large 3D Profile Mesh Avatar */}
                   <div style={{
-                    width: '32px',
-                    height: '32px',
+                    width: '84px',
+                    height: '84px',
                     borderRadius: '50%',
-                    background: '#ffffff',
-                    border: '1px solid rgba(0, 0, 0, 0.05)',
+                    background: 'rgba(255, 255, 255, 0.45)',
+                    border: '3px solid #ffffff',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                    marginRight: '12px',
+                    boxShadow: '0 8px 30px rgba(0,0,0,0.03), inset 0 1px 2px rgba(255,255,255,0.6)',
                     flexShrink: 0
                   }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#0055ff">
-                      <path d="M12 2c0 5.523-4.477 10-10 10 5.523 0 10 4.477 10 10 0-5.523 4.477-10 10-10-5.523 0-10-4.477-10-10z"/>
+                    <svg width="48" height="48" viewBox="0 0 100 100" fill="none" style={{ transform: 'scaleX(-1) translateX(3px)' }}>
+                      {/* Outline head mesh */}
+                      <path 
+                        d="M50,15 C35,15 25,25 22,40 C21,43 19,45 16,46 C12,47 11,48 11,50 C11,52 14,53 17,54 C19,54 21,56 22,58 C24,63 28,68 35,72 C40,75 48,78 60,78 C75,78 88,68 88,48 C88,28 72,15 50,15 Z" 
+                        stroke="#0055ff" 
+                        strokeWidth="1.2" 
+                        strokeDasharray="2 3" 
+                        fill="none" 
+                        opacity="0.8"
+                      />
+                      {/* Nodes inside */}
+                      <circle cx="50" cy="30" r="2" fill="#0055ff" opacity="0.9" />
+                      <circle cx="38" cy="40" r="1.5" fill="#00ccff" opacity="0.9" />
+                      <circle cx="48" cy="48" r="2.2" fill="#0055ff" opacity="0.9" />
+                      <circle cx="62" cy="38" r="1.8" fill="#0055ff" opacity="0.8" />
+                      <circle cx="68" cy="52" r="2" fill="#00ccff" opacity="0.9" />
+                      <circle cx="58" cy="62" r="1.6" fill="#0055ff" opacity="0.8" />
+                      <circle cx="42" cy="60" r="2" fill="#0055ff" opacity="0.9" />
+                      <circle cx="30" cy="52" r="1.5" fill="#00ccff" opacity="0.7" />
+                      <circle cx="76" cy="44" r="1.8" fill="#0055ff" opacity="0.8" />
+                      
+                      {/* Mesh connection lines */}
+                      <line x1="50" y1="30" x2="38" y2="40" stroke="#0055ff" strokeWidth="0.5" opacity="0.4" />
+                      <line x1="38" y1="40" x2="48" y2="48" stroke="#00ccff" strokeWidth="0.5" opacity="0.4" />
+                      <line x1="48" y1="48" x2="62" y2="38" stroke="#0055ff" strokeWidth="0.5" opacity="0.4" />
+                      <line x1="62" y1="38" x2="50" y2="30" stroke="#0055ff" strokeWidth="0.5" opacity="0.4" />
+                      <line x1="62" y1="38" x2="68" y2="52" stroke="#0055ff" strokeWidth="0.5" opacity="0.4" />
+                      <line x1="68" y1="52" x2="58" y2="62" stroke="#00ccff" strokeWidth="0.5" opacity="0.4" />
+                      <line x1="58" y1="62" x2="42" y2="60" stroke="#0055ff" strokeWidth="0.5" opacity="0.4" />
+                      <line x1="42" y1="60" x2="48" y2="48" stroke="#0055ff" strokeWidth="0.5" opacity="0.4" />
+                      <line x1="42" y1="60" x2="30" y2="52" stroke="#00ccff" strokeWidth="0.5" opacity="0.4" />
+                      <line x1="30" y1="52" x2="38" y2="40" stroke="#0055ff" strokeWidth="0.5" opacity="0.4" />
+                      <line x1="68" y1="52" x2="76" y2="44" stroke="#0055ff" strokeWidth="0.5" opacity="0.4" />
+                      <line x1="76" y1="44" x2="62" y2="38" stroke="#0055ff" strokeWidth="0.5" opacity="0.4" />
                     </svg>
                   </div>
-                  {/* Frosted Glass Speech Bubble */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  {/* Clean White Rounded Bubble */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1 }}>
                     <div style={{
-                      background: 'rgba(255, 255, 255, 0.72)',
-                      backdropFilter: 'blur(15px) saturate(120%)',
-                      WebkitBackdropFilter: 'blur(15px) saturate(120%)',
-                      border: '1px solid rgba(255, 255, 255, 0.8)',
-                      borderRadius: '18px 18px 18px 4px',
-                      padding: '12px 18px',
-                      boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
-                      maxWidth: '85%'
+                      background: '#ffffff',
+                      border: '1px solid rgba(0, 0, 0, 0.04)',
+                      borderRadius: '24px',
+                      padding: '20px 24px',
+                      boxShadow: '0 8px 30px rgba(0,0,0,0.02)',
+                      width: '100%',
+                      boxSizing: 'border-box'
                     }}>
-                      <div style={{ fontSize: '0.88rem', color: '#1d1d1f', fontWeight: 500, lineHeight: 1.45, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
-                        Hey, I'm <strong style={{ color: '#0055ff', fontWeight: 700 }}>Abhishek</strong>.<br />
+                      <div style={{ fontSize: '0.92rem', color: '#1d1d1f', fontWeight: 500, lineHeight: 1.6, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+                        Hi, I'm <span style={{ color: '#0055ff', fontWeight: 700 }}>Abhishek Tiwari</span> AI Engineer.<br />
+                        I build production-ready AI systems, RAG pipelines, multi-agent architectures, and FastAPI backend services.<br />
                         How can I help you today?
-                      </div>
-                      <div style={{ fontSize: '0.58rem', color: '#86868b', fontWeight: 500, marginTop: '4px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
-                        {m.time}
                       </div>
                     </div>
                   </div>
@@ -755,6 +842,124 @@ Shipped Projects:
             );
           })}
 
+          {/* ── Center Date Tag & Quick Action Pills (only if no user messages sent yet) ── */}
+          {messages.length === 1 && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', marginTop: '8px', width: '100%' }}>
+              {/* Center Today date tag */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.45)',
+                border: '1px solid rgba(0, 0, 0, 0.04)',
+                borderRadius: '12px',
+                padding: '4px 14px',
+                fontSize: '0.68rem',
+                color: '#86868b',
+                fontWeight: 600,
+                fontFamily: 'sans-serif'
+              }}>
+                Today
+              </div>
+
+              {/* Quick Action Pills */}
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', width: '100%', padding: '0 12px' }}>
+                <button
+                  type="button"
+                  onClick={() => handleSend("Tell me about your projects")}
+                  className="quick-action-pill"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: '#ffffff',
+                    border: '1px solid rgba(0, 0, 0, 0.06)',
+                    borderRadius: '18px',
+                    padding: '8px 16px',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    color: '#1d1d1f',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+                    transition: 'transform 0.2s, border-color 0.2s, background-color 0.2s'
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#86868b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                  Tell me about your projects
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={() => handleSend("Tech stack & tools")}
+                  className="quick-action-pill"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: '#ffffff',
+                    border: '1px solid rgba(0, 0, 0, 0.06)',
+                    borderRadius: '18px',
+                    padding: '8px 16px',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    color: '#1d1d1f',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+                    transition: 'transform 0.2s, border-color 0.2s, background-color 0.2s'
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#86868b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                  Tech stack & tools
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSend("How do you build AI systems?")}
+                  className="quick-action-pill"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: '#ffffff',
+                    border: '1px solid rgba(0, 0, 0, 0.06)',
+                    borderRadius: '18px',
+                    padding: '8px 16px',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    color: '#1d1d1f',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+                    transition: 'transform 0.2s, border-color 0.2s, background-color 0.2s'
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#86868b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2c0 5.523-4.477 10-10 10 5.523 0 10 4.477 10 10 0-5.523 4.477-10 10-10-5.523 0-10-4.477-10-10z"/></svg>
+                  How do you build AI systems?
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleSend("Let's talk!")}
+                  className="quick-action-pill"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: '#ffffff',
+                    border: '1px solid rgba(0, 0, 0, 0.06)',
+                    borderRadius: '18px',
+                    padding: '8px 16px',
+                    fontSize: '0.76rem',
+                    fontWeight: 600,
+                    color: '#1d1d1f',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+                    transition: 'transform 0.2s, border-color 0.2s, background-color 0.2s'
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#86868b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                  Let's talk!
+                </button>
+              </div>
+            </div>
+          )}
+
           {isTyping && (
             <div className="apple-message-container">
               <div className="speeder-bubble-mini">
@@ -778,40 +983,130 @@ Shipped Projects:
             onClick={!isExpanded ? onFocus : undefined}
             style={!isExpanded ? { cursor: 'pointer' } : undefined}
           >
-            {/* Attachment Button */}
-            <button type="button" className="chatgpt-attachment-btn" title="Add attachment">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-            </button>
+            {isExpanded ? (
+              <>
+                {/* Top row: text area input */}
+                <textarea
+                  className="chatgpt-text-area"
+                  placeholder="Message Abhishek AI Engineer..."
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onFocus={onFocus}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      if (input.trim() !== '' && !isExploreActivated) handleSend(input);
+                    }
+                  }}
+                  disabled={isExploreActivated || !isExpanded}
+                />
 
-            {/* Collapsed Search Button */}
-            {!isExpanded && (
-              <button type="button" className="chatgpt-btn-blue-pill" title="Search web" style={{ display: 'flex', alignItems: 'center', gap: '4px', height: '28px', padding: '0 12px', borderRadius: '14px', background: '#0055ff', color: '#ffffff', border: 'none', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', marginRight: '4px', flexShrink: 0 }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                Search
-              </button>
+                {/* Bottom row: Actions & Send */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  {/* Left action: Attachment wrapped in white circle */}
+                  <button
+                    type="button"
+                    className="chatgpt-attachment-btn"
+                    title="Add attachment"
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      background: '#ffffff',
+                      border: '1px solid rgba(0,0,0,0.04)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+                      color: '#86868b',
+                      cursor: 'pointer',
+                      flexShrink: 0
+                    }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                  </button>
+
+                  {/* Right actions: Mic & Send */}
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {/* Microphone Icon Button */}
+                    <button
+                      type="button"
+                      className="chatgpt-mic-btn"
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        background: '#ffffff',
+                        border: '1px solid rgba(0,0,0,0.04)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#86868b',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
+                        marginRight: '8px',
+                        flexShrink: 0
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                    </button>
+
+                    {/* Send Button */}
+                    <button
+                      type="submit"
+                      className="chatgpt-send-btn"
+                      title="Send message"
+                      disabled={!input.trim() || isExploreActivated}
+                      style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        background: '#0055ff',
+                        border: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 4px 10px rgba(0, 85, 255, 0.25)',
+                        color: '#ffffff',
+                        cursor: 'pointer',
+                        flexShrink: 0
+                      }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Attachment Button */}
+                <button type="button" className="chatgpt-attachment-btn" title="Add attachment">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                </button>
+
+                {/* Collapsed Search Button */}
+                <button type="button" className="chatgpt-btn-blue-pill" title="Search web" style={{ display: 'flex', alignItems: 'center', gap: '4px', height: '28px', padding: '0 12px', borderRadius: '14px', background: '#0055ff', color: '#ffffff', border: 'none', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', marginRight: '4px', flexShrink: 0 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                  Search
+                </button>
+
+                {/* Input Textarea */}
+                <textarea
+                  className="chatgpt-text-area"
+                  placeholder="Message Liquid Glass..."
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onFocus={onFocus}
+                  disabled={true}
+                  style={{ pointerEvents: 'none' }}
+                />
+
+                {/* Send Button */}
+                <button type="button" className="chatgpt-send-btn" title="Send message" disabled={true}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+              </>
             )}
-
-            {/* Input Textarea */}
-            <textarea
-              className="chatgpt-text-area"
-              placeholder={isExpanded ? "Ask me anything..." : "Message Liquid Glass..."}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onFocus={onFocus}
-              onKeyDown={e => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  if (input.trim() !== '' && !isExploreActivated) handleSend(input);
-                }
-              }}
-              disabled={isExploreActivated || !isExpanded}
-              style={!isExpanded ? { pointerEvents: 'none' } : undefined}
-            />
-
-            {/* Send Button */}
-            <button type="submit" className="chatgpt-send-btn" title="Send message" disabled={!isExpanded || !input.trim() || isExploreActivated}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            </button>
           </form>
         </div>
       </div>

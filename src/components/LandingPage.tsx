@@ -339,7 +339,7 @@ export function LandingPage({
               width: '60vw',
               maxWidth: '680px',
               minWidth: '320px',
-              height: '340px',
+              height: '440px',
               borderRadius: '28px',
               zIndex: 10,
               background: 'rgba(255, 255, 255, 0.85)',
