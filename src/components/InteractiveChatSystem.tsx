@@ -372,21 +372,17 @@ Shipped Projects:
 
         /* User Message bubble: Sleek blue liquid glass */
         .apple-chat-bubble--user {
-          background: linear-gradient(135deg, rgba(0, 85, 255, 0.12) 0%, rgba(0, 85, 255, 0.03) 100%) !important;
+          background: rgba(0, 85, 255, 0.08) !important;
           backdrop-filter: blur(10px) saturate(160%) !important;
           -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
-          border: 1px solid rgba(0, 85, 255, 0.3) !important;
-          border-right-color: rgba(0, 85, 255, 0.15) !important;
-          border-bottom-color: rgba(0, 85, 255, 0.15) !important;
-          border-radius: 20px 20px 4px 20px !important;
-          padding: 12px 18px !important;
+          border: 1px solid rgba(0, 85, 255, 0.2) !important;
+          border-radius: 18px 18px 4px 18px !important;
+          padding: 10px 16px !important;
           color: #0055ff !important;
           font-family: var(--font-sans) !important;
-          font-size: 0.9rem !important;
+          font-size: 0.88rem !important;
           font-weight: 600 !important;
-          box-shadow: 
-            inset 0 1px 1px rgba(255, 255, 255, 0.4),
-            0 4px 15px rgba(0, 85, 255, 0.03) !important;
+          box-shadow: 0 4px 12px rgba(0, 85, 255, 0.02) !important;
           margin-left: auto !important;
           max-width: 75% !important;
           text-align: left !important;
@@ -394,20 +390,17 @@ Shipped Projects:
 
         /* AI Message bubble: High-shine liquid glass pane */
         .apple-chat-bubble--ai {
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.15) 100%) !important;
-          backdrop-filter: blur(14px) saturate(180%) !important;
-          -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
-          border: 1px solid rgba(255, 255, 255, 0.6) !important;
-          border-right-color: rgba(255, 255, 255, 0.3) !important;
-          border-bottom-color: rgba(255, 255, 255, 0.3) !important;
-          border-radius: 20px 20px 20px 4px !important;
-          padding: 18px 22px !important;
+          background: rgba(255, 255, 255, 0.72) !important;
+          backdrop-filter: blur(15px) saturate(120%) !important;
+          -webkit-backdrop-filter: blur(15px) saturate(120%) !important;
+          border: 1px solid rgba(255, 255, 255, 0.8) !important;
+          border-radius: 18px 18px 18px 4px !important;
+          padding: 12px 18px !important;
           color: #1d1d1f !important;
           font-family: var(--font-sans) !important;
-          box-shadow: 
-            inset 0 1.5px 1.5px rgba(255, 255, 255, 0.9), /* Edge light */
-            inset 0 -1px 3px rgba(0, 0, 0, 0.04),
-            0 8px 30px rgba(0, 0, 0, 0.02) !important;
+          font-size: 0.88rem !important;
+          font-weight: 500 !important;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.02) !important;
           max-width: 82% !important;
         }
 
@@ -547,7 +540,7 @@ Shipped Projects:
         /* Footer layout */
         /* Footer layout */
         .apple-chat-footer {
-          padding: 16px 24px 24px 24px !important;
+          padding: 12px 24px 18px 24px !important;
           background: transparent !important;
           border-top: none !important;
           flex-shrink: 0 !important;
@@ -558,45 +551,36 @@ Shipped Projects:
           box-sizing: border-box !important;
         }
 
-        /* Collapsed: footer sits at the bottom of the card with compact padding */
-        .chat-widget:not(.expanded) .apple-chat-footer {
-          padding: 12px 20px 20px 20px !important;
-          background: transparent !important;
-          border-top: none !important;
-          flex-shrink: 0 !important;
-        }
-
-        /* Unified horizontal single-row input box */
         .chatgpt-input-box {
           display: flex !important;
           flex-direction: row !important;
           align-items: center !important;
           gap: 10px !important;
-          padding: 8px 12px !important;
-          border-radius: 20px !important;
-          background: rgba(255, 255, 255, 0.65) !important;
-          backdrop-filter: blur(10px) !important;
-          -webkit-backdrop-filter: blur(10px) !important;
-          border: 1px solid rgba(0, 0, 0, 0.08) !important;
-          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.02) !important;
-          min-height: 48px !important;
-          height: auto !important;
+          padding: 8px 12px 8px 16px !important;
+          border-radius: 22px !important;
+          background: rgba(255, 255, 255, 0.62) !important;
+          backdrop-filter: blur(20px) saturate(120%) !important;
+          -webkit-backdrop-filter: blur(20px) saturate(120%) !important;
+          border: 1px solid rgba(255, 255, 255, 0.7) !important;
+          box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5), 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+          min-height: 46px !important;
+          height: 46px !important;
           width: 100% !important;
           box-sizing: border-box !important;
           max-width: 100% !important;
         }
 
         .chatgpt-input-box:focus-within {
-          background: rgba(255, 255, 255, 0.85) !important;
-          border-color: rgba(0, 85, 255, 0.25) !important;
-          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 15px rgba(0, 85, 255, 0.05) !important;
+          background: rgba(255, 255, 255, 0.78) !important;
+          border-color: rgba(255, 255, 255, 0.9) !important;
+          box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.5), 0 8px 20px rgba(0, 85, 255, 0.04) !important;
         }
 
         /* Expanded input: Gemini-style floating pill */
         .chat-widget.expanded .chatgpt-input-box {
           max-width: 760px !important;
           width: 100% !important;
-          border-radius: 24px !important;
+          border-radius: 22px !important;
         }
 
         /* Attachment Button */
@@ -748,16 +732,16 @@ Shipped Projects:
                   {/* Frosted Glass Speech Bubble */}
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                     <div style={{
-                      background: 'rgba(255, 255, 255, 0.55)',
-                      backdropFilter: 'blur(20px)',
-                      WebkitBackdropFilter: 'blur(20px)',
-                      border: '1px solid rgba(255, 255, 255, 0.75)',
-                      borderRadius: '20px',
-                      padding: '10px 16px',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.01)',
+                      background: 'rgba(255, 255, 255, 0.72)',
+                      backdropFilter: 'blur(15px) saturate(120%)',
+                      WebkitBackdropFilter: 'blur(15px) saturate(120%)',
+                      border: '1px solid rgba(255, 255, 255, 0.8)',
+                      borderRadius: '18px 18px 18px 4px',
+                      padding: '12px 18px',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
                       maxWidth: '85%'
                     }}>
-                      <div style={{ fontSize: '0.85rem', color: '#1d1d1f', fontWeight: 500, lineHeight: 1.45, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
+                      <div style={{ fontSize: '0.88rem', color: '#1d1d1f', fontWeight: 500, lineHeight: 1.45, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
                         Hey, I'm <strong style={{ color: '#0055ff', fontWeight: 700 }}>Abhishek</strong>.<br />
                         How can I help you today?
                       </div>
@@ -851,9 +835,6 @@ Shipped Projects:
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
           </form>
-          <div className="apple-footer-note">
-            Liquid Glass • Secured Local Assistant Session
-          </div>
         </div>
       </div>
     </div>
