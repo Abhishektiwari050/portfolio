@@ -1678,18 +1678,20 @@ body.explore-active .three-container {
 
 /* ChatGPT Input Wrap & Morph Transition */
 .chatgpt-input-wrap {
-  --wrap-height: 320px;
-  --dock-height: 126px;
+  --wrap-height: 126px;
+  --expanded-bottom: 18vh;
+  --expanded-height: 320px;
+  --expanded-max-width: 680px;
   position: absolute;
-  top: calc(50% - 160px);
-  bottom: auto;
+  bottom: 4vh;
+  top: auto;
   left: 50%;
   transform: translateX(-50%);  /* GSAP only animates geometry, NOT transform */
   width: 60vw;
-  max-width: 680px;
+  max-width: 900px;
   min-width: 320px;
   height: var(--wrap-height);
-  border-radius: 24px;
+  border-radius: 32px;
   z-index: 10;
   background: linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.12) 100%) !important;
   backdrop-filter: blur(14px) saturate(180%) !important;
@@ -1709,11 +1711,13 @@ body.explore-active .three-container {
 
 @media (max-width: 768px) {
   .chatgpt-input-wrap {
-    --wrap-height: 360px;
-    --dock-height: 135px;
-    top: calc(50% - 180px);
-    bottom: auto;
-    width: 92vw;
+    --wrap-height: 135px;
+    --expanded-bottom: 12vh;
+    --expanded-height: 360px;
+    --expanded-max-width: 92vw;
+    bottom: 3vh;
+    top: auto;
+    width: 90vw;
     height: var(--wrap-height);
   }
 }

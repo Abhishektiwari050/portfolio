@@ -821,10 +821,18 @@ Shipped Projects:
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
             </button>
 
+            {/* Collapsed Search Button */}
+            {!isExpanded && (
+              <button type="button" className="chatgpt-btn-blue-pill" title="Search web" style={{ display: 'flex', alignItems: 'center', gap: '4px', height: '28px', padding: '0 12px', borderRadius: '14px', background: '#0055ff', color: '#ffffff', border: 'none', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', marginRight: '4px', flexShrink: 0 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                Search
+              </button>
+            )}
+
             {/* Input Textarea */}
             <textarea
               className="chatgpt-text-area"
-              placeholder="Ask me anything..."
+              placeholder={isExpanded ? "Ask me anything..." : "Message Liquid Glass..."}
               value={input}
               onChange={e => setInput(e.target.value)}
               onFocus={onFocus}
@@ -839,7 +847,7 @@ Shipped Projects:
             />
 
             {/* Send Button */}
-            <button type="submit" className="chatgpt-send-btn" title="Send message" disabled={!input.trim() || isExploreActivated}>
+            <button type="submit" className="chatgpt-send-btn" title="Send message" disabled={!isExpanded || !input.trim() || isExploreActivated}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
           </form>

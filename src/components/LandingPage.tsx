@@ -135,19 +135,23 @@ export function LandingPage({
       }
     });
 
-    // ── Simple morph: other elements fade away, central card scales to cover the viewport
+    // ── Image 1 to Image 2 scroll transition
     tl.to(
-      '.hero-title, .role-badges, .hero-desc, .hero-meta, .hero-scroll-hint, .liquid-glass-square-widget, .liquid-glass-circular-widget, .role-badge-bottom',
+      '.hero-welcome-card, .hero-scroll-hint',
       { opacity: 0, ease: 'power2.out' },
       0
     );
 
     tl.to('.chatgpt-input-wrap', {
-      width: '100vw',
-      maxWidth: '100vw',
-      top: '0px',
-      height: '100vh',
-      borderRadius: '0px',
+      bottom: 'var(--expanded-bottom)',
+      height: 'var(--expanded-height)',
+      maxWidth: 'var(--expanded-max-width)',
+      borderRadius: '24px',
+      ease: 'power2.inOut',
+    }, 0);
+
+    tl.to('.role-badge-bottom', {
+      opacity: 1,
       ease: 'power2.inOut',
     }, 0);
 
@@ -164,7 +168,7 @@ export function LandingPage({
       {/* Sticky 3D Particle Face Background (Fades out partially to let the face spin behind blurred glass) */}
       <div 
         style={{ 
-          opacity: Math.max(0, 1 - transitionProgress * 1.2), 
+          opacity: 1, 
           transition: 'opacity 0.4s ease',
           pointerEvents: 'none'
         }}
@@ -211,6 +215,47 @@ export function LandingPage({
               transform: 'translateY(-20px)',
               transition: 'transform 0.3s ease'
             }}>
+              {/* Premium Frosted Glass Text Console Panel */}
+              <div className="hero-welcome-card" style={{
+                background: 'rgba(255, 255, 255, 0.45)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.55)',
+                borderRadius: '24px',
+                padding: '24px 32px',
+                maxWidth: '500px',
+                margin: '0 auto 1.2rem auto',
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                transformOrigin: 'center center',
+              }}>
+                <h1 className="hero-title" style={{ display: 'none' }}>Abhishek Tiwari — AI Engineer</h1>
+
+                <div className="role-badges" style={{ justifyContent: 'center', gap: '8px', marginBottom: '0.8rem' }}>
+                  <span className="role-badge" style={{ fontSize: '0.62rem', padding: '5px 12px' }}>
+                    <span className="role-badge__dot" />
+                    AI Engineer
+                  </span>
+                </div>
+
+                <p className="hero-desc" style={{ 
+                  textAlign: 'center', 
+                  margin: '0', 
+                  maxWidth: '450px',
+                  fontSize: '0.94rem',
+                  lineHeight: 1.6,
+                  color: '#2c3e50',
+                  fontWeight: 500
+                }}>
+                  Building production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. 
+                  Delivering intelligent client AI solutions at Vistar.
+                </p>
+              </div>
+
+              {/* Layout placeholder to reserve space for absolute input wrap */}
+              <div style={{ width: '60vw', height: '126px', marginBottom: '1rem', visibility: 'hidden' }} />
             </div>
           </div>
 
@@ -239,7 +284,7 @@ export function LandingPage({
             top: 'calc(50% + 285px)',
             left: '50%',
             transform: 'translateX(-50%)',
-            display: chatExpanded ? 'none' : 'flex',
+            display: 'flex',
             alignItems: 'center',
             gap: '6px',
             background: 'rgba(255, 255, 255, 0.45)',
@@ -255,7 +300,7 @@ export function LandingPage({
             letterSpacing: '0.08em',
             zIndex: 9,
             transition: 'opacity 0.4s ease',
-            opacity: Math.max(0, 1 - transitionProgress * 2.5),
+            opacity: 0,
             pointerEvents: 'none'
           }}>
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#0055ff' }} />
