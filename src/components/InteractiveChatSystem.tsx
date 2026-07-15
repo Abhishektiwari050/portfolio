@@ -355,13 +355,14 @@ Shipped Projects:
           min-height: 0 !important; /* critical for flex overflow */
         }
 
-        /* Collapsed: body is visible and scrollable inside the card */
+        /* Collapsed: body is invisible and takes no space */
         .chat-widget:not(.expanded) .apple-chat-body {
-          flex: 1 1 0 !important;
-          opacity: 1 !important;
-          padding: 16px 20px 8px 20px !important;
-          overflow-y: auto !important;
-          pointer-events: auto !important;
+          flex: 0 !important;
+          height: 0px !important;
+          opacity: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+          pointer-events: none !important;
         }
 
         /* Message bubbles */
@@ -557,26 +558,11 @@ Shipped Projects:
           align-items: center !important;
         }
 
-        /* Collapsed: footer sits at the bottom of the card with compact padding */
+        /* Collapsed: footer fills entire wrapper so input-box can fill it */
         .chat-widget:not(.expanded) .apple-chat-footer {
-          padding: 8px 20px 16px 20px !important;
-          background: transparent !important;
-          border-top: none !important;
-          flex-shrink: 0 !important;
-        }
-
-        /* Collapsed: input box styled as a neat search pill inside the card */
-        .chat-widget:not(.expanded) .chatgpt-input-box {
-          background: rgba(0, 0, 0, 0.02) !important;
-          border: 1px solid rgba(0, 0, 0, 0.06) !important;
-          border-radius: 20px !important;
-          padding: 8px 12px !important;
-          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03) !important;
-          backdrop-filter: none !important;
-          -webkit-backdrop-filter: none !important;
-          min-height: 44px !important;
-          height: auto !important;
-          max-width: 100% !important;
+          height: 100% !important;
+          padding: 0 !important;
+          align-items: stretch !important;
         }
 
         /* Expanded input: Gemini-style floating pill */
@@ -588,24 +574,6 @@ Shipped Projects:
           border-radius: 28px !important;
         }
 
-        /* Collapsed: compact textarea */
-        .chat-widget:not(.expanded) .chatgpt-text-area {
-          height: 24px !important;
-          min-height: 24px !important;
-          font-size: 0.88rem !important;
-        }
-
-        /* Collapsed: scale action buttons */
-        .chat-widget:not(.expanded) .chatgpt-btn-circle {
-          width: 28px !important;
-          height: 28px !important;
-        }
-        .chat-widget:not(.expanded) .chatgpt-btn-blue-pill {
-          height: 28px !important;
-          padding: 0 12px !important;
-          font-size: 0.75rem !important;
-        }
-
         /* Collapsed: inner widget container is transparent to let outer wrap glass show through */
         .chat-widget:not(.expanded) {
           background: transparent !important;
@@ -613,6 +581,18 @@ Shipped Projects:
           backdrop-filter: none !important;
           -webkit-backdrop-filter: none !important;
           box-shadow: none !important;
+        }
+
+        /* Collapsed: input box fills footer completely, transparent and borderless */
+        .chat-widget:not(.expanded) .chatgpt-input-box {
+          height: 100% !important;
+          border-radius: 0 !important;
+          max-width: 100% !important;
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
         }
 
         /* Footer note only shows in expanded state */
@@ -654,29 +634,20 @@ Shipped Projects:
       {/* ── Messages — centered column, scrollable */}
       <div className="apple-chat-body" ref={containerRef}>
         <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {!isExpanded && messages.length <= 1 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '10px 0' }}>
-              <div className="role-badges" style={{ justifyContent: 'center', gap: '8px', marginBottom: '0.8rem' }}>
-                <span className="role-badge" style={{ fontSize: '0.62rem', padding: '5px 12px' }}>
-                  <span className="role-badge__dot" />
-                  AI Engineer
-                </span>
+          {messages.map((m, idx) => (
+            <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+              <div className="apple-message-container" style={{ justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div className={`apple-chat-bubble apple-chat-bubble--${m.sender}`}>
+                  {m.sender === 'ai' ? (
+                    <AIEngineeringResponse text={m.text} />
+                  ) : (
+                    m.text
+                  )}
+                </div>
               </div>
-              <p className="hero-desc" style={{ 
-                textAlign: 'center', 
-                margin: '0 0 1.2rem 0', 
-                maxWidth: '500px',
-                fontSize: '0.94rem',
-                lineHeight: 1.6,
-                color: '#2c3e50',
-                fontWeight: 500
-              }}>
-                Building production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. 
-                Delivering intelligent client AI solutions at Vistar.
-              </p>
-              {messages[0]?.options && (
-                <div className="apple-options-row" style={{ paddingLeft: 0, justifyContent: 'center' }}>
-                  {messages[0].options.map((opt, i) => (
+              {m.options && (
+                <div className="apple-options-row">
+                  {m.options.map((opt, i) => (
                     <button key={i} type="button" className="apple-pill-btn" onClick={opt.action}>
                       {opt.label}
                     </button>
@@ -684,30 +655,7 @@ Shipped Projects:
                 </div>
               )}
             </div>
-          ) : (
-            messages.map((m, idx) => (
-              <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-                <div className="apple-message-container" style={{ justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-                  <div className={`apple-chat-bubble apple-chat-bubble--${m.sender}`}>
-                    {m.sender === 'ai' ? (
-                      <AIEngineeringResponse text={m.text} />
-                    ) : (
-                      m.text
-                    )}
-                  </div>
-                </div>
-                {m.options && (
-                  <div className="apple-options-row">
-                    {m.options.map((opt, i) => (
-                      <button key={i} type="button" className="apple-pill-btn" onClick={opt.action}>
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
+          ))}
 
           {isTyping && (
             <div className="apple-message-container">

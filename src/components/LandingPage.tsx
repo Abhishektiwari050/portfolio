@@ -136,23 +136,32 @@ export function LandingPage({
       }
     });
 
-    // ── Phase 1 (0 → 60%): hero exits UP, pill docks bottom + goes full-width
+    // ── Phase 1 (0 → 60%): hero exits, welcome card scales up & fades, nav fades, pill docks bottom
     tl.to(
-      '.hero-title, .role-badges, .hero-desc, .hero-meta, .hero-scroll-hint',
+      '.hero-title, .role-badges, .hero-desc, .hero-meta, .hero-scroll-hint, .liquid-glass-square-widget, .liquid-glass-circular-widget',
       { opacity: 0, y: -80, stagger: 0.04, ease: 'power2.in' },
       0
     );
+    tl.to('.hero-welcome-card', {
+      scale: 1.16,
+      opacity: 0,
+      ease: 'power2.inOut',
+    }, 0);
+    tl.to('.site-nav', {
+      opacity: 0,
+      y: -20,
+      ease: 'power2.in',
+    }, 0);
     tl.to('.chatgpt-input-wrap', {
       width: '100vw',
       maxWidth: '100vw',
-      top: 'calc(100vh - var(--wrap-height, 126px))',
+      bottom: '0px',
       borderRadius: '24px 24px 0px 0px',
       ease: 'power2.inOut',
     }, 0);
 
     // ── Phase 2 (50% → 100%): full-width bar slides UP to fill screen
     tl.to('.chatgpt-input-wrap', {
-      top: '0px',
       height: '100vh',
       borderRadius: '0px',
       ease: 'power3.out',
@@ -171,7 +180,7 @@ export function LandingPage({
       {/* Sticky 3D Particle Face Background (Fades out partially to let the face spin behind blurred glass) */}
       <div 
         style={{ 
-          opacity: Math.max(0.35, 1 - transitionProgress * 1.2), 
+          opacity: Math.max(0, 1 - transitionProgress * 1.2), 
           transition: 'opacity 0.4s ease',
           pointerEvents: 'none'
         }}
@@ -220,7 +229,47 @@ export function LandingPage({
               transform: 'translateY(-20px)',
               transition: 'transform 0.3s ease'
             }}>
+              {/* Premium Frosted Glass Text Console Panel */}
+              <div className="hero-welcome-card" style={{
+                background: 'rgba(255, 255, 255, 0.45)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.55)',
+                borderRadius: '24px',
+                padding: '24px 32px',
+                maxWidth: '560px',
+                margin: '0 auto 1.2rem auto',
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                transformOrigin: 'center center',
+              }}>
+                <h1 className="hero-title" style={{ display: 'none' }}>Abhishek Tiwari — AI Engineer</h1>
 
+                <div className="role-badges" style={{ justifyContent: 'center', gap: '8px', marginBottom: '0.8rem' }}>
+                  <span className="role-badge" style={{ fontSize: '0.62rem', padding: '5px 12px' }}>
+                    <span className="role-badge__dot" />
+                    AI Engineer
+                  </span>
+                </div>
+
+                <p className="hero-desc" style={{ 
+                  textAlign: 'center', 
+                  margin: '0', 
+                  maxWidth: '500px',
+                  fontSize: '0.94rem',
+                  lineHeight: 1.6,
+                  color: '#2c3e50',
+                  fontWeight: 500
+                }}>
+                  Building production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. 
+                  Delivering intelligent client AI solutions at Vistar.
+                </p>
+              </div>
+
+              {/* Layout placeholder to reserve space for absolute input wrap */}
+              <div style={{ width: '60vw', height: '126px', marginBottom: '1rem', visibility: 'hidden' }} />
             </div>
           </div>
 
