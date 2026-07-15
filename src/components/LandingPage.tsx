@@ -136,28 +136,21 @@ export function LandingPage({
       }
     });
 
-    // ── Phase 1 (0 → 60%): hero exits, welcome card scales up & fades, nav fades, pill docks bottom
+    // ── Simple morph: other elements fade away, central card scales to cover the viewport
     tl.to(
-      '.hero-title, .role-badges, .hero-desc, .hero-meta, .hero-scroll-hint, .liquid-glass-square-widget, .liquid-glass-circular-widget',
-      { opacity: 0, y: -80, stagger: 0.04, ease: 'power2.in' },
+      '.hero-title, .role-badges, .hero-desc, .hero-meta, .hero-scroll-hint, .liquid-glass-square-widget, .liquid-glass-circular-widget, .role-badge-bottom',
+      { opacity: 0, ease: 'power2.out' },
       0
     );
+
     tl.to('.chatgpt-input-wrap', {
       width: '100vw',
       maxWidth: '100vw',
-      top: 'calc(100vh - var(--dock-height, 126px))',
-      height: 'var(--dock-height, 126px)',
-      borderRadius: '24px 24px 0px 0px',
-      ease: 'power2.inOut',
-    }, 0);
-
-    // ── Phase 2 (50% → 100%): full-width bar slides UP to fill screen
-    tl.to('.chatgpt-input-wrap', {
       top: '0px',
       height: '100vh',
       borderRadius: '0px',
-      ease: 'power3.out',
-    }, 0.5);
+      ease: 'power2.inOut',
+    }, 0);
 
     return () => {
       lenis.destroy();

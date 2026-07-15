@@ -1681,7 +1681,7 @@ body.explore-active .three-container {
   --wrap-height: 320px;
   --dock-height: 126px;
   position: absolute;
-  top: calc(50% - 60px);
+  top: calc(50% - 160px);
   bottom: auto;
   left: 50%;
   transform: translateX(-50%);  /* GSAP only animates geometry, NOT transform */
@@ -1711,7 +1711,7 @@ body.explore-active .three-container {
   .chatgpt-input-wrap {
     --wrap-height: 360px;
     --dock-height: 135px;
-    top: calc(50% - 40px);
+    top: calc(50% - 180px);
     bottom: auto;
     width: 92vw;
     height: var(--wrap-height);
