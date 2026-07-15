@@ -227,15 +227,14 @@ export function LandingPage({
               alignItems: 'center',
               justifyContent: 'center',
               textAlign: 'center',
-              transform: 'translateY(-20px)',
               transition: 'transform 0.3s ease'
             }}>
               {/* Premium Frosted Glass Text Console Panel */}
               <div className="hero-welcome-card" style={{
-                background: 'rgba(255, 255, 255, 0.45)',
+                background: 'rgba(255, 255, 255, 0.85)',
                 backdropFilter: 'blur(30px) saturate(120%)',
                 WebkitBackdropFilter: 'blur(30px) saturate(120%)',
-                border: '1px solid rgba(255, 255, 255, 0.6)',
+                border: '1px solid rgba(255, 255, 255, 0.65)',
                 borderRadius: '28px',
                 padding: '32px 40px',
                 maxWidth: '520px',
@@ -245,6 +244,7 @@ export function LandingPage({
                 flexDirection: 'column',
                 alignItems: 'center',
                 transformOrigin: 'center center',
+                visibility: transitionProgress >= 0.9 ? 'hidden' : 'visible'
               }}>
                 <h1 className="hero-title" style={{ display: 'none' }}>Abhishek Tiwari — AI Engineer</h1>
 
@@ -282,7 +282,7 @@ export function LandingPage({
               </div>
 
               {/* Layout placeholder to reserve space for absolute input wrap */}
-              <div style={{ width: '60vw', height: '76px', marginBottom: '1rem', visibility: 'hidden' }} />
+              <div style={{ width: '60vw', height: '60px', marginBottom: '1rem', visibility: 'hidden' }} />
             </div>
           </div>
 
@@ -298,8 +298,8 @@ export function LandingPage({
               width: '60vw',
               maxWidth: '900px',
               minWidth: '320px',
-              height: '76px',
-              borderRadius: '38px',
+              height: '60px',
+              borderRadius: '30px',
               zIndex: 10,
               background: 'rgba(255, 255, 255, 0.45)',
               backdropFilter: 'blur(30px) saturate(120%)',
@@ -310,7 +310,7 @@ export function LandingPage({
               flexDirection: 'row',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '0 24px',
+              padding: '0 18px',
               boxSizing: 'border-box',
               cursor: 'pointer'
             }}

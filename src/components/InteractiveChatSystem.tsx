@@ -681,28 +681,7 @@ Shipped Projects:
         }
       `}</style>
 
-      {/* ── Header bar — only visible when expanded */}
-      {isExpanded && (
-        <div className="apple-chat-header">
-          <div className="apple-window-dots">
-            <span className="apple-window-dot apple-window-dot--red" onClick={onExitChat} title="Exit" />
-            <span className="apple-window-dot apple-window-dot--grey1" />
-            <span className="apple-window-dot apple-window-dot--grey2" />
-          </div>
-          <div className="apple-chat-title" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--font-mono)', fontSize: '0.74rem', letterSpacing: '0.12em', color: '#1d1d1f', fontWeight: 700, textTransform: 'uppercase' }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#00cc66', boxShadow: '0 0 6px #00cc66' }} />
-            Liquid Glass
-          </div>
-          <button
-            type="button"
-            className="apple-header-exit-btn"
-            onClick={onExitChat}
-            style={{ fontFamily: 'var(--font-mono)', fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#86868b', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 700 }}
-          >
-            Exit
-          </button>
-        </div>
-      )}
+
 
       {/* ── Messages — centered column, scrollable */}
       <div className="apple-chat-body" ref={containerRef}>

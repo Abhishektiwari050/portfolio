@@ -1678,8 +1678,8 @@ body.explore-active .three-container {
   .chatgpt-input-wrap-collapsed {
     bottom: 3vh !important;
     width: 90vw !important;
-    height: 70px !important;
-    border-radius: 35px !important;
+    height: 56px !important;
+    border-radius: 28px !important;
   }
   .chatgpt-input-wrap-expanded {
     bottom: 12vh !important;
