@@ -114,7 +114,7 @@ export function LandingPage({
         id: 'hero-pin',
         trigger: '#ch-0',
         start: 'top top',
-        end: '+=160%',
+        end: '+=110%',
         scrub: true,
         pin: true,
         anticipatePin: 1,
@@ -140,10 +140,10 @@ export function LandingPage({
 
     // ── Image 1 to Image 2 morph scroll transition (Responsive via MatchMedia)
     mm.add("(min-width: 769px)", () => {
-      // Fade out welcome card
-      tl.to('.hero-welcome-card', { opacity: 0, ease: 'power2.out' }, 0);
+      // Phase 1: Fade out welcome card (Starts at 0, duration 4)
+      tl.to('.hero-welcome-card', { opacity: 0, duration: 4, ease: 'power2.out' }, 0);
       
-      // Morph the single card container
+      // Phase 2: Morph the single card container (Starts at 4, duration 6)
       tl.fromTo('.chatgpt-input-card-morph', 
         {
           bottom: '4vh',
@@ -160,26 +160,31 @@ export function LandingPage({
           height: '440px',
           background: 'rgba(255, 255, 255, 0.85)',
           boxShadow: '0 30px 60px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.85)',
+          duration: 6,
           ease: 'power2.inOut'
         }, 
-        0
+        4
       );
 
-      // Fade out collapsed contents
-      tl.to('.morph-collapsed-content', { opacity: 0, pointerEvents: 'none', ease: 'power2.out' }, 0);
+      // Fade out collapsed contents (Starts at 4, duration 3)
+      tl.to('.morph-collapsed-content', { opacity: 0, pointerEvents: 'none', duration: 3, ease: 'power2.out' }, 4);
       
-      // Fade in expanded contents
-      tl.fromTo('.morph-expanded-content', { opacity: 0, pointerEvents: 'none' }, { opacity: 1, pointerEvents: 'auto', ease: 'power2.inOut' }, 0.1);
+      // Fade in expanded contents (Starts at 6, duration 4)
+      tl.fromTo('.morph-expanded-content', 
+        { opacity: 0, pointerEvents: 'none' }, 
+        { opacity: 1, pointerEvents: 'auto', duration: 4, ease: 'power2.inOut' }, 
+        6
+      );
 
-      // Fade in bottom badge
-      tl.fromTo('.role-badge-bottom', { opacity: 0, y: 15 }, { opacity: 1, y: 0, ease: 'power2.inOut' }, 0);
+      // Fade in bottom badge (Starts at 6, duration 4)
+      tl.fromTo('.role-badge-bottom', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 4, ease: 'power2.inOut' }, 6);
     });
 
     mm.add("(max-width: 768px)", () => {
-      // Fade out welcome card
-      tl.to('.hero-welcome-card', { opacity: 0, ease: 'power2.out' }, 0);
+      // Phase 1: Fade out welcome card (Starts at 0, duration 4)
+      tl.to('.hero-welcome-card', { opacity: 0, duration: 4, ease: 'power2.out' }, 0);
       
-      // Morph the single card container for mobile viewport
+      // Phase 2: Morph the single card container for mobile viewport (Starts at 4, duration 6)
       tl.fromTo('.chatgpt-input-card-morph', 
         {
           bottom: '4vh',
@@ -196,19 +201,24 @@ export function LandingPage({
           height: '460px',
           background: 'rgba(255, 255, 255, 0.85)',
           boxShadow: '0 30px 60px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.85)',
+          duration: 6,
           ease: 'power2.inOut'
         }, 
-        0
+        4
       );
 
-      // Fade out collapsed contents
-      tl.to('.morph-collapsed-content', { opacity: 0, pointerEvents: 'none', ease: 'power2.out' }, 0);
+      // Fade out collapsed contents (Starts at 4, duration 3)
+      tl.to('.morph-collapsed-content', { opacity: 0, pointerEvents: 'none', duration: 3, ease: 'power2.out' }, 4);
       
-      // Fade in expanded contents
-      tl.fromTo('.morph-expanded-content', { opacity: 0, pointerEvents: 'none' }, { opacity: 1, pointerEvents: 'auto', ease: 'power2.inOut' }, 0.1);
+      // Fade in expanded contents (Starts at 6, duration 4)
+      tl.fromTo('.morph-expanded-content', 
+        { opacity: 0, pointerEvents: 'none' }, 
+        { opacity: 1, pointerEvents: 'auto', duration: 4, ease: 'power2.inOut' }, 
+        6
+      );
 
-      // Fade in bottom badge
-      tl.fromTo('.role-badge-bottom', { opacity: 0, y: 15 }, { opacity: 1, y: 0, ease: 'power2.inOut' }, 0);
+      // Fade in bottom badge (Starts at 6, duration 4)
+      tl.fromTo('.role-badge-bottom', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 4, ease: 'power2.inOut' }, 6);
     });
 
     return () => {
@@ -220,7 +230,7 @@ export function LandingPage({
   }, [setChatActive]);
 
   return (
-    <div className="landing-page-mount" style={{ width: '100%', minHeight: '220vh', overflowX: 'hidden' }}>
+    <div className="landing-page-mount" style={{ width: '100%', minHeight: '230vh', overflowX: 'hidden' }}>
       
       {/* Sticky 3D Particle Face Background (Fades out partially to let the face spin behind blurred glass) */}
       <div 
