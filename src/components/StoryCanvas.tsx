@@ -561,7 +561,7 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
           cloud.scale.setScalar(1.4);
         } else {
           targetX = 0; // Centered on all screen sizes
-          cloud.scale.setScalar(srcIdx === 0 ? 1.1 : 1.4); /* Smaller landing scale: head fits ring, chest visible */
+          cloud.scale.setScalar(srcIdx === 0 ? 0.85 : 1.4); /* Smaller landing scale: head fits ring perfectly */
         }
       }
       cloud.position.x += (targetX - cloud.position.x) * 0.05;
