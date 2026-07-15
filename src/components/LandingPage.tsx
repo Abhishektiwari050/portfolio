@@ -77,6 +77,23 @@ export function LandingPage({
     }
   };
 
+  const handleCollapsedClick = () => {
+    isProgrammaticScrollRef.current = true;
+    if (lenisRef.current) {
+      const pinTrigger = ScrollTrigger.getById('hero-pin');
+      if (pinTrigger) {
+        lenisRef.current.scrollTo(pinTrigger.start + (pinTrigger.end - pinTrigger.start) * 0.98, {
+          duration: 1.2,
+          easing: (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t),
+          onComplete: () => {
+            isProgrammaticScrollRef.current = false;
+            setChatActive(true);
+          }
+        });
+      }
+    }
+  };
+
   const chatActiveRef = useRef(chatActive);
   useEffect(() => {
     chatActiveRef.current = chatActive;
@@ -135,25 +152,26 @@ export function LandingPage({
       }
     });
 
-    // ── Image 1 to Image 2 scroll transition
+    // ── Image 1 to Image 2 simple cross-fade scroll transition
     tl.to(
-      '.hero-welcome-card, .hero-scroll-hint',
+      '.hero-welcome-card, .chatgpt-input-wrap-collapsed, .hero-scroll-hint, .hero-meta',
       { opacity: 0, ease: 'power2.out' },
       0
     );
 
-    tl.to('.chatgpt-input-wrap', {
-      bottom: 'var(--expanded-bottom)',
-      height: 'var(--expanded-height)',
-      maxWidth: 'var(--expanded-max-width)',
-      borderRadius: '24px',
-      ease: 'power2.inOut',
-    }, 0);
+    tl.fromTo(
+      '.chatgpt-input-wrap-expanded',
+      { opacity: 0, scale: 0.85 },
+      { opacity: 1, scale: 1, ease: 'power2.inOut' },
+      0
+    );
 
-    tl.to('.role-badge-bottom', {
-      opacity: 1,
-      ease: 'power2.inOut',
-    }, 0);
+    tl.fromTo(
+      '.role-badge-bottom',
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, ease: 'power2.inOut' },
+      0
+    );
 
     return () => {
       lenis.destroy();
@@ -259,12 +277,98 @@ export function LandingPage({
             </div>
           </div>
 
-          {/* ── Absolutely Positioned Expanding Chat Input/Desk ──────────────── */}
+          {/* ── Collapsed Input Bar (Layout A - Image 1 Style) ──────────────── */}
           <div
-            className={`chatgpt-input-wrap ${chatExpanded ? 'expanded' : ''}`}
+            className="chatgpt-input-wrap-collapsed"
+            onClick={handleCollapsedClick}
             style={{
-              opacity: 1,
-              pointerEvents: 'auto',
+              position: 'absolute',
+              bottom: '4vh',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '60vw',
+              maxWidth: '900px',
+              minWidth: '320px',
+              height: '126px',
+              borderRadius: '32px',
+              zIndex: 10,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.12) 100%)',
+              backdropFilter: 'blur(14px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+              border: '1px solid rgba(255,255,255,0.6)',
+              borderRightColor: 'rgba(255,255,255,0.3)',
+              borderBottomColor: 'rgba(255,255,255,0.3)',
+              boxShadow: 'inset 0 1.5px 1px rgba(255,255,255,0.8), inset 0 -1px 2px rgba(0,0,0,0.04), 0 10px 35px rgba(0,0,0,0.03)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              padding: '16px 24px',
+              boxSizing: 'border-box',
+              cursor: 'pointer'
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '8px 12px',
+              borderRadius: '20px',
+              background: 'rgba(255, 255, 255, 0.45)',
+              border: '1px solid rgba(0, 0, 0, 0.06)',
+              boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.02)',
+              minHeight: '48px',
+              width: '100%',
+              boxSizing: 'border-box'
+            }}>
+              {/* Attachment Button */}
+              <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', color: '#86868b' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+
+              {/* Collapsed Search Button */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', height: '28px', padding: '0 12px', borderRadius: '14px', background: '#0055ff', color: '#ffffff', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                Search
+              </div>
+
+              {/* Textarea Placeholder */}
+              <div style={{ flex: 1, fontSize: '0.92rem', color: '#86868b', textAlign: 'left', pointerEvents: 'none', userSelect: 'none', paddingLeft: '4px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+                Message Liquid Glass...
+              </div>
+
+              {/* Send Button */}
+              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#0055ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Expanded Floating Chatbot Card (Layout B - Image 2 Style) ─────────── */}
+          <div
+            className="chatgpt-input-wrap-expanded"
+            style={{
+              position: 'absolute',
+              bottom: '18vh',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '60vw',
+              maxWidth: '680px',
+              minWidth: '320px',
+              height: '320px',
+              borderRadius: '24px',
+              zIndex: 10,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.12) 100%)',
+              backdropFilter: 'blur(14px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(14px) saturate(180%)',
+              border: '1px solid rgba(255,255,255,0.6)',
+              borderRightColor: 'rgba(255,255,255,0.3)',
+              borderBottomColor: 'rgba(255,255,255,0.3)',
+              boxShadow: 'inset 0 1.5px 1px rgba(255,255,255,0.8), inset 0 -1px 2px rgba(0,0,0,0.04), 0 10px 35px rgba(0,0,0,0.03)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              boxSizing: 'border-box'
             }}
           >
             <InteractiveChatSystem
@@ -275,13 +379,14 @@ export function LandingPage({
                 localExitChat();
               }}
               onFocus={localChatFocus}
-              isExpanded={chatExpanded}
+              isExpanded={true}
             />
           </div>
 
+          {/* ── Centered Role Badge at the Bottom (Layout B) ────────────────── */}
           <div className="role-badge-bottom" style={{
             position: 'absolute',
-            top: 'calc(50% + 285px)',
+            bottom: '4vh',
             left: '50%',
             transform: 'translateX(-50%)',
             display: 'flex',
@@ -299,14 +404,13 @@ export function LandingPage({
             textTransform: 'uppercase',
             letterSpacing: '0.08em',
             zIndex: 9,
-            transition: 'opacity 0.4s ease',
-            opacity: 0,
             pointerEvents: 'none'
           }}>
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#0055ff' }} />
             AI Engineer
           </div>
 
+          {/* ── Metadata Info (Layout A) ─────────────────────────────────────── */}
           <div className="hero-meta" style={{ 
             position: 'absolute',
             bottom: '3vh',
@@ -320,17 +424,23 @@ export function LandingPage({
             <span className="hero-meta__item">✉ {profile.email}</span>
           </div>
 
+          {/* ── Centered Scroll Hint (Layout A) ───────────────────────────────── */}
           <div className="hero-scroll-hint" style={{
             position: 'absolute',
-            bottom: '3vh',
-            right: HERO_PADDING_LEFT,
-            display: chatActive ? 'none' : 'flex',
+            bottom: '1.5vh',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
             alignItems: 'center',
             gap: '12px',
             fontFamily: 'var(--font-mono)',
             fontSize: '0.62rem',
-            color: 'var(--text-muted)',
-            zIndex: 10
+            color: 'rgba(29, 29, 31, 0.4)',
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            fontWeight: 700,
+            zIndex: 10,
+            pointerEvents: 'none'
           }}>
             <div className="hero-scroll-hint__bar" style={{
               width: '30px',

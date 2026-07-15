@@ -1676,49 +1676,16 @@ body.explore-active .three-container {
   z-index: 10;
 }
 
-/* ChatGPT Input Wrap & Morph Transition */
-.chatgpt-input-wrap {
-  --wrap-height: 126px;
-  --expanded-bottom: 18vh;
-  --expanded-height: 320px;
-  --expanded-max-width: 680px;
-  position: absolute;
-  bottom: 4vh;
-  top: auto;
-  left: 50%;
-  transform: translateX(-50%);  /* GSAP only animates geometry, NOT transform */
-  width: 60vw;
-  max-width: 900px;
-  min-width: 320px;
-  height: var(--wrap-height);
-  border-radius: 32px;
-  z-index: 10;
-  background: linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.12) 100%) !important;
-  backdrop-filter: blur(14px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
-  border: 1px solid rgba(255,255,255,0.6) !important;
-  border-right-color: rgba(255,255,255,0.3) !important;
-  border-bottom-color: rgba(255,255,255,0.3) !important;
-  box-shadow:
-    inset 0 1.5px 1px rgba(255,255,255,0.8),
-    inset 0 -1px 2px rgba(0,0,0,0.04),
-    0 10px 35px rgba(0,0,0,0.03) !important;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
 @media (max-width: 768px) {
-  .chatgpt-input-wrap {
-    --wrap-height: 135px;
-    --expanded-bottom: 12vh;
-    --expanded-height: 360px;
-    --expanded-max-width: 92vw;
-    bottom: 3vh;
-    top: auto;
-    width: 90vw;
-    height: var(--wrap-height);
+  .chatgpt-input-wrap-collapsed {
+    bottom: 3vh !important;
+    width: 90vw !important;
+    height: 135px !important;
+  }
+  .chatgpt-input-wrap-expanded {
+    bottom: 12vh !important;
+    width: 92vw !important;
+    height: 360px !important;
   }
 }
 
