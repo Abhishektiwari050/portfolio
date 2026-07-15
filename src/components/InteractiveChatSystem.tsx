@@ -545,31 +545,132 @@ Shipped Projects:
         }
 
         /* Footer layout */
+        /* Footer layout */
         .apple-chat-footer {
-          padding: 12px 24px 24px 24px !important;
+          padding: 16px 24px 24px 24px !important;
           background: transparent !important;
           border-top: none !important;
           flex-shrink: 0 !important;
-          /* Gemini-style: center the input with max-width constraint */
           display: flex !important;
           flex-direction: column !important;
           align-items: center !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
         }
 
-        /* Collapsed: footer fills entire wrapper so input-box can fill it */
+        /* Collapsed: footer sits at the bottom of the card with compact padding */
         .chat-widget:not(.expanded) .apple-chat-footer {
-          height: 100% !important;
-          padding: 0 !important;
-          align-items: stretch !important;
+          padding: 12px 20px 20px 20px !important;
+          background: transparent !important;
+          border-top: none !important;
+          flex-shrink: 0 !important;
+        }
+
+        /* Unified horizontal single-row input box */
+        .chatgpt-input-box {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          gap: 10px !important;
+          padding: 8px 12px !important;
+          border-radius: 20px !important;
+          background: rgba(255, 255, 255, 0.65) !important;
+          backdrop-filter: blur(10px) !important;
+          -webkit-backdrop-filter: blur(10px) !important;
+          border: 1px solid rgba(0, 0, 0, 0.08) !important;
+          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.02) !important;
+          min-height: 48px !important;
+          height: auto !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+          max-width: 100% !important;
+        }
+
+        .chatgpt-input-box:focus-within {
+          background: rgba(255, 255, 255, 0.85) !important;
+          border-color: rgba(0, 85, 255, 0.25) !important;
+          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03), 0 4px 15px rgba(0, 85, 255, 0.05) !important;
         }
 
         /* Expanded input: Gemini-style floating pill */
         .chat-widget.expanded .chatgpt-input-box {
           max-width: 760px !important;
           width: 100% !important;
-          height: auto !important;
-          min-height: 80px !important;
-          border-radius: 28px !important;
+          border-radius: 24px !important;
+        }
+
+        /* Attachment Button */
+        .chatgpt-attachment-btn {
+          background: none !important;
+          border: none !important;
+          cursor: pointer !important;
+          padding: 0 !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          width: 28px !important;
+          height: 28px !important;
+          color: #86868b !important;
+          transition: color 0.2s !important;
+          flex-shrink: 0 !important;
+        }
+        .chatgpt-attachment-btn:hover {
+          color: #1d1d1f !important;
+        }
+
+        /* Send Button */
+        .chatgpt-send-btn {
+          width: 32px !important;
+          height: 32px !important;
+          border-radius: 50% !important;
+          background: #0055ff !important;
+          border: none !important;
+          cursor: pointer !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          transition: background 0.2s, opacity 0.2s !important;
+          padding: 0 !important;
+          flex-shrink: 0 !important;
+        }
+        .chatgpt-send-btn:hover:not(:disabled) {
+          background: #0044d4 !important;
+        }
+        .chatgpt-send-btn:disabled {
+          opacity: 0.3 !important;
+          cursor: not-allowed !important;
+        }
+
+        /* Center Textarea */
+        .chatgpt-text-area {
+          flex: 1 !important;
+          height: 24px !important;
+          min-height: 24px !important;
+          max-height: 120px !important;
+          background: transparent !important;
+          border: none !important;
+          outline: none !important;
+          resize: none !important;
+          font-size: 0.92rem !important;
+          line-height: 1.4 !important;
+          color: #1d1d1f !important;
+          font-family: var(--font-sans) !important;
+          padding: 2px 0 !important;
+          box-sizing: border-box !important;
+        }
+
+        .chatgpt-text-area::placeholder {
+          color: #86868b !important;
+          opacity: 0.85 !important;
+        }
+
+        /* Collapsed specific styles to overlay transparently and match card style */
+        .chat-widget:not(.expanded) .chatgpt-input-box {
+          background: rgba(255, 255, 255, 0.45) !important;
+          border: 1px solid rgba(0, 0, 0, 0.06) !important;
+          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
         }
 
         /* Collapsed: inner widget container is transparent to let outer wrap glass show through */
@@ -579,18 +680,6 @@ Shipped Projects:
           backdrop-filter: none !important;
           -webkit-backdrop-filter: none !important;
           box-shadow: none !important;
-        }
-
-        /* Collapsed: input box fills footer completely, transparent and borderless */
-        .chat-widget:not(.expanded) .chatgpt-input-box {
-          height: 100% !important;
-          border-radius: 0 !important;
-          max-width: 100% !important;
-          background: transparent !important;
-          border: none !important;
-          box-shadow: none !important;
-          backdrop-filter: none !important;
-          -webkit-backdrop-filter: none !important;
         }
 
         /* Footer note only shows in expanded state */
@@ -725,9 +814,15 @@ Shipped Projects:
             onClick={!isExpanded ? onFocus : undefined}
             style={!isExpanded ? { cursor: 'pointer' } : undefined}
           >
+            {/* Attachment Button */}
+            <button type="button" className="chatgpt-attachment-btn" title="Add attachment">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+
+            {/* Input Textarea */}
             <textarea
               className="chatgpt-text-area"
-              placeholder="Message Liquid Glass..."
+              placeholder="Ask me anything..."
               value={input}
               onChange={e => setInput(e.target.value)}
               onFocus={onFocus}
@@ -740,17 +835,11 @@ Shipped Projects:
               disabled={isExploreActivated || !isExpanded}
               style={!isExpanded ? { pointerEvents: 'none' } : undefined}
             />
-            <div className="chatgpt-actions-row">
-              <div className="chatgpt-action-btn-group">
-                <button type="button" className="chatgpt-btn-circle" title="Add attachment">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                </button>
-                <button type="button" className="chatgpt-btn-blue-pill" title="Search web">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                  Search
-                </button>
-              </div>
-            </div>
+
+            {/* Send Button */}
+            <button type="submit" className="chatgpt-send-btn" title="Send message" disabled={!input.trim() || isExploreActivated}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
           </form>
           <div className="apple-footer-note">
             Liquid Glass • Secured Local Assistant Session

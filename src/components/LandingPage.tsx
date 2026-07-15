@@ -244,6 +244,34 @@ export function LandingPage({
             />
           </div>
 
+          <div className="role-badge-bottom" style={{
+            position: 'absolute',
+            top: 'calc(50% + 285px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: chatExpanded ? 'none' : 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            background: 'rgba(255, 255, 255, 0.45)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            border: '1px solid rgba(0, 0, 0, 0.05)',
+            borderRadius: '16px',
+            padding: '5px 12px',
+            fontSize: '0.62rem',
+            fontWeight: 700,
+            color: '#0055ff',
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            zIndex: 9,
+            transition: 'opacity 0.4s ease',
+            opacity: Math.max(0, 1 - transitionProgress * 2.5),
+            pointerEvents: 'none'
+          }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#0055ff' }} />
+            AI Engineer
+          </div>
+
           <div className="hero-meta" style={{ 
             position: 'absolute',
             bottom: '3vh',
