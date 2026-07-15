@@ -220,48 +220,7 @@ export function LandingPage({
               transform: 'translateY(-20px)',
               transition: 'transform 0.3s ease'
             }}>
-              {/* Premium Frosted Glass Text Console Panel */}
-              <div style={{
-                background: 'rgba(255, 255, 255, 0.45)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.55)',
-                borderRadius: '24px',
-                padding: '24px 32px',
-                maxWidth: '560px',
-                margin: '0 auto 1.2rem auto',
-                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}>
 
-
-                <h1 className="hero-title" style={{ display: 'none' }}>Abhishek Tiwari — AI Engineer</h1>
-
-                <div className="role-badges" style={{ justifyContent: 'center', gap: '8px', marginBottom: '0.8rem' }}>
-                  <span className="role-badge" style={{ fontSize: '0.62rem', padding: '5px 12px' }}>
-                    <span className="role-badge__dot" />
-                    AI Engineer
-                  </span>
-                </div>
-
-                <p className="hero-desc" style={{ 
-                  textAlign: 'center', 
-                  margin: '0', 
-                  maxWidth: '500px',
-                  fontSize: '0.94rem',
-                  lineHeight: 1.6,
-                  color: '#2c3e50',
-                  fontWeight: 500
-                }}>
-                  Building production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. 
-                  Delivering intelligent client AI solutions at Vistar.
-                </p>
-              </div>
-
-              {/* Layout placeholder to reserve space for absolute input wrap */}
-              <div style={{ width: '60vw', height: '126px', marginBottom: '1rem', visibility: 'hidden' }} />
             </div>
           </div>
 
