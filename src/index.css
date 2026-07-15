@@ -136,17 +136,15 @@ body {
   justify-content: center;
   pointer-events: none;
   z-index: 2; /* Rendered behind the WebGL canvas (z-index: 3) */
-  transform: translateY(-5%) scale(1.1); /* 2D circular frame, centered */
   transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
               transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .circular-marquee-svg {
-  /* Frame the head, hair and chest by going wider than viewport margins */
-  width: 105vw;
-  height: 105vw;
-  max-width: 105vh;
-  max-height: 105vh;
+  width: 680px;
+  height: 680px;
+  max-width: 95vw;
+  max-height: 95vh;
   animation: spin-marquee 50s linear infinite;
   transform-origin: center;
 }
@@ -1680,12 +1678,17 @@ body.explore-active .three-container {
   .chatgpt-input-wrap-collapsed {
     bottom: 3vh !important;
     width: 90vw !important;
-    height: 135px !important;
+    height: 70px !important;
+    border-radius: 35px !important;
   }
   .chatgpt-input-wrap-expanded {
     bottom: 12vh !important;
     width: 92vw !important;
     height: 360px !important;
+  }
+  .circular-marquee-svg {
+    width: 90vw !important;
+    height: 90vw !important;
   }
 }
 
