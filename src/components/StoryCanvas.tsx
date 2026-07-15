@@ -561,7 +561,7 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
           cloud.scale.setScalar(1.4);
         } else {
           targetX = 0; // Centered on all screen sizes
-          cloud.scale.setScalar(srcIdx === 0 ? 0.85 : 1.4); /* Smaller landing scale: head fits ring perfectly */
+          cloud.scale.setScalar(srcIdx === 0 ? 0.98 : 1.4); /* Smaller landing scale: head fits ring perfectly */
         }
       }
       cloud.position.x += (targetX - cloud.position.x) * 0.05;
@@ -628,8 +628,8 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
             fill="none"
           />
           <text className="circular-marquee-text">
-            <textPath href="#circlePath" startOffset="0%">
-              ABHISHEK TIWARI • AI ENGINEER • ABHISHEK TIWARI • AI ENGINEER • ABHISHEK TIWARI • AI ENGINEER •
+            <textPath href="#circlePath" startOffset="0%" textLength="741.4" lengthAdjust="spacing">
+              ABHISHEK TIWARI • AI ENGINEER • ABHISHEK TIWARI • AI ENGINEER • ABHISHEK TIWARI • AI ENGINEER • ABHISHEK TIWARI • AI ENGINEER • 
             </textPath>
           </text>
         </svg>

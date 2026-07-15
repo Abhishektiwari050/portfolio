@@ -4,7 +4,6 @@ import { profile } from '../data/resume';
 interface ChatProps {
   onExplore: () => void;
   isExploreActivated: boolean;
-  onExitChat: () => void;
   onFocus: () => void;
   isExpanded: boolean;
 }
@@ -149,7 +148,7 @@ function AIEngineeringResponse({ text }: { text: string }) {
   );
 }
 
-export function InteractiveChatSystem({ onExplore, isExploreActivated, onExitChat, onFocus, isExpanded }: ChatProps) {
+export function InteractiveChatSystem({ onExplore, isExploreActivated, onFocus, isExpanded }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
