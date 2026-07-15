@@ -574,11 +574,25 @@ Shipped Projects:
           border-radius: 28px !important;
         }
 
-        /* Collapsed: input box fills footer completely */
+        /* Collapsed: inner widget container is transparent to let outer wrap glass show through */
+        .chat-widget:not(.expanded) {
+          background: transparent !important;
+          border: none !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          box-shadow: none !important;
+        }
+
+        /* Collapsed: input box fills footer completely, transparent and borderless */
         .chat-widget:not(.expanded) .chatgpt-input-box {
           height: 100% !important;
-          border-radius: 28px !important;
+          border-radius: 0 !important;
           max-width: 100% !important;
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
         }
 
         /* Footer note only shows in expanded state */
@@ -659,7 +673,7 @@ Shipped Projects:
 
       {/* ── Input footer — centered column, Gemini-style floating pill */}
       <div className="apple-chat-footer">
-        <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto' }}>
+        <div style={isExpanded ? { maxWidth: '720px', width: '100%', margin: '0 auto' } : { width: '100%', height: '100%' }}>
           <form
             onSubmit={handleSubmit}
             className="chatgpt-input-box"
