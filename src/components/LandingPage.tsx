@@ -2,13 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { profile } from '../data/resume';
 import { StoryCanvas } from './StoryCanvas';
 import { InteractiveChatSystem } from './InteractiveChatSystem';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const HERO_PADDING_LEFT = '5vw';
 
 interface LandingPageProps {
   onExplore: () => void;
@@ -154,7 +151,7 @@ export function LandingPage({
 
     // ── Image 1 to Image 2 simple cross-fade scroll transition
     tl.to(
-      '.hero-welcome-card, .chatgpt-input-wrap-collapsed, .hero-scroll-hint, .hero-meta',
+      '.hero-welcome-card, .chatgpt-input-wrap-collapsed',
       { opacity: 0, ease: 'power2.out' },
       0
     );
@@ -236,14 +233,14 @@ export function LandingPage({
               {/* Premium Frosted Glass Text Console Panel */}
               <div className="hero-welcome-card" style={{
                 background: 'rgba(255, 255, 255, 0.45)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.55)',
-                borderRadius: '24px',
-                padding: '24px 32px',
-                maxWidth: '500px',
+                backdropFilter: 'blur(30px) saturate(120%)',
+                WebkitBackdropFilter: 'blur(30px) saturate(120%)',
+                border: '1px solid rgba(255, 255, 255, 0.6)',
+                borderRadius: '28px',
+                padding: '32px 40px',
+                maxWidth: '520px',
                 margin: '0 auto 1.2rem auto',
-                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.03)',
+                boxShadow: '0 30px 60px rgba(0, 0, 0, 0.03)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -251,11 +248,23 @@ export function LandingPage({
               }}>
                 <h1 className="hero-title" style={{ display: 'none' }}>Abhishek Tiwari — AI Engineer</h1>
 
-                <div className="role-badges" style={{ justifyContent: 'center', gap: '8px', marginBottom: '0.8rem' }}>
-                  <span className="role-badge" style={{ fontSize: '0.62rem', padding: '5px 12px' }}>
-                    <span className="role-badge__dot" />
-                    AI Engineer
-                  </span>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'rgba(0, 85, 255, 0.08)',
+                  border: '1px solid rgba(0, 85, 255, 0.15)',
+                  borderRadius: '12px',
+                  padding: '4px 12px',
+                  fontSize: '0.62rem',
+                  fontWeight: 700,
+                  color: '#0055ff',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  marginBottom: '1rem'
+                }}>
+                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#0055ff' }} />
+                  AI Engineer
                 </div>
 
                 <p className="hero-desc" style={{ 
@@ -273,7 +282,7 @@ export function LandingPage({
               </div>
 
               {/* Layout placeholder to reserve space for absolute input wrap */}
-              <div style={{ width: '60vw', height: '126px', marginBottom: '1rem', visibility: 'hidden' }} />
+              <div style={{ width: '60vw', height: '76px', marginBottom: '1rem', visibility: 'hidden' }} />
             </div>
           </div>
 
@@ -289,58 +298,45 @@ export function LandingPage({
               width: '60vw',
               maxWidth: '900px',
               minWidth: '320px',
-              height: '126px',
-              borderRadius: '32px',
+              height: '76px',
+              borderRadius: '38px',
               zIndex: 10,
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.12) 100%)',
-              backdropFilter: 'blur(14px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(14px) saturate(180%)',
-              border: '1px solid rgba(255,255,255,0.6)',
-              borderRightColor: 'rgba(255,255,255,0.3)',
-              borderBottomColor: 'rgba(255,255,255,0.3)',
-              boxShadow: 'inset 0 1.5px 1px rgba(255,255,255,0.8), inset 0 -1px 2px rgba(0,0,0,0.04), 0 10px 35px rgba(0,0,0,0.03)',
+              background: 'rgba(255, 255, 255, 0.45)',
+              backdropFilter: 'blur(30px) saturate(120%)',
+              WebkitBackdropFilter: 'blur(30px) saturate(120%)',
+              border: '1px solid rgba(255,255,255,0.65)',
+              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.6)',
               display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              padding: '16px 24px',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0 24px',
               boxSizing: 'border-box',
               cursor: 'pointer'
             }}
           >
-            <div style={{
-              display: 'flex',
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '8px 12px',
-              borderRadius: '20px',
-              background: 'rgba(255, 255, 255, 0.45)',
-              border: '1px solid rgba(0, 0, 0, 0.06)',
-              boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.02)',
-              minHeight: '48px',
-              width: '100%',
-              boxSizing: 'border-box'
-            }}>
+            {/* Left elements: Attachment & Search */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
               {/* Attachment Button */}
               <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', color: '#86868b' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
               </button>
 
               {/* Collapsed Search Button */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', height: '28px', padding: '0 12px', borderRadius: '14px', background: '#0055ff', color: '#ffffff', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px', height: '32px', padding: '0 14px', borderRadius: '16px', background: '#0055ff', color: '#ffffff', fontSize: '0.76rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0, boxShadow: '0 2px 8px rgba(0, 85, 255, 0.15)' }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
                 Search
               </div>
+            </div>
 
-              {/* Textarea Placeholder */}
-              <div style={{ flex: 1, fontSize: '0.92rem', color: '#86868b', textAlign: 'left', pointerEvents: 'none', userSelect: 'none', paddingLeft: '4px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-                Message Liquid Glass...
-              </div>
+            {/* Middle element: Placeholder text */}
+            <div style={{ flex: 1, fontSize: '0.94rem', color: '#86868b', textAlign: 'left', pointerEvents: 'none', userSelect: 'none', paddingLeft: '16px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontWeight: 500 }}>
+              Message Liquid Glass...
+            </div>
 
-              {/* Send Button */}
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#0055ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-              </div>
+            {/* Right element: Send Button */}
+            <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#0055ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(0, 85, 255, 0.15)' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
             </div>
           </div>
 
@@ -410,46 +406,7 @@ export function LandingPage({
             AI Engineer
           </div>
 
-          {/* ── Metadata Info (Layout A) ─────────────────────────────────────── */}
-          <div className="hero-meta" style={{ 
-            position: 'absolute',
-            bottom: '3vh',
-            left: HERO_PADDING_LEFT,
-            display: 'flex',
-            gap: '2rem',
-            margin: '0',
-            zIndex: 10
-          }}>
-            <span className="hero-meta__item">📍 DELHI, INDIA</span>
-            <span className="hero-meta__item">✉ {profile.email}</span>
-          </div>
 
-          {/* ── Centered Scroll Hint (Layout A) ───────────────────────────────── */}
-          <div className="hero-scroll-hint" style={{
-            position: 'absolute',
-            bottom: '1.5vh',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.62rem',
-            color: 'rgba(29, 29, 31, 0.4)',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            fontWeight: 700,
-            zIndex: 10,
-            pointerEvents: 'none'
-          }}>
-            <div className="hero-scroll-hint__bar" style={{
-              width: '30px',
-              height: '1px',
-              background: 'currentColor',
-              opacity: 0.5
-            }} />
-            <span>SCROLL TO ENTER TERMINAL</span>
-          </div>
         </section>
       </main>
     </div>
