@@ -13,6 +13,8 @@ interface ChatMessage {
   sender: 'ai' | 'user';
   text: string;
   options?: { label: string; action: () => void }[];
+  isWelcome?: boolean;
+  time?: string;
 }
 
 function getClientFallbackReply(message: string) {
@@ -156,13 +158,9 @@ export function InteractiveChatSystem({ onExplore, isExploreActivated, onExitCha
   const getBootSequence = (): ChatMessage => {
     return { 
       sender: 'ai', 
-      text: `[METADATA: CONFIDENCE=100% | AREA=BOOT_SEQUENCE]\n[STATUS: AUTHORIZED]\n---\nHi! I'm Abhishek Tiwari. I build production-ready RAG pipelines, multi-agent systems, and FastAPI backend services. Ask me anything about my work, skills, projects, or select a quick action below to explore.`,
-      options: [
-        { label: 'Explore Career 🚀', action: () => onExplore() },
-        { label: 'Technical Skills 🛠️', action: () => handleSend('Tell me about your skills') },
-        { label: 'Shipped Projects 📦', action: () => handleSend('What projects have you built?') },
-        { label: 'Contact Info ✉️', action: () => handleSend('How can I contact you?') }
-      ]
+      text: "Hey, I'm Abhishek. How can I help you today?",
+      isWelcome: true,
+      time: '08:26 AM'
     };
   };
 
@@ -634,28 +632,75 @@ Shipped Projects:
       {/* ── Messages — centered column, scrollable */}
       <div className="apple-chat-body" ref={containerRef}>
         <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {messages.map((m, idx) => (
-            <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-              <div className="apple-message-container" style={{ justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-                <div className={`apple-chat-bubble apple-chat-bubble--${m.sender}`}>
-                  {m.sender === 'ai' ? (
-                    <AIEngineeringResponse text={m.text} />
-                  ) : (
-                    m.text
-                  )}
+          {messages.map((m, idx) => {
+            if (m.isWelcome) {
+              return (
+                <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', width: '100%', marginBottom: '4px' }}>
+                  {/* Sparkle Icon Circle Avatar */}
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: '#ffffff',
+                    border: '1px solid rgba(0, 0, 0, 0.05)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    marginRight: '12px',
+                    flexShrink: 0
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#0055ff">
+                      <path d="M12 2c0 5.523-4.477 10-10 10 5.523 0 10 4.477 10 10 0-5.523 4.477-10 10-10-5.523 0-10-4.477-10-10z"/>
+                    </svg>
+                  </div>
+                  {/* Frosted Glass Speech Bubble */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.55)',
+                      backdropFilter: 'blur(20px)',
+                      WebkitBackdropFilter: 'blur(20px)',
+                      border: '1px solid rgba(255, 255, 255, 0.75)',
+                      borderRadius: '20px',
+                      padding: '10px 16px',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.01)',
+                      maxWidth: '85%'
+                    }}>
+                      <div style={{ fontSize: '0.85rem', color: '#1d1d1f', fontWeight: 500, lineHeight: 1.45, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
+                        Hey, I'm <strong style={{ color: '#0055ff', fontWeight: 700 }}>Abhishek</strong>.<br />
+                        How can I help you today?
+                      </div>
+                      <div style={{ fontSize: '0.58rem', color: '#86868b', fontWeight: 500, marginTop: '4px', textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                        {m.time}
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              );
+            }
+            return (
+              <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+                <div className="apple-message-container" style={{ justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+                  <div className={`apple-chat-bubble apple-chat-bubble--${m.sender}`}>
+                    {m.sender === 'ai' ? (
+                      <AIEngineeringResponse text={m.text} />
+                    ) : (
+                      m.text
+                    )}
+                  </div>
+                </div>
+                {m.options && (
+                  <div className="apple-options-row">
+                    {m.options.map((opt, i) => (
+                      <button key={i} type="button" className="apple-pill-btn" onClick={opt.action}>
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              {m.options && (
-                <div className="apple-options-row">
-                  {m.options.map((opt, i) => (
-                    <button key={i} type="button" className="apple-pill-btn" onClick={opt.action}>
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
 
           {isTyping && (
             <div className="apple-message-container">
