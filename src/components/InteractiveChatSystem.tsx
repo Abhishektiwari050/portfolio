@@ -342,7 +342,7 @@ Shipped Projects:
 
         /* Messages container — fills available space only when expanded */
         .apple-chat-body {
-          padding: 24px !important;
+          padding: 32px 36px 12px 36px !important;
           display: flex !important;
           flex-direction: column !important;
           gap: 20px !important;

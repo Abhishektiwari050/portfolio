@@ -1668,9 +1668,9 @@ body.explore-active .three-container {
 
 /* ChatGPT Style Glass Input Box */
 .apple-chat-footer {
-  padding: 16px 24px 24px 24px;
-  background: transparent;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 16px 36px 32px 36px !important;
+  background: transparent !important;
+  border-top: none !important;
   z-index: 10;
 }
 
@@ -2402,37 +2402,7 @@ html, body { overflow-x: hidden; max-width: 100%; }
   gap: 0 !important;
 }
 
-.chatgpt-input-wrap.expanded .apple-chat-footer {
-  flex-shrink: 0 !important;
-  background: rgba(255,255,255,0.55) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  border-top: 1px solid rgba(0,0,0,0.06) !important;
-  border-radius: 0 !important;
-  padding: 16px 24px 20px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-}
 
-.chatgpt-input-wrap.expanded .chatgpt-input-box {
-  max-width: 760px !important;
-  width: 100% !important;
-  min-height: 96px !important;
-  height: auto !important;
-  border-radius: 20px !important;
-  padding: 14px 18px 10px !important;
-  background: rgba(255,255,255,0.75) !important;
-  border: 1px solid rgba(0,0,0,0.08) !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.06) !important;
-}
-
-.chatgpt-input-wrap.expanded .chatgpt-text-area {
-  height: auto !important;
-  min-height: 52px !important;
-  max-height: 160px !important;
-  overflow-y: auto !important;
-}
 
 .chatgpt-input-wrap.expanded .apple-footer-note {
   font-family: var(--font-mono) !important;
