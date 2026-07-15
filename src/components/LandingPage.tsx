@@ -85,7 +85,6 @@ export function LandingPage({
 
   // Setup main scroll engines
   useEffect(() => {
-    // 1. Initialize Lenis smooth scroll
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -104,30 +103,28 @@ export function LandingPage({
     const raf = (t: number) => { lenis.raf(t); requestAnimationFrame(raf); };
     requestAnimationFrame(raf);
 
-    // 2. Give GSAP full ownership of the pill's transform/position
-    //    so CSS and GSAP never conflict.
-    gsap.set('.chatgpt-input-wrap', { xPercent: -50 });
-
-    // 3. Two-phase cinematic timeline
+    // Two-phase cinematic transition
+    // GSAP only controls width/height/bottom/borderRadius.
+    // CSS keeps transform:translateX(-50%) so math stays clean:
+    //   width=60vw  → left edge at 50%-30% = 20vw  (centered pill)
+    //   width=100vw → left edge at 50%-50% = 0     (full bleed)
+    // No xPercent / left manipulation needed.
     const tl = gsap.timeline({
       scrollTrigger: {
         id: 'hero-pin',
         trigger: '#ch-0',
         start: 'top top',
-        end: '+=140%',
-        scrub: 1.2,          // slight lag = buttery feel
+        end: '+=160%',
+        scrub: true,
         pin: true,
         anticipatePin: 1,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
           setTransitionProgress(self.progress);
-
           if (self.progress >= 0.99) {
-            if (lenisRef.current && !isProgrammaticScrollRef.current) {
+            if (lenisRef.current && !isProgrammaticScrollRef.current)
               lenisRef.current.stop();
-            }
           }
-
           if (!isProgrammaticScrollRef.current) {
             if (self.progress >= 0.95) {
               if (!chatActiveRef.current) setChatActive(true);
@@ -139,30 +136,26 @@ export function LandingPage({
       }
     });
 
-    // ── PHASE 1 (0 → 55%): hero exits UP, pill docks to bottom full-width ──
+    // ── Phase 1 (0 → 60%): hero exits UP, pill docks bottom + goes full-width
     tl.to(
       '.hero-eyebrow, .hero-title, .role-badges, .hero-desc, .hero-meta, .hero-scroll-hint',
-      { opacity: 0, y: -70, stagger: 0.04, ease: 'power2.in' },
-      0            // start at beginning
+      { opacity: 0, y: -80, stagger: 0.04, ease: 'power2.in' },
+      0
     );
-
     tl.to('.chatgpt-input-wrap', {
-      // Move to bottom-left corner, expand to full viewport width
-      xPercent: -0,          // cancel the -50% centering
-      left: '0%',
-      bottom: '0px',
       width: '100vw',
       maxWidth: '100vw',
-      borderRadius: '20px 20px 0 0',
+      bottom: '0px',
+      borderRadius: '24px 24px 0px 0px',
       ease: 'power2.inOut',
-    }, 0);                   // also starts at beginning, finishes at ~55%
+    }, 0);
 
-    // ── PHASE 2 (45% → 100%): full-width bar SLIDES UP to fill screen ──
+    // ── Phase 2 (50% → 100%): full-width bar slides UP to fill screen
     tl.to('.chatgpt-input-wrap', {
       height: '100vh',
       borderRadius: '0px',
       ease: 'power3.out',
-    }, '>-0.4');             // start 40% before phase 1 ends → overlap = fluid
+    }, 0.5);
 
     return () => {
       lenis.destroy();
@@ -170,7 +163,6 @@ export function LandingPage({
       ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, [setChatActive]);
-
 
   return (
     <div className="landing-page-mount" style={{ width: '100%', minHeight: '220vh', overflowX: 'hidden' }}>
