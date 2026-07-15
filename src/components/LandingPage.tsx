@@ -5,7 +5,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { profile } from '../data/resume';
 import { StoryCanvas } from './StoryCanvas';
 import { InteractiveChatSystem } from './InteractiveChatSystem';
-import { WorkPreviewWidgets } from './WorkPreviewWidgets';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -192,8 +191,6 @@ export function LandingPage({
             position: 'relative'
           }}
         >
-          {/* Popping previews of shipped projects */}
-          <WorkPreviewWidgets chatActive={chatActive} />
           <div className="chapter__inner chapter__inner--hero" style={{ 
             display: 'flex', 
             alignItems: 'center', 
