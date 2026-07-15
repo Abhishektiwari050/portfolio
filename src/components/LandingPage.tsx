@@ -138,20 +138,21 @@ export function LandingPage({
 
     // ── Phase 1 (0 → 60%): hero exits UP, pill docks bottom + goes full-width
     tl.to(
-      '.hero-eyebrow, .hero-title, .role-badges, .hero-desc, .hero-meta, .hero-scroll-hint',
+      '.hero-title, .role-badges, .hero-desc, .hero-meta, .hero-scroll-hint',
       { opacity: 0, y: -80, stagger: 0.04, ease: 'power2.in' },
       0
     );
     tl.to('.chatgpt-input-wrap', {
       width: '100vw',
       maxWidth: '100vw',
-      bottom: '0px',
+      top: 'calc(100vh - var(--wrap-height, 126px))',
       borderRadius: '24px 24px 0px 0px',
       ease: 'power2.inOut',
     }, 0);
 
     // ── Phase 2 (50% → 100%): full-width bar slides UP to fill screen
     tl.to('.chatgpt-input-wrap', {
+      top: '0px',
       height: '100vh',
       borderRadius: '0px',
       ease: 'power3.out',
@@ -234,17 +235,7 @@ export function LandingPage({
                 flexDirection: 'column',
                 alignItems: 'center',
               }}>
-                <div className="hero-eyebrow" style={{ 
-                  justifyContent: 'center', 
-                  fontSize: '0.64rem', 
-                  letterSpacing: '0.16em',
-                  color: 'var(--color-text-secondary)',
-                  opacity: 0.75,
-                  marginBottom: '1rem'
-                }}>
-                  <span className="hero-eyebrow__dot" style={{ background: '#00cc66', boxShadow: '0 0 6px #00cc66' }} />
-                  <span>// PORTFOLIO INITIALIZED • ACTIVE SESSION</span>
-                </div>
+
 
                 <h1 className="hero-title" style={{ display: 'none' }}>Abhishek Tiwari — AI Engineer</h1>
 

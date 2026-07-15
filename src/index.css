@@ -377,7 +377,6 @@ body.explore-active .three-container {
   padding: 0;
 }
 
-.chapter--hero.explore-active .hero-eyebrow,
 .chapter--hero.explore-active .hero-title,
 .chapter--hero.explore-active .role-badges,
 .chapter--hero.explore-active .hero-desc,
@@ -410,33 +409,6 @@ body.explore-active .three-container {
   position: relative;
   z-index: 20;
   box-sizing: border-box !important;
-}
-
-.hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--blue-primary);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-bottom: 1.5rem;
-}
-
-.hero-eyebrow__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--blue-primary);
-  box-shadow: 0 0 8px var(--blue-primary);
-  animation: beacon 2s infinite ease-in-out;
-}
-
-@keyframes beacon {
-  0%, 100% { opacity: 0.4; transform: scale(0.9); }
-  50% { opacity: 1; transform: scale(1.2); }
 }
 
 .hero-title {
@@ -484,10 +456,6 @@ body.explore-active .three-container {
   z-index: 12;
 }
 
-.hero-eyebrow {
-  position: relative;
-  z-index: 12;
-}
 
 .role-badges {
   position: relative;
@@ -1710,14 +1678,16 @@ body.explore-active .three-container {
 
 /* ChatGPT Input Wrap & Morph Transition */
 .chatgpt-input-wrap {
+  --wrap-height: 126px;
   position: absolute;
-  bottom: 4vh;
+  top: calc(50% + 115px);
+  bottom: auto;
   left: 50%;
   transform: translateX(-50%);  /* GSAP only animates geometry, NOT transform */
   width: 60vw;
   max-width: 900px;
   min-width: 320px;
-  height: 126px;
+  height: var(--wrap-height);
   border-radius: 32px;
   z-index: 10;
   background: linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.12) 100%) !important;
@@ -1738,9 +1708,11 @@ body.explore-active .three-container {
 
 @media (max-width: 768px) {
   .chatgpt-input-wrap {
+    --wrap-height: 135px;
+    top: calc(50% + 130px);
+    bottom: auto;
     width: 90vw;
-    bottom: 3vh;
-    height: 135px;
+    height: var(--wrap-height);
   }
 }
 
@@ -2352,10 +2324,6 @@ body.explore-active .three-container {
     position: static !important;
     transform: none !important;
     width: 100% !important;
-  }
-  .hero-eyebrow {
-    font-size: 0.6rem !important;
-    margin-bottom: 1rem !important;
   }
   .role-badges {
     gap: 8px !important;
