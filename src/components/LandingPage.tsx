@@ -147,8 +147,8 @@ export function LandingPage({
       tl.fromTo('.chatgpt-input-card-morph', 
         {
           bottom: '4vh',
-          width: '60vw',
-          maxWidth: '900px',
+          width: '70vw',
+          maxWidth: '820px',
           height: '120px',
           background: 'rgba(255, 255, 255, 0.15)',
           border: '1px solid rgba(255, 255, 255, 0.35)',
@@ -156,9 +156,9 @@ export function LandingPage({
         },
         {
           bottom: '12vh',
-          width: '60vw',
-          maxWidth: '680px',
-          height: '440px',
+          width: '70vw',
+          maxWidth: '820px',
+          height: '220px',
           background: 'rgba(255, 255, 255, 0.28)',
           border: '1px solid rgba(255, 255, 255, 0.45)',
           boxShadow: '0 30px 60px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.55)',
@@ -201,7 +201,7 @@ export function LandingPage({
           bottom: '12vh',
           width: '92vw',
           maxWidth: '92vw',
-          height: '460px',
+          height: '220px',
           background: 'rgba(255, 255, 255, 0.28)',
           border: '1px solid rgba(255, 255, 255, 0.45)',
           boxShadow: '0 30px 60px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.55)',
@@ -338,7 +338,7 @@ export function LandingPage({
               </div>
 
               {/* Layout placeholder to reserve space for absolute input wrap */}
-              <div style={{ width: '60vw', height: '120px', marginBottom: '1rem', visibility: 'hidden' }} />
+              <div style={{ width: '70vw', maxWidth: '820px', height: '120px', marginBottom: '1rem', visibility: 'hidden' }} />
             </div>
           </div>
 
@@ -351,8 +351,8 @@ export function LandingPage({
               bottom: '4vh',
               left: '50%',
               transform: 'translateX(-50%)',
-              width: '60vw',
-              maxWidth: '900px',
+              width: '70vw',
+              maxWidth: '820px',
               minWidth: '320px',
               height: '120px',
               borderRadius: '28px',
