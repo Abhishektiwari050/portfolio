@@ -121,10 +121,6 @@ export function LandingPage({
         invalidateOnRefresh: true,
         onUpdate: (self) => {
           setTransitionProgress(self.progress);
-          if (self.progress >= 0.99) {
-            if (lenisRef.current && !isProgrammaticScrollRef.current)
-              lenisRef.current.stop();
-          }
           if (!isProgrammaticScrollRef.current) {
             if (self.progress >= 0.95) {
               if (!chatActiveRef.current) setChatActive(true);
