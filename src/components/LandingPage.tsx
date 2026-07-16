@@ -180,6 +180,9 @@ export function LandingPage({
 
       // Fade in bottom badge (Starts at 6, duration 4)
       tl.fromTo('.role-badge-bottom', { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 4, ease: 'power2.inOut' }, 6);
+
+      // Fade out landing side cards on scroll (Starts at 0, duration 4)
+      tl.fromTo('.landing-side-card', { opacity: 1, pointerEvents: 'auto' }, { opacity: 0, pointerEvents: 'none', duration: 4, ease: 'power2.out' }, 0);
     });
 
     mm.add("(max-width: 768px)", () => {
@@ -466,9 +469,122 @@ export function LandingPage({
             AI Engineer
           </div>
 
+        {/* Left Side Polaroid Card */}
+        <div 
+          className="landing-side-card left-card"
+          style={{
+            position: 'fixed',
+            left: '-20px',
+            top: '40vh',
+            transform: 'translateY(-50%) rotate(-5deg)',
+            width: '150px',
+            background: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.08)',
+            borderRadius: '4px',
+            padding: '10px 10px 18px 10px',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.03)',
+            zIndex: 9,
+            pointerEvents: 'auto',
+            transition: 'transform 0.3s ease, left 0.3s ease, box-shadow 0.3s ease',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget;
+            el.style.left = '10px';
+            el.style.transform = 'translateY(-50%) rotate(-2deg)';
+            el.style.boxShadow = '0 12px 30px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.04)';
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget;
+            el.style.left = '-20px';
+            el.style.transform = 'translateY(-50%) rotate(-5deg)';
+            el.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.03)';
+          }}
+        >
+          <img 
+            src="/suburban_house.png" 
+            alt="Indian Assets Management"
+            style={{
+              width: '100%',
+              aspectRatio: '1',
+              objectFit: 'cover',
+              border: '1px solid rgba(0,0,0,0.05)',
+              borderRadius: '2px',
+              marginBottom: '10px'
+            }}
+          />
+          <div style={{
+            fontFamily: 'monospace',
+            fontSize: '0.58rem',
+            lineHeight: '1.3',
+            color: '#4a4a4a',
+            textTransform: 'uppercase',
+            fontWeight: 700,
+            letterSpacing: '0.04em'
+          }}>
+            INDIAN ASSETS<br />MANAGEMENT
+          </div>
+        </div>
 
-        </section>
-      </main>
-    </div>
+        {/* Right Side Polaroid Card */}
+        <div 
+          className="landing-side-card right-card"
+          style={{
+            position: 'fixed',
+            right: '-20px',
+            top: '42vh',
+            transform: 'translateY(-50%) rotate(5deg)',
+            width: '150px',
+            background: '#ffffff',
+            border: '1px solid rgba(0, 0, 0, 0.08)',
+            borderRadius: '4px',
+            padding: '10px 10px 18px 10px',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.03)',
+            zIndex: 9,
+            pointerEvents: 'auto',
+            transition: 'transform 0.3s ease, right 0.3s ease, box-shadow 0.3s ease',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget;
+            el.style.right = '10px';
+            el.style.transform = 'translateY(-50%) rotate(2deg)';
+            el.style.boxShadow = '0 12px 30px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.04)';
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget;
+            el.style.right = '-20px';
+            el.style.transform = 'translateY(-50%) rotate(5deg)';
+            el.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.03)';
+          }}
+        >
+          <img 
+            src="/aviation_compliance.png" 
+            alt="VayuWays Aviation Compliance"
+            style={{
+              width: '100%',
+              aspectRatio: '1',
+              objectFit: 'cover',
+              border: '1px solid rgba(0,0,0,0.05)',
+              borderRadius: '2px',
+              marginBottom: '10px'
+            }}
+          />
+          <div style={{
+            fontFamily: 'monospace',
+            fontSize: '0.58rem',
+            lineHeight: '1.3',
+            color: '#4a4a4a',
+            textTransform: 'uppercase',
+            fontWeight: 700,
+            letterSpacing: '0.04em'
+          }}>
+            VAYUWAYS<br />AVIATION TOOL
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
   );
 }

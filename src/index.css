@@ -1690,6 +1690,9 @@ body.explore-active .three-container {
     width: 90vw !important;
     height: 90vw !important;
   }
+  .landing-side-card {
+    display: none !important;
+  }
 }
 
 .chatgpt-input-wrap.expanded {
