@@ -6,6 +6,7 @@ interface ChatProps {
   isExploreActivated: boolean;
   onFocus: () => void;
   isExpanded: boolean;
+  onTypingChange?: (isTyping: boolean) => void;
 }
 
 interface ChatMessage {
@@ -148,7 +149,7 @@ function AIEngineeringResponse({ text }: { text: string }) {
   );
 }
 
-export function InteractiveChatSystem({ onExplore, isExploreActivated, onFocus, isExpanded }: ChatProps) {
+export function InteractiveChatSystem({ onExplore, isExploreActivated, onFocus, isExpanded, onTypingChange }: ChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -166,6 +167,12 @@ export function InteractiveChatSystem({ onExplore, isExploreActivated, onFocus, 
   useEffect(() => {
     setMessages([getBootSequence()]);
   }, [onExplore]);
+
+  useEffect(() => {
+    if (onTypingChange) {
+      onTypingChange(input.trim().length > 0);
+    }
+  }, [input, onTypingChange]);
 
   const handleSend = async (text: string) => {
     const cleanText = text.trim();

@@ -26,6 +26,7 @@ export function LandingPage({
   const [scrollVelocity, setScrollVelocity] = useState(0);
   const [transitionProgress, setTransitionProgress] = useState(0);
   const [chatExpanded, setChatExpanded] = useState(false);
+  const [chatTyping, setChatTyping] = useState(false);
 
   const lenisRef = useRef<Lenis | null>(null);
   const isProgrammaticScrollRef = useRef(false);
@@ -248,7 +249,7 @@ export function LandingPage({
           scrollVelocity={scrollVelocity}
           isExploreActivated={transitionProgress >= 0.98}
           transitionProgress={transitionProgress}
-          isChatActive={chatActive}
+          isChatActive={chatTyping}
         />
       </div>
 
@@ -434,6 +435,7 @@ export function LandingPage({
                 isExploreActivated={false}
                 onFocus={localChatFocus}
                 isExpanded={true}
+                onTypingChange={(isTyping) => setChatTyping(isTyping)}
               />
             </div>
           </div>
