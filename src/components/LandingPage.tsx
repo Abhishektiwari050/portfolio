@@ -438,7 +438,7 @@ export function LandingPage({
                     onExplore={onExplore}
                     isExploreActivated={false}
                     onFocus={localChatFocus}
-                    isExpanded={true}
+                    isExpanded={chatActive}
                     onTypingChange={(isTyping) => setChatTyping(isTyping)}
                   />
                 </div>

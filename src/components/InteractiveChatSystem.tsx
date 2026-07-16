@@ -763,7 +763,7 @@ Shipped Projects:
           letter-spacing: 0.06em !important;
         }
       `}</style>      {/* ── Messages — centered column, scrollable (rendered at body level to bypass container clipping) */}
-      {createPortal(
+      {isExpanded && createPortal(
         <div className="apple-chat-body" ref={containerRef}>
           <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {isExpanded && <div style={{ height: '4px', flexShrink: 0 }} />}
