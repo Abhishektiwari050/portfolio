@@ -1682,9 +1682,9 @@ body.explore-active .three-container {
     border-radius: 24px !important;
   }
   .chatgpt-input-wrap-expanded {
-    bottom: 12vh !important;
+    bottom: 3vh !important;
     width: 92vw !important;
-    height: 220px !important;
+    height: 120px !important;
   }
   .circular-marquee-svg {
     width: 90vw !important;

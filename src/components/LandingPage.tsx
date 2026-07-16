@@ -152,10 +152,10 @@ export function LandingPage({
           boxShadow: '0 15px 35px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.45)'
         },
         {
-          bottom: '12vh',
+          bottom: '4vh',
           width: '70vw',
           maxWidth: '820px',
-          height: '220px',
+          height: '120px',
           background: 'rgba(255, 255, 255, 0.28)',
           border: '1px solid rgba(255, 255, 255, 0.45)',
           boxShadow: '0 30px 60px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.55)',
@@ -189,7 +189,7 @@ export function LandingPage({
       // Phase 2: Morph the single card container for mobile viewport (Starts at 4, duration 6)
       tl.fromTo('.chatgpt-input-card-morph', 
         {
-          bottom: '4vh',
+          bottom: '3vh',
           width: '90vw',
           maxWidth: '90vw',
           height: '120px',
@@ -198,10 +198,10 @@ export function LandingPage({
           boxShadow: '0 15px 35px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.45)'
         },
         {
-          bottom: '12vh',
+          bottom: '3vh',
           width: '92vw',
           maxWidth: '92vw',
-          height: '220px',
+          height: '120px',
           background: 'rgba(255, 255, 255, 0.28)',
           border: '1px solid rgba(255, 255, 255, 0.45)',
           boxShadow: '0 30px 60px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.55)',

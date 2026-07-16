@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { profile } from '../data/resume';
 
 interface ChatProps {
@@ -154,6 +155,9 @@ export function InteractiveChatSystem({ onExplore, isExploreActivated, onFocus, 
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Dummy reference to satisfy TS compiler
+  if (false && onFocus) onFocus();
 
   const getBootSequence = (): ChatMessage => {
     return { 
@@ -348,14 +352,38 @@ Shipped Projects:
         }
 
         .apple-chat-body {
-          padding: 16px 20px 8px 20px !important;
+          position: fixed !important;
+          top: 6vh !important;
+          bottom: 22vh !important;
+          left: 50% !important;
+          transform: translateX(-50%) !important;
+          width: 70vw !important;
+          max-width: 820px !important;
+          z-index: 8 !important;
+          padding: 20px 0 !important;
           display: flex !important;
           flex-direction: column !important;
           gap: 12px !important;
           overflow-y: auto !important;
-          flex: 1 !important;
           background: transparent !important;
-          min-height: 0 !important; /* critical for flex overflow */
+          min-height: 0 !important;
+        }
+
+        @media (max-width: 768px) {
+          .apple-chat-body {
+            width: 92vw !important;
+            top: 4vh !important;
+            bottom: 20vh !important;
+          }
+        }
+
+        /* Hide scrollbars for a clean aesthetic */
+        .apple-chat-body::-webkit-scrollbar {
+          display: none !important;
+        }
+        .apple-chat-body {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
         }
 
         /* Collapsed: body is invisible and takes no space */
@@ -556,6 +584,20 @@ Shipped Projects:
           box-sizing: border-box !important;
         }
 
+        .chat-widget.expanded .apple-chat-footer {
+          position: fixed !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          height: 120px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          padding: 16px 20px !important;
+          box-sizing: border-box !important;
+          background: transparent !important;
+        }
+
         .chatgpt-input-box {
           display: flex !important;
           flex-direction: row !important;
@@ -720,221 +762,256 @@ Shipped Projects:
           margin-top: 8px !important;
           letter-spacing: 0.06em !important;
         }
-      `}</style>
-
-      {/* ── Messages — centered column, scrollable */}
-      <div className="apple-chat-body" ref={containerRef}>
-        <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {isExpanded && <div style={{ height: '4px', flexShrink: 0 }} />}
-          {messages.map((m, idx) => {
-            if (m.isWelcome) {
-              return (
-                <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', width: '100%', marginBottom: '4px', gap: '12px' }}>
-                  {/* Small Sparkle Avatar */}
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    background: '#ffffff',
-                    border: '1px solid rgba(0,0,0,0.04)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.02)',
-                    flexShrink: 0
-                  }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#0055ff">
-                      <path d="M12,2 L14.5,9.5 L22,12 L14.5,14.5 L12,22 L9.5,14.5 L2,12 L9.5,9.5 Z" />
-                    </svg>
-                  </div>
-                  {/* Compact Welcome Bubble */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1 }}>
+      `}</style>      {/* ── Messages — centered column, scrollable (rendered at body level to bypass container clipping) */}
+      {createPortal(
+        <div className="apple-chat-body" ref={containerRef}>
+          <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {isExpanded && <div style={{ height: '4px', flexShrink: 0 }} />}
+            {messages.map((m, idx) => {
+              if (m.sender === 'ai') {
+                return (
+                  <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', width: '100%', marginBottom: '4px', gap: '12px' }}>
+                    {/* Circular Avatar */}
                     <div style={{
-                      background: 'rgba(255, 255, 255, 0.28)',
-                      backdropFilter: 'blur(20px) saturate(140%)',
-                      WebkitBackdropFilter: 'blur(20px) saturate(140%)',
-                      border: '1px solid rgba(255, 255, 255, 0.45)',
-                      borderRadius: '18px',
-                      padding: '10px 16px',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
-                      width: '100%',
-                      boxSizing: 'border-box'
-                    }}>
-                      <div style={{ fontSize: '0.88rem', color: '#1d1d1f', fontWeight: 500, lineHeight: 1.4, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-                        Hey, I'm <span style={{ color: '#0055ff', fontWeight: 600 }}>Abhishek.</span><br />
-                        How can I help you today?
-                      </div>
-                      <div style={{ fontSize: '0.68rem', color: '#86868b', marginTop: '4px', fontWeight: 500 }}>
-                        {m.time || '08:26 AM'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            }
-            return (
-              <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-                <div className="apple-message-container" style={{ justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
-                  <div className={`apple-chat-bubble apple-chat-bubble--${m.sender}`}>
-                    {m.sender === 'ai' ? (
-                      <AIEngineeringResponse text={m.text} />
-                    ) : (
-                      m.text
-                    )}
-                  </div>
-                </div>
-                {m.options && (
-                  <div className="apple-options-row">
-                    {m.options.map((opt, i) => (
-                      <button key={i} type="button" className="apple-pill-btn" onClick={opt.action}>
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-
-
-          {isTyping && (
-            <div className="apple-message-container">
-              <div className="speeder-bubble-mini">
-                <div className="loader-mini">
-                  <span><span /><span /><span /><span /></span>
-                  <div className="base-mini"><span /><div className="face-mini" /></div>
-                </div>
-                <div className="longfazers-mini"><span /><span /><span /></div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── Input footer — centered column, Gemini-style floating pill */}
-      <div className="apple-chat-footer">
-        <div style={isExpanded ? { maxWidth: '720px', width: '100%', margin: '0 auto' } : { width: '100%', height: '100%' }}>
-          <form
-            onSubmit={handleSubmit}
-            className="chatgpt-input-box"
-            onClick={!isExpanded ? onFocus : undefined}
-            style={!isExpanded ? { cursor: 'pointer' } : undefined}
-          >
-            {isExpanded ? (
-              <>
-                <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: '10px' }}>
-                  {/* Left Action: Attachment Icon Button */}
-                  <button
-                    type="button"
-                    className="chatgpt-attachment-btn"
-                    title="Add attachment"
-                    style={{
-                      background: 'none',
-                      border: 'none',
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      background: '#ffffff',
+                      border: '1px solid rgba(0,0,0,0.08)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      color: '#86868b',
-                      cursor: 'pointer',
-                      padding: 0,
-                      width: '24px',
-                      height: '24px',
-                      flexShrink: 0
-                    }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                  </button>
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                      flexShrink: 0,
+                      overflow: 'hidden'
+                    }}>
+                      <img src="/wireframe_avatar.png" alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                    {/* Message Bubble */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1, maxWidth: '82%' }}>
+                      <div style={{
+                        background: '#ffffff',
+                        border: '1px solid rgba(0, 0, 0, 0.08)',
+                        borderRadius: '18px 18px 18px 4px',
+                        padding: '12px 18px',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.02)',
+                        width: '100%',
+                        boxSizing: 'border-box'
+                      }}>
+                        {m.isWelcome ? (
+                          <div style={{ fontSize: '0.88rem', color: '#1d1d1f', fontWeight: 500, lineHeight: 1.4, fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+                            Hi! I'm <span style={{ color: '#0055ff', fontWeight: 600 }}>Abhishek Tiwari,</span><br />
+                            an AI Engineer.<br />
+                            How can I help you today?
+                          </div>
+                        ) : (
+                          <AIEngineeringResponse text={m.text} />
+                        )}
+                        <div style={{ fontSize: '0.68rem', color: '#86868b', marginTop: '6px', fontWeight: 500 }}>
+                          {m.time || '10:30 AM'}
+                        </div>
+                      </div>
+                      {m.options && (
+                        <div className="apple-options-row">
+                          {m.options.map((opt, i) => (
+                            <button key={i} type="button" className="apple-pill-btn" onClick={opt.action}>
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              } else {
+                return (
+                  <div key={idx} style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'flex-end', marginBottom: '4px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', maxWidth: '75%' }}>
+                      <div style={{
+                        background: 'rgba(0, 85, 255, 0.08)',
+                        border: '1px solid rgba(0, 85, 255, 0.12)',
+                        borderRadius: '18px 18px 4px 18px',
+                        padding: '10px 16px',
+                        color: '#0055ff',
+                        fontFamily: 'var(--font-sans)',
+                        fontSize: '0.88rem',
+                        fontWeight: 600,
+                        boxShadow: '0 4px 12px rgba(0, 85, 255, 0.02)',
+                        textAlign: 'left'
+                      }}>
+                        {m.text}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', fontSize: '0.68rem', color: '#0055ff', marginTop: '6px', fontWeight: 500, opacity: 0.8 }}>
+                          {m.time || '10:31 AM'}
+                          <svg width="14" height="10" viewBox="0 0 24 18" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: '4px' }}>
+                            <path d="M2 10l5 5L20 3M8 14.5l2.5 2.5L22 5" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+            })}
 
-                  {/* Input field */}
+            {isTyping && (
+              <div className="apple-message-container">
+                <div className="speeder-bubble-mini">
+                  <div className="loader-mini">
+                    <span><span /><span /><span /><span /></span>
+                    <div className="base-mini"><span /><div className="face-mini" /></div>
+                  </div>
+                  <div className="longfazers-mini"><span /><span /><span /></div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Input footer — centered column, Gemini-style floating pill */}
+      <div className="apple-chat-footer">
+        <div style={{ width: '100%', height: '100%' }}>
+          <form
+            onSubmit={handleSubmit}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              width: '100%',
+              height: '100%',
+              padding: '16px 20px',
+              boxSizing: 'border-box'
+            }}
+          >
+            {isExpanded ? (
+              <>
+                {/* Top row: Message Input */}
+                <div style={{ width: '100%' }}>
                   <textarea
                     className="chatgpt-text-area"
-                    placeholder="Ask me anything..."
+                    placeholder="Message Liquid Glass..."
                     value={input}
                     onChange={e => setInput(e.target.value)}
-                    onFocus={onFocus}
-                    onKeyDown={e => {
+                    onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
                         if (input.trim() !== '' && !isExploreActivated) handleSend(input);
                       }
                     }}
-                    disabled={isExploreActivated || !isExpanded}
+                    disabled={isExploreActivated}
                     style={{
-                      flex: 1,
-                      height: '20px',
-                      minHeight: '20px',
-                      maxHeight: '24px',
+                      width: '100%',
+                      height: '48px',
+                      minHeight: '48px',
+                      maxHeight: '48px',
                       background: 'transparent',
                       border: 'none',
                       outline: 'none',
                       resize: 'none',
-                      fontSize: '0.92rem',
+                      fontSize: '0.94rem',
                       color: '#1d1d1f',
                       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                       padding: 0,
-                      alignSelf: 'center',
-                      lineHeight: '20px'
+                      lineHeight: '1.4'
                     }}
                   />
+                </div>
 
-                  {/* Send Button */}
-                  <button
+                {/* Bottom row: Actions & Send */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  {/* Left actions: Clip & Search */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {/* Attachment Button */}
+                    <button 
+                      type="button" 
+                      style={{ 
+                        background: 'none', 
+                        border: 'none', 
+                        cursor: 'pointer', 
+                        padding: 0, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        width: '28px', 
+                        height: '28px', 
+                        color: '#86868b',
+                        transition: 'color 0.2s' 
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                    </button>
+                    
+                    {/* Search Button */}
+                    <button 
+                      type="button" 
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '5px', 
+                        height: '32px', 
+                        padding: '0 14px', 
+                        borderRadius: '16px', 
+                        background: '#0055ff', 
+                        color: '#ffffff', 
+                        fontSize: '0.76rem', 
+                        fontWeight: 600, 
+                        cursor: 'pointer', 
+                        border: 'none',
+                        boxShadow: '0 2px 8px rgba(0, 85, 255, 0.15)'
+                      }}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                      Search
+                    </button>
+                  </div>
+
+                  {/* Right action: Send Button */}
+                  <button 
                     type="submit"
-                    className="chatgpt-send-btn"
-                    title="Send message"
                     disabled={!input.trim() || isExploreActivated}
-                    style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      background: '#0055ff',
+                    style={{ 
+                      width: '36px', 
+                      height: '36px', 
+                      borderRadius: '50%', 
+                      background: '#0055ff', 
                       border: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 4px 10px rgba(0, 85, 255, 0.2)',
-                      color: '#ffffff',
-                      cursor: 'pointer',
-                      flexShrink: 0,
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      cursor: input.trim() ? 'pointer' : 'not-allowed', 
+                      opacity: input.trim() ? 1 : 0.3,
+                      boxShadow: '0 2px 8px rgba(0, 85, 255, 0.15)',
                       padding: 0
                     }}
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="22" y1="2" x2="11" y2="13"></line>
-                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="19" x2="12" y2="5"></line>
+                      <polyline points="5 12 12 5 19 12"></polyline>
                     </svg>
                   </button>
                 </div>
               </>
             ) : (
               <>
-                {/* Attachment Button */}
-                <button type="button" className="chatgpt-attachment-btn" title="Add attachment">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                </button>
-
-                {/* Collapsed Search Button */}
-                <button type="button" className="chatgpt-btn-blue-pill" title="Search web" style={{ display: 'flex', alignItems: 'center', gap: '4px', height: '28px', padding: '0 12px', borderRadius: '14px', background: '#0055ff', color: '#ffffff', border: 'none', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', marginRight: '4px', flexShrink: 0 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                  Search
-                </button>
-
-                {/* Input Textarea */}
-                <textarea
-                  className="chatgpt-text-area"
-                  placeholder="Message Liquid Glass..."
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onFocus={onFocus}
-                  disabled={true}
-                  style={{ pointerEvents: 'none' }}
-                />
-
-                {/* Send Button */}
-                <button type="button" className="chatgpt-send-btn" title="Send message" disabled={true}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                </button>
+                {/* Collapsed state matches the same structure */}
+                <div style={{ width: '100%', fontSize: '0.94rem', color: '#86868b', textAlign: 'left', pointerEvents: 'none', userSelect: 'none', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontWeight: 500 }}>
+                  Message Liquid Glass...
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', color: '#86868b' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', height: '32px', padding: '0 14px', borderRadius: '16px', background: '#0055ff', color: '#ffffff', fontSize: '0.76rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0, boxShadow: '0 2px 8px rgba(0, 85, 255, 0.15)' }}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                      Search
+                    </div>
+                  </div>
+                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#0055ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(0, 85, 255, 0.15)' }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                  </div>
+                </div>
               </>
             )}
           </form>
