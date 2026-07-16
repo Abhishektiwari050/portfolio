@@ -387,6 +387,8 @@ export function LandingPage({
                     justifyContent: 'space-between',
                     padding: '16px 20px',
                     boxSizing: 'border-box',
+                    opacity: chatActive ? 0 : 1,
+                    pointerEvents: chatActive ? 'none' : 'auto',
                     transition: 'opacity 0.2s ease-in-out'
                   }}
                 >
@@ -430,8 +432,8 @@ export function LandingPage({
                     display: 'flex',
                     flexDirection: 'column',
                     boxSizing: 'border-box',
-                    opacity: 0,
-                    pointerEvents: 'none'
+                    opacity: chatActive ? 1 : 0,
+                    pointerEvents: chatActive ? 'auto' : 'none'
                   }}
                 >
                   <InteractiveChatSystem
