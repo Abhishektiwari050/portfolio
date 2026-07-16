@@ -394,6 +394,7 @@ Shipped Projects:
         }
 
         /* AI Message bubble: High-shine liquid glass pane */
+        .apple-chat-bubble--ai {
           background: rgba(255, 255, 255, 0.28) !important;
           backdrop-filter: blur(20px) saturate(140%) !important;
           -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
@@ -724,7 +725,7 @@ Shipped Projects:
       {/* ── Messages — centered column, scrollable */}
       <div className="apple-chat-body" ref={containerRef}>
         <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {isExpanded && <div style={{ height: '48px', flexShrink: 0 }} />}
+          {isExpanded && <div style={{ height: '4px', flexShrink: 0 }} />}
           {messages.map((m, idx) => {
             if (m.isWelcome) {
               return (
