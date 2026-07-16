@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -343,102 +344,109 @@ export function LandingPage({
           </div>
 
           {/* ── Morphing Chatbot Card (Smooth Transition from Layout A to Layout B) ── */}
-          <div
-            className="chatgpt-input-card-morph"
-            onClick={!chatActive ? handleCollapsedClick : undefined}
-            style={{
-              position: 'absolute',
-              bottom: '4vh',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: '70vw',
-              maxWidth: '820px',
-              minWidth: '320px',
-              height: '120px',
-              borderRadius: '28px',
-              zIndex: 10,
-              background: 'rgba(255, 255, 255, 0.15)',
-              backdropFilter: 'blur(30px) saturate(140%)',
-              WebkitBackdropFilter: 'blur(30px) saturate(140%)',
-              border: '1px solid rgba(255, 255, 255, 0.35)',
-              boxShadow: '0 15px 35px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.45)',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-              cursor: !chatActive ? 'pointer' : 'default'
-            }}
-          >
-            {/* Collapsed state contents */}
-            <div
-              className="morph-collapsed-content"
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                padding: '16px 20px',
-                boxSizing: 'border-box',
-                transition: 'opacity 0.2s ease-in-out'
-              }}
-            >
-              {/* Top row: Message placeholder */}
-              <div style={{ width: '100%', fontSize: '0.94rem', color: '#86868b', textAlign: 'left', pointerEvents: 'none', userSelect: 'none', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontWeight: 500 }}>
-                Message Liquid Glass...
-              </div>
+          {/* ── Morphing Chatbot Card (Smooth Transition from Layout A to Layout B) ── */}
+          {(() => {
+            const cardContent = (
+              <div
+                className="chatgpt-input-card-morph"
+                onClick={!chatActive ? handleCollapsedClick : undefined}
+                style={{
+                  position: chatActive ? 'fixed' : 'absolute',
+                  bottom: chatActive ? (window.innerWidth <= 768 ? '3vh' : '4vh') : '4vh',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '70vw',
+                  maxWidth: '820px',
+                  minWidth: '320px',
+                  height: '120px',
+                  borderRadius: '28px',
+                  zIndex: 10,
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  backdropFilter: 'blur(30px) saturate(140%)',
+                  WebkitBackdropFilter: 'blur(30px) saturate(140%)',
+                  border: '1px solid rgba(255, 255, 255, 0.35)',
+                  boxShadow: '0 15px 35px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.45)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden',
+                  boxSizing: 'border-box',
+                  cursor: !chatActive ? 'pointer' : 'default'
+                }}
+              >
+                {/* Collapsed state contents */}
+                <div
+                  className="morph-collapsed-content"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    padding: '16px 20px',
+                    boxSizing: 'border-box',
+                    transition: 'opacity 0.2s ease-in-out'
+                  }}
+                >
+                  {/* Top row: Message placeholder */}
+                  <div style={{ width: '100%', fontSize: '0.94rem', color: '#86868b', textAlign: 'left', pointerEvents: 'none', userSelect: 'none', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', fontWeight: 500 }}>
+                    Message Liquid Glass...
+                  </div>
 
-              {/* Bottom row: Actions & Send */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                {/* Left actions: Clip & Search */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  {/* Attachment Button */}
-                  <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', color: '#86868b' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                  </button>
-                  {/* Collapsed Search Button */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', height: '32px', padding: '0 14px', borderRadius: '16px', background: '#0055ff', color: '#ffffff', fontSize: '0.76rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0, boxShadow: '0 2px 8px rgba(0, 85, 255, 0.15)' }}>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                    Search
+                  {/* Bottom row: Actions & Send */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    {/* Left actions: Clip & Search */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      {/* Attachment Button */}
+                      <button type="button" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', color: '#86868b' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                      </button>
+                      {/* Collapsed Search Button */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', height: '32px', padding: '0 14px', borderRadius: '16px', background: '#0055ff', color: '#ffffff', fontSize: '0.76rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0, boxShadow: '0 2px 8px rgba(0, 85, 255, 0.15)' }}>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        Search
+                      </div>
+                    </div>
+
+                    {/* Right action: Send Button */}
+                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#0055ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(0, 85, 255, 0.15)' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline>
+                      </svg>
+                    </div>
                   </div>
                 </div>
 
-                {/* Right action: Send Button */}
-                <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#0055ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 8px rgba(0, 85, 255, 0.15)' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline>
-                  </svg>
+                {/* Expanded state contents */}
+                <div
+                  className="morph-expanded-content"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxSizing: 'border-box',
+                    opacity: 0,
+                    pointerEvents: 'none'
+                  }}
+                >
+                  <InteractiveChatSystem
+                    onExplore={onExplore}
+                    isExploreActivated={false}
+                    onFocus={localChatFocus}
+                    isExpanded={true}
+                    onTypingChange={(isTyping) => setChatTyping(isTyping)}
+                  />
                 </div>
               </div>
-            </div>
+            );
 
-            {/* Expanded state contents */}
-            <div
-              className="morph-expanded-content"
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                boxSizing: 'border-box',
-                opacity: 0,
-                pointerEvents: 'none'
-              }}
-            >
-              <InteractiveChatSystem
-                onExplore={onExplore}
-                isExploreActivated={false}
-                onFocus={localChatFocus}
-                isExpanded={true}
-                onTypingChange={(isTyping) => setChatTyping(isTyping)}
-              />
-            </div>
-          </div>
+            return chatActive ? createPortal(cardContent, document.body) : cardContent;
+          })()}
 
           {/* ── Centered Role Badge at the Bottom (Layout B) ────────────────── */}
           <div className="role-badge-bottom" style={{
