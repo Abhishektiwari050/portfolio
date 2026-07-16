@@ -513,7 +513,6 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
       const exploreActive = exploreRef.current;
       const tProg = transitionRef.current;
       const scroll = scrollRef.current;
-      const chatActive = chatActiveRef.current;
 
       if (exploreActive) {
         // Scrolled past Chapter 0 (curtain rolled up)
@@ -526,18 +525,18 @@ export const StoryCanvas: React.FC<StoryCanvasProps> = ({
         cloud.scale.setScalar(1.0);
       } else {
         // Still on Hero / Chat screen (curtain not rolled up yet)
-        targetRawIdx = chatActive ? 1.0 : 0.0; // Morph to AI letters only if chat system is up/conversing!
+        // Keep rendering the high-fidelity 3D head model (0.0) for the chat active state
+        targetRawIdx = 0.0;
         
         if (tProg > 0) {
-          // Center and zoom inside terminal wrapper
           const t = Math.min(1.0, tProg / 0.8);
-          targetZ = 130 - t * 85;
+          targetZ = 130 - t * 15; // Pull closer slightly to center it nicely
           targetX = 0; // Centered
-          cloud.scale.setScalar(0.8 - t * 0.3);
+          cloud.scale.setScalar(0.98); // Keep scale constant at 0.98 so it covers the screen beautifully
         } else {
           targetZ = 130;
           targetX = 0; // Centered
-          cloud.scale.setScalar(0.8);
+          cloud.scale.setScalar(0.98);
         }
       }
 

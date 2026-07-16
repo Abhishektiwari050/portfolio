@@ -388,11 +388,10 @@ Shipped Projects:
         }
 
         /* AI Message bubble: High-shine liquid glass pane */
-        .apple-chat-bubble--ai {
-          background: rgba(255, 255, 255, 0.72) !important;
-          backdrop-filter: blur(15px) saturate(120%) !important;
-          -webkit-backdrop-filter: blur(15px) saturate(120%) !important;
-          border: 1px solid rgba(255, 255, 255, 0.8) !important;
+          background: rgba(255, 255, 255, 0.28) !important;
+          backdrop-filter: blur(20px) saturate(140%) !important;
+          -webkit-backdrop-filter: blur(20px) saturate(140%) !important;
+          border: 1px solid rgba(255, 255, 255, 0.45) !important;
           border-radius: 18px 18px 18px 4px !important;
           padding: 12px 18px !important;
           color: #1d1d1f !important;
@@ -587,9 +586,9 @@ Shipped Projects:
           justify-content: space-between !important;
           padding: 16px 20px !important;
           box-sizing: border-box !important;
-          background: rgba(255, 255, 255, 0.65) !important;
-          border: 1px solid rgba(255, 255, 255, 0.75) !important;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important;
+          background: rgba(255, 255, 255, 0.28) !important;
+          border: 1px solid rgba(255, 255, 255, 0.45) !important;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.55) !important;
         }
 
         /* Attachment Button */
@@ -800,8 +799,10 @@ Shipped Projects:
                   {/* Clean White Rounded Bubble */}
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1 }}>
                     <div style={{
-                      background: '#ffffff',
-                      border: '1px solid rgba(0, 0, 0, 0.04)',
+                      background: 'rgba(255, 255, 255, 0.28)',
+                      backdropFilter: 'blur(20px) saturate(140%)',
+                      WebkitBackdropFilter: 'blur(20px) saturate(140%)',
+                      border: '1px solid rgba(255, 255, 255, 0.45)',
                       borderRadius: '24px',
                       padding: '20px 24px',
                       boxShadow: '0 8px 30px rgba(0,0,0,0.02)',
