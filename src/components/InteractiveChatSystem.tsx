@@ -871,6 +871,7 @@ Shipped Projects:
       <div className="apple-chat-footer">
         <div style={{ width: '100%', height: '100%' }}>
           <form
+            className="chatgpt-input-form"
             onSubmit={handleSubmit}
             style={{
               display: 'flex',

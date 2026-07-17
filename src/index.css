@@ -1713,58 +1713,71 @@ body.explore-active .three-container {
   .chatgpt-input-wrap-collapsed {
     bottom: 3vh !important;
     width: 90vw !important;
-    height: 120px !important;
-    border-radius: 24px !important;
+    height: 82px !important;
+    border-radius: 20px !important;
   }
   .chatgpt-input-wrap-expanded {
     bottom: 3vh !important;
     width: 92vw !important;
     height: 120px !important;
   }
+  .chatgpt-input-form {
+    padding: 10px 14px !important;
+  }
+  .chatgpt-text-area {
+    font-size: 0.84rem !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    max-height: 38px !important;
+  }
   .circular-marquee-svg {
-    width: 82vw !important;
-    height: 82vw !important;
+    width: 74vw !important;
+    height: 74vw !important;
   }
   .hero-welcome-card {
-    padding: 16px 20px !important;
-    max-width: 86vw !important;
-    border-radius: 20px !important;
-    margin: 0 auto 0.8rem auto !important;
+    padding: 12px 16px !important;
+    max-width: 82vw !important;
+    border-radius: 22px !important;
+    background: rgba(255, 255, 255, 0.40) !important;
+    backdrop-filter: blur(20px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(130%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    margin: 0 auto 0.6rem auto !important;
   }
   .hero-desc {
-    font-size: 0.82rem !important;
-    line-height: 1.45 !important;
+    font-size: 0.78rem !important;
+    line-height: 1.4 !important;
   }
   .three-container {
     top: 15% !important;
     height: 60vh !important;
   }
   .landing-side-card {
-    width: 105px !important;
-    padding: 6px 6px 12px 6px !important;
+    width: 92px !important;
+    padding: 5px 5px 10px 5px !important;
     border-radius: 4px !important;
-    top: 26vh !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
+    top: 25vh !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.06) !important;
     z-index: 99 !important;
   }
   .landing-side-card.left-card {
-    left: -25px !important;
-    transform: translateY(-50%) rotate(-4deg) !important;
+    left: -30px !important;
+    transform: translateY(-50%) rotate(-10deg) !important;
   }
   .landing-side-card.left-card:active {
-    left: 5px !important;
-    transform: translateY(-50%) rotate(-1deg) scale(1.05) !important;
+    left: 8px !important;
+    transform: translateY(-50%) rotate(-3deg) scale(1.05) !important;
   }
   .landing-side-card.right-card {
-    right: -25px !important;
-    transform: translateY(-50%) rotate(4deg) !important;
+    right: -30px !important;
+    transform: translateY(-50%) rotate(10deg) !important;
   }
   .landing-side-card.right-card:active {
-    right: 5px !important;
-    transform: translateY(-50%) rotate(1deg) scale(1.05) !important;
+    right: 8px !important;
+    transform: translateY(-50%) rotate(3deg) scale(1.05) !important;
   }
   .landing-side-card div {
-    font-size: 0.44rem !important;
+    font-size: 0.40rem !important;
     line-height: 1.2 !important;
   }
 }
