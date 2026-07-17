@@ -764,7 +764,13 @@ Shipped Projects:
         }
       `}</style>      {/* ── Messages — centered column, scrollable (rendered at body level to bypass container clipping) */}
       {isExpanded && createPortal(
-        <div className="apple-chat-body" ref={containerRef}>
+        <div 
+          className="apple-chat-body" 
+          ref={containerRef}
+          data-lenis-prevent
+          onWheel={e => e.stopPropagation()}
+          onTouchMove={e => e.stopPropagation()}
+        >
           <div style={{ maxWidth: '720px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {isExpanded && <div style={{ height: '4px', flexShrink: 0 }} />}
             {messages.map((m, idx) => {
