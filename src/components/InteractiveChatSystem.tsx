@@ -299,6 +299,28 @@ Shipped Projects:
     }
   }, [messages, isTyping]);
 
+  // Isolate scroll interactions inside the chatbox from propagating to Lenis page scroll
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.stopPropagation();
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      e.stopPropagation();
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: true });
+    el.addEventListener('touchmove', handleTouchMove, { passive: true });
+
+    return () => {
+      el.removeEventListener('wheel', handleWheel);
+      el.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [messages, isExpanded]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleSend(input);
