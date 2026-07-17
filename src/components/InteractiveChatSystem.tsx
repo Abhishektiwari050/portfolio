@@ -381,7 +381,7 @@ Shipped Projects:
           transform: translateX(-50%) !important;
           width: 70vw !important;
           max-width: 820px !important;
-          z-index: 8 !important;
+          z-index: 9998 !important;
           padding: 20px 0 !important;
           display: flex !important;
           flex-direction: column !important;

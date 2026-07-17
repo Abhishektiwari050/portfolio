@@ -360,7 +360,7 @@ export function LandingPage({
                   minWidth: '320px',
                   height: '120px',
                   borderRadius: '28px',
-                  zIndex: 10,
+                  zIndex: chatActive ? 9999 : 10,
                   background: 'rgba(255, 255, 255, 0.15)',
                   backdropFilter: 'blur(30px) saturate(140%)',
                   WebkitBackdropFilter: 'blur(30px) saturate(140%)',
