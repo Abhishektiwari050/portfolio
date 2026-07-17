@@ -607,15 +607,13 @@ Shipped Projects:
         }
 
         .chat-widget.expanded .apple-chat-footer {
-          position: fixed !important;
-          bottom: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
-          height: 120px !important;
+          position: relative !important;
+          height: 100% !important;
+          width: 100% !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
-          padding: 16px 20px !important;
+          padding: 0 !important;
           box-sizing: border-box !important;
           background: transparent !important;
         }
