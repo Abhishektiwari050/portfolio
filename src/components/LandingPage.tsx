@@ -23,6 +23,38 @@ export function LandingPage({
   handleChatFocus, 
   handleExitChat: _handleExitChat 
 }: LandingPageProps) {
+  const leftProjects = [
+    {
+      title: "Agentic B2B Lead Gen",
+      subtitle: "LEAD GEN SCORING",
+      img: "/project_lead_gen.png"
+    },
+    {
+      title: "WhatsApp RAG Agent",
+      subtitle: "WHATSAPP BOT",
+      img: "/project_whatsapp.png"
+    }
+  ];
+
+  const rightProjects = [
+    {
+      title: "VayuWays Compliance",
+      subtitle: "AVIATION COMPLIANCE",
+      img: "/project_aviation.png"
+    },
+    {
+      title: "Anomaly Detector",
+      subtitle: "VITAL TELEMETRY",
+      img: "/project_anomaly.png"
+    }
+  ];
+
+  const [leftIndex, setLeftIndex] = useState(0);
+  const [rightIndex, setRightIndex] = useState(0);
+
+  const currentLeft = leftProjects[leftIndex];
+  const currentRight = rightProjects[rightIndex];
+
   const [scrollProgress, setScrollProgress] = useState(0);
   const [scrollVelocity, setScrollVelocity] = useState(0);
   const [transitionProgress, setTransitionProgress] = useState(0);
@@ -482,36 +514,14 @@ export function LandingPage({
           className="landing-side-card left-card"
           style={{
             position: 'fixed',
-            left: '-20px',
             top: '40vh',
-            transform: 'translateY(-50%) rotate(-5deg)',
-            width: '150px',
-            background: '#ffffff',
-            border: '1px solid rgba(0, 0, 0, 0.08)',
-            borderRadius: '4px',
-            padding: '10px 10px 18px 10px',
-            boxShadow: '0 8px 20px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.03)',
-            zIndex: 9,
-            pointerEvents: 'auto',
-            transition: 'transform 0.3s ease, left 0.3s ease, box-shadow 0.3s ease',
-            cursor: 'pointer'
+            pointerEvents: 'auto'
           }}
-          onMouseEnter={(e) => {
-            const el = e.currentTarget;
-            el.style.left = '10px';
-            el.style.transform = 'translateY(-50%) rotate(-2deg)';
-            el.style.boxShadow = '0 12px 30px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.04)';
-          }}
-          onMouseLeave={(e) => {
-            const el = e.currentTarget;
-            el.style.left = '-20px';
-            el.style.transform = 'translateY(-50%) rotate(-5deg)';
-            el.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.03)';
-          }}
+          onClick={() => setLeftIndex((prev) => (prev + 1) % leftProjects.length)}
         >
           <img 
-            src="/suburban_house.png" 
-            alt="Indian Assets Management"
+            src={currentLeft.img} 
+            alt={currentLeft.title}
             style={{
               width: '100%',
               aspectRatio: '1',
@@ -523,14 +533,14 @@ export function LandingPage({
           />
           <div style={{
             fontFamily: 'monospace',
-            fontSize: '0.58rem',
+            fontSize: '0.62rem',
             lineHeight: '1.3',
             color: '#4a4a4a',
             textTransform: 'uppercase',
             fontWeight: 700,
             letterSpacing: '0.04em'
           }}>
-            INDIAN ASSETS<br />MANAGEMENT
+            {currentLeft.subtitle}
           </div>
         </div>
 
@@ -539,36 +549,14 @@ export function LandingPage({
           className="landing-side-card right-card"
           style={{
             position: 'fixed',
-            right: '-20px',
             top: '42vh',
-            transform: 'translateY(-50%) rotate(5deg)',
-            width: '150px',
-            background: '#ffffff',
-            border: '1px solid rgba(0, 0, 0, 0.08)',
-            borderRadius: '4px',
-            padding: '10px 10px 18px 10px',
-            boxShadow: '0 8px 20px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.03)',
-            zIndex: 9,
-            pointerEvents: 'auto',
-            transition: 'transform 0.3s ease, right 0.3s ease, box-shadow 0.3s ease',
-            cursor: 'pointer'
+            pointerEvents: 'auto'
           }}
-          onMouseEnter={(e) => {
-            const el = e.currentTarget;
-            el.style.right = '10px';
-            el.style.transform = 'translateY(-50%) rotate(2deg)';
-            el.style.boxShadow = '0 12px 30px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.04)';
-          }}
-          onMouseLeave={(e) => {
-            const el = e.currentTarget;
-            el.style.right = '-20px';
-            el.style.transform = 'translateY(-50%) rotate(5deg)';
-            el.style.boxShadow = '0 8px 20px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.03)';
-          }}
+          onClick={() => setRightIndex((prev) => (prev + 1) % rightProjects.length)}
         >
           <img 
-            src="/aviation_compliance.png" 
-            alt="VayuWays Aviation Compliance"
+            src={currentRight.img} 
+            alt={currentRight.title}
             style={{
               width: '100%',
               aspectRatio: '1',
@@ -580,14 +568,14 @@ export function LandingPage({
           />
           <div style={{
             fontFamily: 'monospace',
-            fontSize: '0.58rem',
+            fontSize: '0.62rem',
             lineHeight: '1.3',
             color: '#4a4a4a',
             textTransform: 'uppercase',
             fontWeight: 700,
             letterSpacing: '0.04em'
           }}>
-            VAYUWAYS<br />AVIATION TOOL
+            {currentRight.subtitle}
           </div>
         </div>
 

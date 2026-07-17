@@ -1674,6 +1674,41 @@ body.explore-active .three-container {
   z-index: 10;
 }
 
+/* Polaroid Side Cards default (desktop) styling */
+.landing-side-card {
+  width: 215px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 6px !important;
+  padding: 10px 10px 18px 10px !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06), 0 2px 5px rgba(0,0,0,0.03) !important;
+  z-index: 9 !important;
+  transition: transform 0.3s ease, left 0.3s ease, right 0.3s ease, box-shadow 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+.landing-side-card.left-card {
+  left: -35px !important;
+  transform: translateY(-50%) rotate(-5deg) !important;
+}
+
+.landing-side-card.left-card:hover {
+  left: 15px !important;
+  transform: translateY(-50%) rotate(-2deg) scale(1.04) !important;
+  box-shadow: 0 16px 36px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.05) !important;
+}
+
+.landing-side-card.right-card {
+  right: -35px !important;
+  transform: translateY(-50%) rotate(5deg) !important;
+}
+
+.landing-side-card.right-card:hover {
+  right: 15px !important;
+  transform: translateY(-50%) rotate(2deg) scale(1.04) !important;
+  box-shadow: 0 16px 36px rgba(0,0,0,0.12), 0 4px 10px rgba(0,0,0,0.05) !important;
+}
+
 @media (max-width: 768px) {
   .chatgpt-input-wrap-collapsed {
     bottom: 3vh !important;
@@ -1687,11 +1722,50 @@ body.explore-active .three-container {
     height: 120px !important;
   }
   .circular-marquee-svg {
-    width: 90vw !important;
-    height: 90vw !important;
+    width: 82vw !important;
+    height: 82vw !important;
+  }
+  .hero-welcome-card {
+    padding: 16px 20px !important;
+    max-width: 86vw !important;
+    border-radius: 20px !important;
+    margin: 0 auto 0.8rem auto !important;
+  }
+  .hero-desc {
+    font-size: 0.82rem !important;
+    line-height: 1.45 !important;
+  }
+  .three-container {
+    top: 15% !important;
+    height: 60vh !important;
   }
   .landing-side-card {
-    display: none !important;
+    width: 105px !important;
+    padding: 6px 6px 12px 6px !important;
+    border-radius: 4px !important;
+    top: 26vh !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
+    z-index: 99 !important;
+  }
+  .landing-side-card.left-card {
+    left: -25px !important;
+    transform: translateY(-50%) rotate(-4deg) !important;
+  }
+  .landing-side-card.left-card:active {
+    left: 5px !important;
+    transform: translateY(-50%) rotate(-1deg) scale(1.05) !important;
+  }
+  .landing-side-card.right-card {
+    right: -25px !important;
+    transform: translateY(-50%) rotate(4deg) !important;
+  }
+  .landing-side-card.right-card:active {
+    right: 5px !important;
+    transform: translateY(-50%) rotate(1deg) scale(1.05) !important;
+  }
+  .landing-side-card div {
+    font-size: 0.44rem !important;
+    line-height: 1.2 !important;
   }
 }
 
