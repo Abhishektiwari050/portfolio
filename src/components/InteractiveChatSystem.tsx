@@ -43,6 +43,17 @@ function getClientFallbackReply(message: string) {
   return `[METADATA: CONFIDENCE=90% | AREA=GENERAL]\n[STATUS: RETRIEVAL_SUCCESS]\n---\nHi! I'm Abhishek Tiwari. I'm an AI Engineer. Ask me anything about my skills, projects, work experience, or contact details!`;
 }
 
+function parseInlineMarkdown(text: string) {
+  if (!text.includes('**')) return text;
+  const parts = text.split(/\*\*([^*]+)\*\*/g);
+  return parts.map((part, index) => {
+    if (index % 2 === 1) {
+      return <strong key={index} style={{ fontWeight: 700, color: '#1d1d1f' }}>{part}</strong>;
+    }
+    return part;
+  });
+}
+
 function AIEngineeringResponse({ text }: { text: string }) {
   const metadataRegex = /\[METADATA:\s*CONFIDENCE=([^\|]+)\s*\|\s*AREA=([^\]]+)\]/i;
   const statusRegex = /\[STATUS:\s*([^\]]+)\]/i;
@@ -50,18 +61,12 @@ function AIEngineeringResponse({ text }: { text: string }) {
   const metadataMatch = text.match(metadataRegex);
   const statusMatch = text.match(statusRegex);
 
-  let confidence = "98%";
-  let area = "SYSTEM_TELEMETRY";
-  let status = "COMPILING_SUCCESS";
   let cleanText = text;
 
   if (metadataMatch) {
-    confidence = metadataMatch[1].trim();
-    area = metadataMatch[2].trim().toUpperCase();
     cleanText = cleanText.replace(metadataRegex, '');
   }
   if (statusMatch) {
-    status = statusMatch[1].trim().toUpperCase();
     cleanText = cleanText.replace(statusRegex, '');
   }
 
@@ -70,39 +75,6 @@ function AIEngineeringResponse({ text }: { text: string }) {
 
   return (
     <div className="apple-system-response">
-      {/* Liquid Glass Telemetry Console Header */}
-      <div className="apple-response-badge">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '4px' }}>
-          <span style={{ 
-            background: status === 'SECURITY_REFUSED' ? 'rgba(255, 59, 48, 0.08)' : 'rgba(0, 85, 255, 0.08)',
-            color: status === 'SECURITY_REFUSED' ? '#ff3b30' : '#0055ff',
-            border: status === 'SECURITY_REFUSED' ? '1px solid rgba(255,59,48,0.2)' : '1px solid rgba(0,85,255,0.2)',
-            padding: '2px 8px',
-            borderRadius: '6px',
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.58rem',
-            fontWeight: 800
-          }}>
-            [ {status} ]
-          </span>
-          <span style={{ color: '#86868b', fontSize: '0.58rem', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
-            {area}
-          </span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-          <span style={{ minWidth: '85px', fontSize: '0.58rem', fontFamily: 'var(--font-mono)' }}>CONFIDENCE: {confidence}</span>
-          <div style={{ flex: 1, height: '4px', background: 'rgba(0,0,0,0.04)', borderRadius: '2px', overflow: 'hidden' }}>
-            <div style={{ 
-              width: confidence.includes('%') ? confidence : `${confidence}%`, 
-              height: '100%', 
-              background: '#0055ff', 
-              boxShadow: '0 0 4px #0055ff',
-              borderRadius: '2px'
-            }} />
-          </div>
-        </div>
-      </div>
-
       <div className="apple-response-content">
         {lines.map((line, i) => {
           const trimmed = line.trim();
@@ -112,7 +84,7 @@ function AIEngineeringResponse({ text }: { text: string }) {
             const headerText = trimmed.replace(/[#\*]+/g, '').trim();
             return (
               <h4 key={i} className="apple-response-header">
-                {headerText}
+                {parseInlineMarkdown(headerText)}
               </h4>
             );
           }
@@ -125,8 +97,8 @@ function AIEngineeringResponse({ text }: { text: string }) {
               const val = content.substring(colonIndex + 1);
               return (
                 <div key={i} className="apple-response-row">
-                  <span className="apple-response-row__key">{key}</span>
-                  <span className="apple-response-row__val">{val}</span>
+                  <span className="apple-response-row__key">{parseInlineMarkdown(key)}</span>
+                  <span className="apple-response-row__val">{parseInlineMarkdown(val)}</span>
                 </div>
               );
             }
@@ -134,14 +106,14 @@ function AIEngineeringResponse({ text }: { text: string }) {
             return (
               <div key={i} className="apple-response-bullet">
                 <span className="apple-response-bullet__icon">•</span>
-                <span className="apple-response-bullet__text">{content}</span>
+                <span className="apple-response-bullet__text">{parseInlineMarkdown(content)}</span>
               </div>
             );
           }
 
           return (
             <p key={i} className="apple-response-para">
-              {trimmed}
+              {parseInlineMarkdown(trimmed)}
             </p>
           );
         })}
