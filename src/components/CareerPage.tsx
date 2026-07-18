@@ -410,27 +410,31 @@ export function CareerPage({ onBack, currentHash }: CareerPageProps) {
       revealTriggers.push(tl.scrollTrigger!);
     });
 
-    // 3. Apple-style horizontal scroll pinning for Projects
+    // 3. Apple-style horizontal scroll pinning for Projects (Only on desktop)
     const horizontalContainer = horizontalRef.current;
     let projectsTrigger: ScrollTrigger | null = null;
-    if (horizontalContainer) {
-      const scrollWidth = horizontalContainer.scrollWidth;
-      const amountToScroll = scrollWidth - window.innerWidth + 100;
-      
-      const tl = gsap.to(horizontalContainer, {
-        x: -amountToScroll,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '#ch-3',
-          pin: true,
-          scrub: 1,
-          start: 'top top',
-          end: () => `+=${amountToScroll}`,
-          invalidateOnRefresh: true,
-        }
-      });
-      projectsTrigger = tl.scrollTrigger!;
-    }
+    let mm = gsap.matchMedia();
+
+    mm.add("(min-width: 769px)", () => {
+      if (horizontalContainer) {
+        const scrollWidth = horizontalContainer.scrollWidth;
+        const amountToScroll = scrollWidth - window.innerWidth + 100;
+        
+        const tl = gsap.to(horizontalContainer, {
+          x: -amountToScroll,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '#ch-3',
+            pin: true,
+            scrub: 1,
+            start: 'top top',
+            end: () => `+=${amountToScroll}`,
+            invalidateOnRefresh: true,
+          }
+        });
+        projectsTrigger = tl.scrollTrigger!;
+      }
+    });
 
     // 4. Handle direct linking section parameters on mount
     const match = currentHash.match(/section=([^&?]+)/);
@@ -452,6 +456,7 @@ export function CareerPage({ onBack, currentHash }: CareerPageProps) {
       lenis.destroy();
       revealTriggers.forEach(t => t.kill());
       if (projectsTrigger) projectsTrigger.kill();
+      mm.revert();
       ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, [currentHash]);
@@ -479,8 +484,9 @@ export function CareerPage({ onBack, currentHash }: CareerPageProps) {
           href="#ch-0" 
           className="site-nav__brand"
           onClick={(e) => handleNavClick(e, '#ch-0')}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
         >
-          [ ABHISHEK TIWARI ]
+          ← ABHISHEK TIWARI
         </a>
         <nav className="site-nav__links">
           {CHAPTERS.map((ch, i) => (
@@ -544,16 +550,15 @@ export function CareerPage({ onBack, currentHash }: CareerPageProps) {
 
             {/* Circular Radar Infographic (Apple style motion layout) */}
             <div className="skills-infographic story-reveal" data-delay="0.2">
-              <div className="skills-radar-rings">
-                <div className="skills-radar-labels">
-                  {['Agent Systems', 'LLM Architectures', 'Vector DBs', 'Scalable Backends', 'Speech/Voice Systems', 'Workflow Automations'].map((s, i) => (
-                    <div key={s} className="radar-label" style={{
-                      '--angle': `${(i / 6) * 360}deg`,
-                    } as React.CSSProperties}>
-                      {s}
-                    </div>
-                  ))}
-                </div>
+              <div className="skills-radar-rings" />
+              <div className="skills-radar-labels">
+                {['Agent Systems', 'LLM Architectures', 'Vector DBs', 'Scalable Backends', 'Speech/Voice Systems', 'Workflow Automations'].map((s, i) => (
+                  <div key={s} className="radar-label" style={{
+                    '--angle': `${(i / 6) * 360}deg`,
+                  } as React.CSSProperties}>
+                    {s}
+                  </div>
+                ))}
               </div>
             </div>
 

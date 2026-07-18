@@ -822,12 +822,29 @@ body.explore-active .three-container {
 
 @media (max-width: 768px) {
   .arch-flow-diagram {
-    flex-direction: column;
-    gap: 3rem;
+    flex-direction: column !important;
+    gap: 3.5rem !important;
+    margin: 2rem 0 !important;
   }
   .arch-connection-line {
-    display: none;
+    display: block !important;
+    width: 2px !important;
+    height: 48px !important;
+    background: repeating-linear-gradient(180deg, var(--blue-primary), var(--blue-primary) 6px, transparent 6px, transparent 12px) !important;
+    margin: -1.75rem auto !important;
   }
+  .arch-connection-pulse {
+    left: -4px !important;
+    top: 0% !important;
+    animation: pulse-flow-vertical 2s infinite linear !important;
+  }
+}
+
+@keyframes pulse-flow-vertical {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
 }
 
 .arch-node {
@@ -1026,16 +1043,17 @@ body.explore-active .three-container {
 }
 
 .skills-radar-labels {
-  position: relative;
+  position: absolute;
   width: 320px;
   height: 320px;
+  pointer-events: none;
 }
 
 .radar-label {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) rotate(var(--angle)) translate(150px) rotate(calc(-1 * var(--angle)));
+  transform: translate(-50%, -50%) rotate(var(--angle)) translate(var(--radar-translate, 150px)) rotate(calc(-1 * var(--angle)));
   font-family: var(--font-mono);
   font-size: 0.65rem;
   font-weight: 700;
@@ -1046,6 +1064,7 @@ body.explore-active .three-container {
   border-radius: 99px;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.01);
+  pointer-events: auto;
 }
 
 .lang-bars {
@@ -2427,6 +2446,68 @@ body.explore-active .three-container {
   .chat-body { padding: 16px !important; }
   .chat-input-row { padding: 12px 16px 20px !important; }
   .chat-body-inner, .chat-input-row-inner { max-width: 100% !important; }
+
+  /* Projects Section Mobile list view */
+  .horizontal-scroll-container {
+    overflow: visible !important;
+  }
+  .horizontal-scroll-wrapper {
+    flex-direction: column !important;
+    gap: 2rem !important;
+    padding: var(--space-lg) 0 !important;
+    transform: none !important;
+  }
+  .project-slide {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    margin-right: 0 !important;
+    min-height: auto !important;
+  }
+  .project-card {
+    padding: 1.5rem !important;
+  }
+  .project-card__header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Skills Radar Chart Scaling for Mobile */
+  .skills-infographic {
+    height: 260px !important;
+    margin-bottom: 3rem !important;
+    --radar-translate: 96px;
+  }
+  .skills-radar-rings {
+    width: 210px !important;
+    height: 210px !important;
+  }
+  .skills-radar-rings::before {
+    width: 140px !important;
+    height: 140px !important;
+  }
+  .skills-radar-rings::after {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  .skills-radar-labels {
+    width: 210px !important;
+    height: 210px !important;
+  }
+  .radar-label {
+    font-size: 0.56rem !important;
+    padding: 4px 10px !important;
+  }
+
+  /* Tap feedback transitions for mobile */
+  .btn-primary:active,
+  .site-nav__brand:active,
+  .site-nav__link--cta:active,
+  .connect-card:active {
+    transform: scale(0.96) !important;
+    opacity: 0.85 !important;
+  }
 }
 
 @media (max-width: 480px) {
