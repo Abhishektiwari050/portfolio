@@ -255,10 +255,16 @@ Shipped Projects:
         const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || "I couldn't process that response. Please try again.";
         setMessages(prev => [...prev, { sender: 'ai', text: replyText }]);
       } else {
+        console.error("Gemini API call failed with status:", response.status, response.statusText);
+        try {
+          const errData = await response.json();
+          console.error("Gemini API error details:", errData);
+        } catch (_) {}
         const fallbackText = getClientFallbackReply(cleanText);
         setMessages(prev => [...prev, { sender: 'ai', text: fallbackText }]);
       }
-    } catch (e) {
+    } catch (e: any) {
+      console.error("Gemini API network or configuration error:", e);
       setIsTyping(false);
       const fallbackText = getClientFallbackReply(cleanText);
       setMessages(prev => [...prev, { sender: 'ai', text: fallbackText }]);
